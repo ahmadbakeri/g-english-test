@@ -33,6 +33,32 @@ class StudentResource extends Resource
         return 2;
     }
 
+    public static function resolveClassLabel(Student $record): string
+    {
+        $enrolledClasses = $record->classes
+            ->pluck('name')
+            ->map(fn ($n) => trim((string) $n))
+            ->filter()
+            ->sort()
+            ->join(', ');
+
+        if ($enrolledClasses !== '') {
+            return $enrolledClasses;
+        }
+
+        $rawClass = trim((string) $record->class_name);
+        return $rawClass !== '' ? $rawClass : 'Tanpa Kelas';
+    }
+
+    public static function resolveSchoolClassLabel(Student $record): string
+    {
+        $rawSchool = trim((string) $record->school_name);
+        $school = $rawSchool !== '' ? $rawSchool : 'Tanpa Sekolah';
+        $class = self::resolveClassLabel($record);
+
+        return "{$school} — {$class}";
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema->columns(1)->components([
@@ -163,38 +189,54 @@ class StudentResource extends Resource
 
     public static function table(Table $table): Table
     {
+        $classSortSql = "COALESCE(
+            NULLIF(TRIM(LOWER((
+                SELECT GROUP_CONCAT(TRIM(c.name) ORDER BY c.name SEPARATOR ', ')
+                FROM classes c
+                INNER JOIN class_student cs ON cs.class_id = c.id
+                WHERE cs.student_id = students.id AND c.deleted_at IS NULL
+            ))), ''),
+            NULLIF(TRIM(LOWER(students.class_name)), ''),
+            'tanpa kelas'
+        )";
+
         return $table
             ->groups([
                 Group::make('class_name')
                     ->label('Kelas')
                     ->collapsible()
-                    ->getTitleFromRecordUsing(function (Student $record): string {
-                        $enrolledClasses = $record->classes->pluck('name')->filter()->join(', ');
-                        if ($enrolledClasses !== '') {
-                            return $enrolledClasses;
-                        }
-                        return filled($record->class_name) ? (string) $record->class_name : 'Tanpa Kelas';
+                    ->getKeyFromRecordUsing(fn (Student $record): string => mb_strtolower(trim(self::resolveClassLabel($record))))
+                    ->getTitleFromRecordUsing(fn (Student $record): string => trim(self::resolveClassLabel($record)))
+                    ->orderQueryUsing(function (Builder $query, string $direction) use ($classSortSql): Builder {
+                        $dir = strtolower($direction) === 'desc' ? 'DESC' : 'ASC';
+                        return $query
+                            ->reorder()
+                            ->orderByRaw("{$classSortSql} {$dir}")
+                            ->orderBy('students.name', 'asc');
                     }),
                 Group::make('school_name')
                     ->label('Sekolah — Kelas')
                     ->collapsible()
-                    ->getTitleFromRecordUsing(function (Student $record): string {
-                        $school = filled($record->school_name) ? $record->school_name : 'Tanpa Sekolah';
-                        $class = filled($record->class_name)
-                            ? $record->class_name
-                            : ($record->classes->pluck('name')->filter()->join(', ') ?: 'Tanpa Kelas');
-                        return "{$school} — {$class}";
-                    })
-                    ->orderQueryUsing(fn (Builder $query, string $direction) => $query->orderBy('school_name', $direction)->orderBy('class_name', $direction)),
+                    ->getKeyFromRecordUsing(fn (Student $record): string => mb_strtolower(trim(self::resolveSchoolClassLabel($record))))
+                    ->getTitleFromRecordUsing(fn (Student $record): string => trim(self::resolveSchoolClassLabel($record)))
+                    ->orderQueryUsing(function (Builder $query, string $direction) use ($classSortSql): Builder {
+                        $dir = strtolower($direction) === 'desc' ? 'DESC' : 'ASC';
+                        return $query
+                            ->reorder()
+                            ->orderByRaw("COALESCE(NULLIF(TRIM(LOWER(students.school_name)), ''), 'tanpa sekolah') {$dir}")
+                            ->orderByRaw("{$classSortSql} {$dir}")
+                            ->orderBy('students.name', 'asc');
+                    }),
             ])
             ->defaultGroup(function ($livewire): ?string {
-                $activeTab = $livewire->activeTab ?? null;
+                $activeTab = $livewire->activeTab ?? 'internal';
                 return match ($activeTab) {
                     'internal' => 'class_name',
                     'external' => 'school_name',
-                    default => null,
+                    default => 'class_name',
                 };
             })
+            ->collapsedGroupsByDefault()
             ->groupingSettingsInDropdownOnDesktop()
             ->columns([
                 \Filament\Tables\Columns\Layout\Split::make([
@@ -220,7 +262,7 @@ class StudentResource extends Resource
                         ->toggleable(),
                     Tables\Columns\TextColumn::make('class_name')
                         ->label('Kelas')
-                        ->getStateUsing(fn (Student $record): string => $record->class_name ?: ($record->classes->pluck('name')->join(', ') ?: '-'))
+                        ->getStateUsing(fn (Student $record): string => self::resolveClassLabel($record))
                         ->searchable()
                         ->toggleable(),
                     Tables\Columns\TextColumn::make('gender')
