@@ -5,23 +5,38 @@ namespace App\Filament\Resources\HR;
 use App\Filament\Resources\HR\UserResource\Pages;
 use App\Models\User;
 use Filament\Forms;
-use Filament\Schemas\Schema;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Hash;
 
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-users';
-    public static function getNavigationLabel(): string { return __('Employee Management'); }
-    public static function getModelLabel(): string { return __('Employee / User'); }
-    public static function getPluralModelLabel(): string { return __('Employees'); }
+
+    public static function getNavigationLabel(): string
+    {
+        return 'Kelola Employee';
+    }
+
+    public static function getModelLabel(): string
+    {
+        return 'Employee';
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return 'Kelola Employee';
+    }
+
     public static function getNavigationGroup(): ?string
     {
         return __('Master Data');
     }
+
     public static function getNavigationSort(): ?int
     {
         return 4;
@@ -30,6 +45,13 @@ class UserResource extends Resource
     public static function canCreate(): bool
     {
         return auth()->user()->isAdmin();
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->whereIn('role', ['admin', 'tutor'])
+            ->whereDoesntHave('roles', fn (Builder $q) => $q->whereIn('name', ['siswa', 'student', 'parent']));
     }
 
     public static function form(Schema $schema): Schema
@@ -55,11 +77,10 @@ class UserResource extends Resource
                 Forms\Components\Select::make('role')
                     ->label(__('Role'))
                     ->options([
-                        'admin' => 'Administrator',
-                        'karyawan' => 'Karyawan Biasa',
+                        'admin' => 'Admin',
                         'tutor' => 'Tutor',
                     ])
-                    ->default('karyawan')
+                    ->default('tutor')
                     ->required(),
             ])->columns(2),
         ]);
@@ -70,29 +91,39 @@ class UserResource extends Resource
         return $table
             ->columns([
                 \Filament\Tables\Columns\Layout\Split::make([
-                Tables\Columns\TextColumn::make('name')
-                    ->label(__('Name'))->translateLabel()
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('email')
-                    ->label(__('Email'))->translateLabel()
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('role')
-                    ->label(__('Role'))
-                    ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'admin' => 'danger',
-                        'tutor' => 'success',
-                        default => 'info',
-                    }),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->label(__('Created At'))->translateLabel()
-                    ->dateTime('d/m/Y')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    Tables\Columns\TextColumn::make('name')
+                        ->label(__('Name'))->translateLabel()
+                        ->searchable(),
+                    Tables\Columns\TextColumn::make('email')
+                        ->label(__('Email'))->translateLabel()
+                        ->searchable(),
+                    Tables\Columns\TextColumn::make('role')
+                        ->label(__('Role'))
+                        ->badge()
+                        ->color(fn (string $state): string => match ($state) {
+                            'admin' => 'danger',
+                            'tutor' => 'success',
+                            default => 'gray',
+                        })
+                        ->formatStateUsing(fn (string $state): string => match ($state) {
+                            'admin' => 'Admin',
+                            'tutor' => 'Tutor',
+                            default => ucfirst($state),
+                        }),
+                    Tables\Columns\TextColumn::make('created_at')
+                        ->label(__('Created At'))->translateLabel()
+                        ->dateTime('d/m/Y')
+                        ->sortable()
+                        ->toggleable(isToggledHiddenByDefault: true),
                 ])->from('md'),
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('role')
+                    ->label(__('Role'))
+                    ->options([
+                        'admin' => 'Admin',
+                        'tutor' => 'Tutor',
+                    ]),
             ])
             ->actions([
                 \Filament\Actions\EditAction::make(),
@@ -112,5 +143,3 @@ class UserResource extends Resource
         ];
     }
 }
-
-
