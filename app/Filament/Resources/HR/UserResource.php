@@ -20,7 +20,7 @@ class UserResource extends Resource
     public static function getPluralModelLabel(): string { return __('Employees'); }
     public static function getNavigationGroup(): ?string
     {
-        return __('Administration');
+        return __('Master Data');
     }
     public static function getNavigationSort(): ?int
     {

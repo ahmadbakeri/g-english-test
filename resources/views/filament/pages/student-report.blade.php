@@ -41,30 +41,7 @@
             border-color: #0284c7;
             box-shadow: 0 0 0 2px rgba(2,132,199,0.15);
         }
-        .btn-generate {
-            padding: 0.5rem 1.5rem;
-            background: linear-gradient(135deg, #0369a1, #0284c7);
-            color: white;
-            border: none;
-            border-radius: 0.5rem;
-            font-weight: 700;
-            font-size: 0.875rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .btn-generate:hover { background: linear-gradient(135deg, #075985, #0369a1); }
-        .btn-pdf {
-            padding: 0.5rem 1.5rem;
-            background: linear-gradient(135deg, #dc2626, #ef4444);
-            color: white;
-            border: none;
-            border-radius: 0.5rem;
-            font-weight: 700;
-            font-size: 0.875rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .btn-pdf:hover { background: linear-gradient(135deg, #b91c1c, #dc2626); }
+
 
         .report-table-wrapper {
             background: #ffffff;
@@ -122,9 +99,9 @@
                 </select>
             </div>
             <div class="filter-group" style="display: flex; gap: 0.5rem;">
-                <button wire:click="generateReport" class="btn-generate">📊 Tampilkan</button>
+                <button wire:click="generateReport" class="px-6 py-2 bg-genza-blue hover:bg-blue-800 text-white font-bold rounded-full shadow-md hover:-translate-y-0.5 hover:shadow-lg transition-all duration-300 text-sm">📊 Tampilkan</button>
                 @if(!empty($reportData))
-                    <button wire:click="exportPdf" class="btn-pdf">📄 Cetak Raport PDF</button>
+                    <button wire:click="exportPdf" class="px-6 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-full shadow-md hover:-translate-y-0.5 hover:shadow-lg transition-all duration-300 text-sm">📄 Cetak Raport PDF</button>
                 @endif
             </div>
         </div>

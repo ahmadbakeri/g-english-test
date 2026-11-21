@@ -32,4 +32,9 @@ class Subject extends Model
     {
         return $this->hasMany(Test::class);
     }
+
+    public function studyMaterials(): HasMany
+    {
+        return $this->hasMany(StudyMaterial::class);
+    }
 }

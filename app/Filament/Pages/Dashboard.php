@@ -4,8 +4,17 @@ namespace App\Filament\Pages;
 
 class Dashboard extends \Filament\Pages\Dashboard
 {
-    protected static ?string $title = 'Dashboard';
     protected static ?int $navigationSort = -2;
+
+    public function getTitle(): string
+    {
+        return __('Dashboard');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('Dashboard');
+    }
 
     public function getWidgets(): array
     {

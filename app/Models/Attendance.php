@@ -18,6 +18,8 @@ class Attendance extends Model
         'user_id',
         'date',
         'status',
+        'time_in',
+        'time_out',
         'notes',
         'created_at',
     ];

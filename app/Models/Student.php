@@ -16,6 +16,7 @@ class Student extends Model
     protected $fillable = [
         'user_id',
         'nis',
+        'student_type',
         'name',
         'gender',
         'birth_date',
@@ -31,6 +32,13 @@ class Student extends Model
         'father_job',
         'photo',
         'is_active',
+        'birth_place',
+        'religion',
+        'social_media',
+        'education_level',
+        'course_level',
+        'class_name',
+        'school_name',
     ];
 
     protected $casts = [
@@ -62,6 +70,33 @@ class Student extends Model
             }
         });
 
+        static::saved(function (Student $student) {
+            // Auto-provision Parent Users
+            $parentsToSync = [];
+            
+            $provisionParent = function ($phone, $name) use (&$parentsToSync) {
+                if ($phone) {
+                    $user = User::firstOrCreate(
+                        ['username' => $phone],
+                        [
+                            'name' => $name ?? 'Orang Tua',
+                            'email' => $phone . '@parent.g-english.com',
+                            'password' => \Illuminate\Support\Facades\Hash::make($phone),
+                            'role' => 'parent'
+                        ]
+                    );
+                    $parentsToSync[] = $user->id;
+                }
+            };
+
+            $provisionParent($student->father_phone, $student->father_name);
+            $provisionParent($student->mother_phone, $student->mother_name);
+
+            if (count($parentsToSync) > 0) {
+                $student->parents()->syncWithoutDetaching($parentsToSync);
+            }
+        });
+
         static::deleting(function (Student $student) {
             if ($student->isForceDeleting() && $student->user) {
                 $student->user->delete();
@@ -89,5 +124,15 @@ class Student extends Model
     public function honors(): HasMany
     {
         return $this->hasMany(Honor::class);
+    }
+
+    public function cbtAttempts(): HasMany
+    {
+        return $this->hasMany(CbtAttempt::class);
+    }
+
+    public function parents(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'student_parent');
     }
 }

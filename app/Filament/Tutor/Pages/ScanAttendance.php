@@ -54,6 +54,7 @@ class ScanAttendance extends Page
                 return;
             }
             $studentId = $student->id;
+            $userId = $student->user_id;
             $name = $student->name;
             
             $classSchedule = ClassSchedule::whereHas('classRoom.students', function ($q) use ($id) {
@@ -71,6 +72,7 @@ class ScanAttendance extends Page
                 return;
             }
             $tutorId = $tutor->id;
+            $userId = $tutor->user_id;
             $name = $tutor->name;
             
             $classSchedule = ClassSchedule::where('tutor_id', $id)
@@ -94,10 +96,14 @@ class ScanAttendance extends Page
 
         $date = now()->format('Y-m-d');
         
-        $query = Attendance::where('role_type', $roleType)->where('date', $date);
-        if ($studentId) $query->where('student_id', $studentId);
-        if ($tutorId) $query->where('tutor_id', $tutorId);
-        if ($userId) $query->where('user_id', $userId);
+        $query = Attendance::where('date', $date)->where('role_type', $roleType);
+        if ($roleType === 'student') {
+            $query->where('student_id', $studentId);
+        } elseif ($roleType === 'tutor') {
+            $query->where('tutor_id', $tutorId);
+        } else {
+            $query->where('user_id', $userId);
+        }
         
         if ($query->exists()) {
             $this->dispatch('scan-result', ['type' => 'error', 'message' => __(':name has already checked in today.', ['name' => $name])]);
@@ -133,6 +139,7 @@ class ScanAttendance extends Page
             'user_id' => $userId,
             'date' => $date,
             'status' => $status,
+            'time_in' => now()->format('H:i:s'),
         ]);
 
         $this->dispatch('scan-result', ['type' => 'success', 'message' => __('Check-in successful: :name', ['name' => $name])]);

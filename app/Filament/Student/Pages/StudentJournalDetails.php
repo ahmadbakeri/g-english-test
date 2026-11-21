@@ -32,11 +32,13 @@ class StudentJournalDetails extends Page implements HasInfolists
     public function getHeading(): string|\Illuminate\Contracts\Support\Htmlable
     {
         return new \Illuminate\Support\HtmlString('
-            <div class="flex items-center gap-3">
-                <a href="' . \App\Filament\Student\Pages\StudentJournals::getUrl() . '" class="custom-back-btn" style="margin-bottom: 0;">
-                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 20 20"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+                <a href="' . \App\Filament\Student\Pages\StudentJournals::getUrl() . '" style="display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 9999px; background-color: transparent; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); border: 1px solid #e5e7eb; color: #6b7280; transition: all 0.3s;" onmouseover="this.style.color=\'var(--primary-600)\'; this.style.borderColor=\'var(--primary-500)\'; this.style.boxShadow=\'0 4px 6px -1px rgba(0, 0, 0, 0.1)\';" onmouseout="this.style.color=\'#6b7280\'; this.style.borderColor=\'#e5e7eb\'; this.style.boxShadow=\'0 1px 2px 0 rgba(0, 0, 0, 0.05)\';">
+                    <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
                 </a>
-                <span>' . static::$title . '</span>
+                <h1 style="font-size: 1.875rem; line-height: 2.25rem; font-weight: 800; letter-spacing: -0.025em; color: inherit; margin: 0;">
+                    ' . static::$title . '
+                </h1>
             </div>
         ');
     }
@@ -168,10 +170,37 @@ class StudentJournalDetails extends Page implements HasInfolists
                                     ->badge()
                                     ->size('lg')
                                     ->color(fn (string $state): string => match (strtolower($state)) {
-                                        'sakit' => 'warning',
-                                        'alpha' => 'danger',
-                                        'belum diabsen' => 'gray',
+                                        'sakit', 'excused' => 'warning',
+                                        'alpha', 'absent' => 'danger',
+                                        'late' => 'warning',
+                                        'belum diabsen', 'not attended yet' => 'gray',
                                         default => 'primary',
+                                    }),
+                                
+                                TextEntry::make('time_in')
+                                    ->label(__('Time In (Masuk)'))
+                                    ->icon('heroicon-m-arrow-right-on-rectangle')
+                                    ->iconColor('success')
+                                    ->getStateUsing(function (Journal $record) use ($student) {
+                                        if (!$student) return '-';
+                                        $attendance = Attendance::where('class_id', $record->class_id)
+                                            ->where('date', $record->date)
+                                            ->where('student_id', $student->id)
+                                            ->first();
+                                        return $attendance && $attendance->time_in ? \Carbon\Carbon::parse($attendance->time_in)->format('H:i') : '-';
+                                    }),
+                                
+                                TextEntry::make('time_out')
+                                    ->label(__('Time Out (Pulang)'))
+                                    ->icon('heroicon-m-arrow-left-on-rectangle')
+                                    ->iconColor('danger')
+                                    ->getStateUsing(function (Journal $record) use ($student) {
+                                        if (!$student) return '-';
+                                        $attendance = Attendance::where('class_id', $record->class_id)
+                                            ->where('date', $record->date)
+                                            ->where('student_id', $student->id)
+                                            ->first();
+                                        return $attendance && $attendance->time_out ? \Carbon\Carbon::parse($attendance->time_out)->format('H:i') : '-';
                                     }),
                             ]),
                     ])->columnSpan(['lg' => 1]),

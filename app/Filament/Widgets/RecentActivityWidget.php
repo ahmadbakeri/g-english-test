@@ -9,6 +9,8 @@ use App\Models\ActivityLog;
 
 class RecentActivityWidget extends BaseWidget
 {
+    protected static bool $isLazy = false;
+
     protected int|string|array $columnSpan = 'full';
     protected static ?int $sort = 4;
 
@@ -29,7 +31,7 @@ class RecentActivityWidget extends BaseWidget
             ->modelLabel(__('activity log'))
             ->pluralModelLabel(__('activity logs'))
             ->query(
-                ActivityLog::query()
+                ActivityLog::query()->with('user')
                     ->whereDate('created_at', today())
                     ->latest()
                     ->limit(10)

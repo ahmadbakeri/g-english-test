@@ -47,7 +47,7 @@ class JournalResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        $query = parent::getEloquentQuery();
+        $query = parent::getEloquentQuery()->with(['classRoom', 'tutor']);
         
         if (auth()->user()->isTutor() && auth()->user()->tutor) {
             $query->where('tutor_id', auth()->user()->tutor->id);
@@ -84,10 +84,10 @@ class JournalResource extends Resource
                 Forms\Components\TextInput::make('link')->label(__('Resource Link (e.g. YouTube)'))->url()->columnSpanFull(),
                 Forms\Components\Select::make('status')->label(__('Status'))
                     ->options([
-                        'draft' => '📝 Draft',
-                        'submitted' => '📤 Diajukan',
-                        'validated' => '✅ Divalidasi',
-                        'rejected' => '❌ Ditolak',
+                        'draft' => 'ðŸ“ Draft',
+                        'submitted' => 'ðŸ“¤ Diajukan',
+                        'validated' => 'âœ… Divalidasi',
+                        'rejected' => 'âŒ Ditolak',
                     ])->default('draft')->required(),
                 Forms\Components\TextInput::make('jp_count')->label(__('Workload (JP)'))->numeric()->default(2)->required(),
             ])->columns(2),

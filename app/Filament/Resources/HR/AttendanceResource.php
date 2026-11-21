@@ -31,7 +31,7 @@ class AttendanceResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        $query = parent::getEloquentQuery();
+        $query = parent::getEloquentQuery()->with(['student', 'classRoom', 'tutor', 'user']);
         
         if (auth()->user()->isTutor() && auth()->user()->tutor) {
             $query->whereHas('classRoom', function (Builder $q) {
@@ -87,15 +87,16 @@ class AttendanceResource extends Resource
                     ->visible(fn ($get) => $get('role_type') === 'employee')
                     ->required(fn ($get) => $get('role_type') === 'employee'),
                 Forms\Components\DatePicker::make('date')->label(__('Attendance Date (Date Only)'))->required()->default(now()),
-                Forms\Components\DateTimePicker::make('created_at')->label(__('Entry Time (Scan Time)'))->required()->default(now()),
+                Forms\Components\TimePicker::make('time_in')->label(__('Time In (Masuk)'))->default(now()),
+                Forms\Components\TimePicker::make('time_out')->label(__('Time Out (Pulang)')),
                 Forms\Components\Select::make('status')->label(__('Status'))->required()
                     ->options([
-                        'present' => '✅ Hadir',
-                        'absent' => '❌ Tidak Hadir',
-                        'late' => '⏰ Terlambat',
-                        'excused' => '📋 Izin',
+                        'present' => 'âœ… Hadir',
+                        'absent' => 'âŒ Tidak Hadir',
+                        'late' => 'â° Terlambat',
+                        'excused' => 'ðŸ“‹ Izin',
                     ])->default('present'),
-                Forms\Components\Textarea::make('notes')->label(__('Notes'))->rows(2),
+                Forms\Components\Textarea::make('notes')->label(__('Notes'))->rows(2)->columnSpanFull(),
             ])->columns(2),
         ]);
     }
@@ -105,7 +106,8 @@ class AttendanceResource extends Resource
         return $table->columns([
             \Filament\Tables\Columns\Layout\Split::make([
             Tables\Columns\TextColumn::make('date')->label(__('Date'))->translateLabel()->date('d/m/Y')->sortable(),
-            Tables\Columns\TextColumn::make('created_at')->label(__('Entry Time'))->time('H:i')->sortable(),
+            Tables\Columns\TextColumn::make('time_in')->label(__('Time In'))->time('H:i')->sortable(),
+            Tables\Columns\TextColumn::make('time_out')->label(__('Time Out'))->time('H:i')->sortable(),
             Tables\Columns\TextColumn::make('role_type')->label(__('Type'))->translateLabel()
                 ->badge()
                 ->color(fn (string $state): string => match ($state) {

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\TutorSalary;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 
 class ReportController extends Controller
 {
@@ -34,12 +35,25 @@ class ReportController extends Controller
             7 => 'Juli', 8 => 'Agustus', 9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
         ];
 
+        $activeMonth = $payment->paid_at ? $payment->paid_at->month : ($payment->due_date ? Carbon::parse($payment->due_date)->month : date('n'));
+        $activeYear = $payment->paid_at ? $payment->paid_at->year : ($payment->due_date ? Carbon::parse($payment->due_date)->year : date('Y'));
+        
+        $monthName = $months[$activeMonth] ?? '';
+
+        $remainingBalance = \App\Models\StudentPayment::where('student_id', $payment->student_id)
+            ->where('status', 'unpaid')
+            ->sum('amount');
+
+        $picName = \App\Models\Setting::where('key', 'receipt_pic_name')->value('value') ?? auth()->user()?->name ?? 'Admin Keuangan';
+
         $pdf = Pdf::loadView('reports.student-payment', [
             'payment' => $payment,
-            'monthName' => $months[$payment->month]
+            'monthName' => $monthName,
+            'remainingBalance' => $remainingBalance,
+            'picName' => $picName
         ]);
 
-        return $pdf->stream("Kuitansi_SPP_{$payment->student->name}_{$months[$payment->month]}_{$payment->year}.pdf");
+        return $pdf->stream("Kuitansi_Pembayaran_{$payment->student->name}_{$monthName}_{$activeYear}.pdf");
     }
 
     public function printCertificate($id)

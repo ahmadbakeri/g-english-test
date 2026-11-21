@@ -12,6 +12,8 @@ use Illuminate\Support\Carbon;
 
 class TutorTodayScheduleWidget extends TableWidget
 {
+    protected static bool $isLazy = false;
+
     protected static ?int $sort = 3;
     
     protected int|string|array $columnSpan = 'full';
@@ -25,7 +27,7 @@ class TutorTodayScheduleWidget extends TableWidget
         $tutorId = $tutor?->id;
 
         return $table
-            ->heading('📅 ' . __('Today\'s Teaching Schedule'))
+            ->heading('Ã°Å¸â€œâ€¦ ' . __('Today\'s Teaching Schedule'))
             ->query(
                 fn (): Builder => ClassSchedule::query()
                     ->whereJsonContains('schedule_items', ['day' => $today])

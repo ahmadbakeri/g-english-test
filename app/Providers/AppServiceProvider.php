@@ -16,6 +16,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->app->singleton(
+            \Filament\Http\Responses\Auth\Contracts\LoginResponse::class,
+            \App\Http\Responses\LoginResponse::class
+        );
         //
     }
 
@@ -24,6 +28,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if (request()->server('HTTP_X_FORWARDED_PROTO') === 'https' || str_contains(request()->header('Host', ''), 'trycloudflare.com')) {
+            \Illuminate\Support\Facades\URL::forceScheme('https');
+        }
+
         // Disable clickable rows globally so users must click the explicit action buttons
         Table::configureUsing(function (Table $table): void {
             $table->recordUrl(null);
@@ -59,7 +67,7 @@ class AppServiceProvider extends ServiceProvider
         \Filament\Actions\CreateAction::configureUsing(function (\Filament\Actions\CreateAction $action) {
             $action->modalSubmitActionLabel(__('Create'))
                    ->modalCancelActionLabel(__('Cancel'))
-                   ->createAnotherAction(fn ($a) => $a->label(__('Create & create another')));
+                   ->createAnotherAction(fn ($a) => $a?->label(__('Create & create another')));
         });
 
         // Global CSS for Hamburger, Topbar Icons, and Back Button

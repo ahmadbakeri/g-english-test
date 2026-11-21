@@ -11,6 +11,7 @@ class Admission extends Model
 
     protected $fillable = [
         'registration_number',
+        'student_type',
         'name',
         'email',
         'phone',
@@ -34,6 +35,16 @@ class Admission extends Model
         'payment_method',
         'amount_paid',
         'notes',
+        'parent_name',
+        'parent_phone',
+        'birth_place',
+        'gender',
+        'religion',
+        'social_media',
+        'education_level',
+        'course_level',
+        'class_name',
+        'school_name',
     ];
 
     protected $casts = [

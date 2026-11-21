@@ -7,10 +7,12 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class StatsOverviewWidget extends BaseStatsOverviewWidget
 {
+    protected static bool $isLazy = false;
+
     protected function getStats(): array
     {
         $activeStudents = \App\Models\Student::where('is_active', true)->count();
-        $totalTutors = \App\Models\User::where('role', 'tutor')->count(); // Currently we use role='tutor' or isAdmin(). Assuming all non-admins are tutors for now, or we can just count all users except admin. Wait, let's just count all users for now if role column doesn't exist, but wait we have `role`? We can count users who are tutors. Let's just count `User::count()`.
+        $totalStaff = \App\Models\User::whereIn('role', ['admin', 'tutor'])->count();
         
         $currentMonthIncome = \App\Models\StudentPayment::where('month', date('n'))
             ->where('year', date('Y'))
@@ -21,16 +23,22 @@ class StatsOverviewWidget extends BaseStatsOverviewWidget
             Stat::make(__('Total Active Students'), $activeStudents)
                 ->description(__('All currently active students'))
                 ->descriptionIcon('heroicon-m-user-group')
+                ->icon('heroicon-o-users')
                 ->chart([7, 2, 10, 3, 15, 4, 17])
-                ->color('success'),
+                ->color('success')
+                ->extraAttributes(['class' => 'stat-card stat-emerald']),
             Stat::make(__('This Month Income'), 'Rp ' . number_format($currentMonthIncome, 0, ',', '.'))
                 ->description(__('Paid tuition this month'))
                 ->descriptionIcon('heroicon-m-banknotes')
-                ->color('info'),
-            Stat::make(__('Total Tutors'), \App\Models\User::count())
+                ->icon('heroicon-o-banknotes')
+                ->color('info')
+                ->extraAttributes(['class' => 'stat-card stat-sky']),
+            Stat::make(__('Total Tutors & Staff'), $totalStaff)
                 ->description(__('Total registered staff & tutors'))
                 ->descriptionIcon('heroicon-m-academic-cap')
-                ->color('warning'),
+                ->icon('heroicon-o-academic-cap')
+                ->color('warning')
+                ->extraAttributes(['class' => 'stat-card stat-amber']),
         ];
     }
 }

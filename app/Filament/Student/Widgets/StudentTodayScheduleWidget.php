@@ -11,6 +11,8 @@ use Filament\Tables\Columns\TextColumn;
 
 class StudentTodayScheduleWidget extends TableWidget
 {
+    protected static bool $isLazy = false;
+
     protected static ?int $sort = 3;
     
     protected int|string|array $columnSpan = 'full';
@@ -24,7 +26,7 @@ class StudentTodayScheduleWidget extends TableWidget
         $studentId = $student?->id;
 
         return $table
-            ->heading('📅 ' . __('Today\'s Class Schedule'))
+            ->heading('Ã°Å¸â€œâ€¦ ' . __('Today\'s Class Schedule'))
             ->query(
                 fn (): Builder => ClassSchedule::query()
                     ->whereJsonContains('schedule_items', ['day' => $today])
@@ -68,7 +70,7 @@ class StudentTodayScheduleWidget extends TableWidget
                 ])->from('md'),
             ])
             ->emptyStateHeading(__('No schedule today'))
-            ->emptyStateDescription(__('You have no classes scheduled for today. Have a good rest! 🎉'))
+            ->emptyStateDescription(__('You have no classes scheduled for today. Have a good rest! Ã°Å¸Å½â€°'))
             ->emptyStateIcon('heroicon-o-calendar')
             ->paginated(false);
     }

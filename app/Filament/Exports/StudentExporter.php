@@ -17,7 +17,7 @@ class StudentExporter extends Exporter
         return [
             ExportColumn::make('id')
                 ->label(__('ID')),
-            ExportColumn::make('nis'),
+            ExportColumn::make('user.username')->label('No. Siswa'),
             ExportColumn::make('name'),
             ExportColumn::make('gender'),
             ExportColumn::make('birth_date'),

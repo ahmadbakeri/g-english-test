@@ -7,7 +7,7 @@
             <p class="mt-4 text-sm">{{ __('Please save this registration number for re-registration purposes. Our team will contact you shortly.') }}</p>
             
             <div class="mt-6">
-                <a href="/" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-full transition duration-300">
+                <a href="/" class="inline-block bg-genza-blue hover:bg-blue-800 text-white font-bold py-2 px-6 rounded-full hover:-translate-y-0.5 shadow-md transition-all duration-300">
                     {{ __('Return to Home') }}
                 </a>
             </div>
@@ -83,7 +83,7 @@
             </div>
 
             <div class="flex items-center justify-end mt-6">
-                <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-8 rounded-full focus:outline-none focus:shadow-outline transition duration-300" type="submit">
+                <button class="bg-genza-blue hover:bg-blue-800 text-white font-bold py-2 px-8 rounded-full shadow-md hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-genza-blue focus:ring-offset-2 transition-all duration-300" type="submit">
                     {{ __('Register Now') }}
                 </button>
             </div>

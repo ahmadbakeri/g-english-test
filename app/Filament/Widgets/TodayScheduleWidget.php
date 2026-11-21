@@ -11,6 +11,8 @@ use Filament\Tables\Columns\TextColumn;
 
 class TodayScheduleWidget extends TableWidget
 {
+    protected static bool $isLazy = false;
+
     protected static ?int $sort = 2; // Position after StatsOverview
     protected static ?string $heading = 'Jadwal Kelas Hari Ini';
 
@@ -19,12 +21,12 @@ class TodayScheduleWidget extends TableWidget
         $today = now()->format('l');
 
         return $table
-            ->query(fn (): Builder => ClassSchedule::query()->whereJsonContains('schedule_items', ['day' => $today]))
+            ->query(fn (): Builder => ClassSchedule::query()->with(['classRoom', 'tutor.user'])->whereJsonContains('schedule_items', ['day' => $today]))
             ->columns([
                 \Filament\Tables\Columns\Layout\Split::make([
                 TextColumn::make('classRoom.name')
                     ->label(__('Class Room')),
-                TextColumn::make('user.name')
+                TextColumn::make('tutor.user.name')
                     ->label(__('Tutor')),
                 TextColumn::make('start_time')
                     ->label(__('Start Time'))

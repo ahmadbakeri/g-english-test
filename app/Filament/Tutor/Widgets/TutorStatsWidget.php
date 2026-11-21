@@ -12,6 +12,8 @@ use Illuminate\Support\Carbon;
 
 class TutorStatsWidget extends BaseStatsOverviewWidget
 {
+    protected static bool $isLazy = false;
+
     protected static ?int $sort = 2;
 
     protected function getStats(): array
@@ -42,17 +44,23 @@ class TutorStatsWidget extends BaseStatsOverviewWidget
             Stat::make(__('Active Classes'), $totalClasses)
                 ->description(__('Classes you currently teach'))
                 ->descriptionIcon('heroicon-m-building-library')
+                ->icon('heroicon-o-building-library')
                 ->chart([3, 5, 4, 6, $totalClasses])
-                ->color('primary'),
+                ->color('primary')
+                ->extraAttributes(['class' => 'stat-card stat-indigo']),
             Stat::make(__('Total Students'), $totalStudents)
                 ->description(__('Students across all your classes'))
                 ->descriptionIcon('heroicon-m-user-group')
+                ->icon('heroicon-o-users')
                 ->chart([5, 8, 6, 9, $totalStudents])
-                ->color('success'),
+                ->color('success')
+                ->extraAttributes(['class' => 'stat-card stat-emerald']),
             Stat::make(__('Journals This Month'), $monthJournals)
                 ->description(__('Journals filled this month'))
                 ->descriptionIcon('heroicon-m-book-open')
-                ->color('info'),
+                ->icon('heroicon-o-book-open')
+                ->color('info')
+                ->extraAttributes(['class' => 'stat-card stat-sky']),
         ];
     }
 }

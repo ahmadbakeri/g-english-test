@@ -53,8 +53,8 @@ class TutorSalaryResource extends Resource
                 Forms\Components\TextInput::make('total_amount')->label(__('Total Salary (Rp)'))->numeric()->required()->default(0),
                 Forms\Components\Select::make('status')->label(__('Status'))
                     ->options([
-                        'pending' => '⏳ Pending',
-                        'paid' => '✅ Dibayar',
+                        'pending' => 'â³ Pending',
+                        'paid' => 'âœ… Dibayar',
                     ])->default('pending')->required(),
                 Forms\Components\DatePicker::make('paid_at')->label(__('Paid Date'))->nullable(),
             ])->columns(2),
@@ -133,6 +133,11 @@ class TutorSalaryResource extends Resource
                 \Filament\Actions\DeleteBulkAction::make(),
             ]),
         ]);
+    }
+
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        return parent::getEloquentQuery()->with(['tutor']);
     }
 
     public static function getPages(): array

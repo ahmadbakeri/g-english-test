@@ -1,4 +1,4 @@
-﻿<x-dynamic-component :component="$getFieldWrapperView()" :field="$field">
+<x-dynamic-component :component="$getFieldWrapperView()" :field="$field">
     @php
         $imageField = $getImageField();
         $record = $getRecord();
@@ -33,7 +33,7 @@
     }">
         @if($imageUrl)
             <!-- Toggle Button -->
-            <button type="button" @click="showCropper = !showCropper" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; font-size: 0.875rem; font-weight: 500; color: #3b82f6; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 0.5rem; cursor: pointer; transition: all 0.2s; margin-top: 0.5rem;">
+            <button type="button" @click="showCropper = !showCropper" class="mt-2 flex items-center gap-2 px-4 py-2 text-sm font-medium text-genza-blue bg-blue-50 border border-blue-200 rounded-full hover:bg-blue-100 transition-colors">
                 <svg style="width: 1.25rem; height: 1.25rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />

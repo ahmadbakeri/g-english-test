@@ -90,6 +90,12 @@ class AttendanceResource extends Resource
                 TextEntry::make('notes')
                     ->placeholder('-')
                     ->columnSpanFull(),
+                TextEntry::make('time_in')
+                    ->time()
+                    ->placeholder('-'),
+                TextEntry::make('time_out')
+                    ->time()
+                    ->placeholder('-'),
                 TextEntry::make('created_at')
                     ->dateTime()
                     ->placeholder('-'),
@@ -118,6 +124,12 @@ class AttendanceResource extends Resource
                     ->searchable(),
                 TextColumn::make('date')
                     ->date()
+                    ->sortable(),
+                TextColumn::make('time_in')
+                    ->time()
+                    ->sortable(),
+                TextColumn::make('time_out')
+                    ->time()
                     ->sortable(),
                 TextColumn::make('status')
                     ->searchable(),

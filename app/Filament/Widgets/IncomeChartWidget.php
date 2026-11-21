@@ -6,6 +6,8 @@ use Filament\Widgets\ChartWidget;
 
 class IncomeChartWidget extends ChartWidget
 {
+    protected static bool $isLazy = false;
+
     protected ?string $heading = 'Grafik Pendapatan Tahun Ini';
 
     protected function getData(): array
@@ -13,10 +15,7 @@ class IncomeChartWidget extends ChartWidget
         // Get income per month for the current year
         $incomeData = [];
         for ($month = 1; $month <= 12; $month++) {
-            $total = \App\Models\StudentPayment::where('year', date('Y'))
-                ->where('month', $month)
-                ->where('status', 'lunas')
-                ->sum('amount');
+            $total = \App\Models\StudentPayment::whereYear('paid_at', date('Y'))->whereMonth('paid_at', $month)->where('status', 'paid')->sum('amount');
             $incomeData[] = $total;
         }
 

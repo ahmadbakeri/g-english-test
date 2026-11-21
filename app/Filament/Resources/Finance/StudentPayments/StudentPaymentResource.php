@@ -10,6 +10,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
@@ -60,19 +61,8 @@ class StudentPaymentResource extends Resource
                     ->relationship('student', 'name')
                     ->searchable()
                     ->required(),
-                Select::make('month')
-                    ->label(__('Month'))
-                    ->options([
-                        1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
-                        5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
-                        9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
-                    ])
-                    ->required(),
-                TextInput::make('year')
-                    ->label(__('Year'))
-                    ->numeric()
-                    ->default(now()->year)
-                    ->required(),
+                DatePicker::make('due_date')->label(__('Due Date')),
+                
                 TextInput::make('amount')
                     ->label(__('Amount (Rp)'))
                     ->numeric()
@@ -103,18 +93,8 @@ class StudentPaymentResource extends Resource
                     ->label(__('Student'))
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('month')
-                    ->label(__('Month'))
-                    ->formatStateUsing(fn (int $state): string => match ($state) {
-                        1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
-                        5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
-                        9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
-                        default => (string) $state,
-                    })
-                    ->sortable(),
-                TextColumn::make('year')
-                    ->label(__('Year'))
-                    ->sortable(),
+                TextColumn::make('notes')->label(__('Description'))->wrap(),
+                TextColumn::make('due_date')->label(__('Due Date'))->date('d M Y')->sortable(),
                 TextColumn::make('amount')
                     ->label(__('Amount'))->translateLabel()
                     ->money('IDR', locale: 'id')
@@ -176,6 +156,11 @@ class StudentPaymentResource extends Resource
                     DeleteBulkAction::make(),
                 ]),
             ]);
+    }
+
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        return parent::getEloquentQuery()->with(['student']);
     }
 
     public static function getPages(): array

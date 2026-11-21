@@ -25,7 +25,7 @@ class TutorResource extends Resource
     public static function getPluralModelLabel(): string { return __('Tutors'); }
     public static function getNavigationGroup(): ?string
     {
-        return __('Administration');
+        return __('Academic');
     }
     public static function getNavigationSort(): ?int
     {
@@ -107,6 +107,11 @@ class TutorResource extends Resource
             \Filament\Actions\DeleteAction::make(),
         ])
         ->bulkActions([\Filament\Actions\BulkActionGroup::make([\Filament\Actions\DeleteBulkAction::make()])]);
+    }
+
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        return parent::getEloquentQuery()->with(['user']);
     }
 
     public static function getPages(): array

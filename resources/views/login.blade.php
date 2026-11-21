@@ -74,7 +74,7 @@
                         <input type="password" name="password" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-genza-blue" placeholder="••••••••" required>
                     </div>
 
-                    <button type="submit" class="w-full bg-genza-blue text-white text-lg font-bold px-8 py-3.5 rounded-xl hover:bg-blue-800 hover:-translate-y-0.5 transition-transform shadow-lg shadow-blue-900/30">
+                    <button type="submit" class="w-full bg-genza-blue text-white text-lg font-semibold px-8 py-3.5 rounded-full hover:bg-blue-800 hover:-translate-y-0.5 transition-all duration-300 shadow-md">
                         Login
                     </button>
                 </form>

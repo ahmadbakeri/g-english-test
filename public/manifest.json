@@ -1,0 +1,16 @@
+{
+  "name": "G-English Management System",
+  "short_name": "G-English",
+  "description": "Sistem Informasi Manajemen Edukasi G-English",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1a368b",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "192x192",
+      "type": "image/x-icon"
+    }
+  ]
+}

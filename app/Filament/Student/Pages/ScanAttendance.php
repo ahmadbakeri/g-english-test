@@ -99,9 +99,20 @@ class ScanAttendance extends Page
         if ($tutorId) $query->where('tutor_id', $tutorId);
         if ($userId) $query->where('user_id', $userId);
         
-        if ($query->exists()) {
-            $this->dispatch('scan-result', ['type' => 'error', 'message' => __(':name has already checked in today.', ['name' => $name])]);
-            return;
+        $existingAttendance = $query->first();
+
+        if ($existingAttendance) {
+            if ($existingAttendance->time_out) {
+                $this->dispatch('scan-result', ['type' => 'error', 'message' => __(':name has already checked out today.', ['name' => $name])]);
+                return;
+            } else {
+                // Perform check-out
+                $existingAttendance->update([
+                    'time_out' => now()->format('H:i:s'),
+                ]);
+                $this->dispatch('scan-result', ['type' => 'success', 'message' => __('Check-out successful: :name', ['name' => $name])]);
+                return;
+            }
         }
 
         $status = 'present';
@@ -133,6 +144,7 @@ class ScanAttendance extends Page
             'user_id' => $userId,
             'date' => $date,
             'status' => $status,
+            'time_in' => now()->format('H:i:s'),
         ]);
 
         $this->dispatch('scan-result', ['type' => 'success', 'message' => __('Check-in successful: :name', ['name' => $name])]);

@@ -6,6 +6,8 @@ use Filament\Widgets\ChartWidget;
 
 class AttendanceChartWidget extends ChartWidget
 {
+    protected static bool $isLazy = false;
+
     protected ?string $heading = 'Statistik Kehadiran (Bulan Ini)';
 
     protected function getData(): array

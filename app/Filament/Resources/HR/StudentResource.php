@@ -24,7 +24,7 @@ class StudentResource extends Resource
     public static function getPluralModelLabel(): string { return __('Student'); }
     public static function getNavigationGroup(): ?string
     {
-        return __('Administration');
+        return __('Academic');
     }
     public static function getNavigationSort(): ?int
     {
@@ -37,10 +37,18 @@ class StudentResource extends Resource
                 \Filament\Schemas\Components\Section::make(__('Student Data'))
                     ->schema([
                         Forms\Components\TextInput::make('nis')
-                            ->label(__('NIS'))
+                            ->label(__('No. Siswa (NIS)'))
                             ->required()
                             ->unique(ignoreRecord: true)
                             ->maxLength(20),
+                        Forms\Components\Select::make('student_type')
+                            ->label(__('Student Type'))
+                            ->options([
+                                'internal' => __('Internal'),
+                                'external' => __('External'),
+                            ])
+                            ->default('internal')
+                            ->required(),
                         Forms\Components\TextInput::make('name')
                             ->label(__('Full Name'))
                             ->required()
@@ -133,14 +141,19 @@ class StudentResource extends Resource
                 \Filament\Tables\Columns\Layout\Split::make([
                 Tables\Columns\ImageColumn::make('photo')->label(__('Photo'))->circular()->disk('public')
                     ->defaultImageUrl(fn ($record) => 'https://ui-avatars.com/api/?name=' . urlencode($record->name) . '&color=2563eb&background=dbeafe'),
-                Tables\Columns\TextColumn::make('nis')
-                    ->label(__('NIS'))
+                Tables\Columns\TextColumn::make('user.username')
+                    ->label(__('No. Siswa'))
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('name')
                     ->label(__('Name'))->translateLabel()
                     ->searchable()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('student_type')
+                    ->label(__('Type'))
+                    ->badge()
+                    ->color(fn (?string $state): string => $state === 'external' ? 'warning' : 'info')
+                    ->formatStateUsing(fn (?string $state): string => $state === 'external' ? __('External') : __('Internal')),
                 Tables\Columns\TextColumn::make('gender')
                     ->label(__('Gender'))
                     ->badge()
@@ -162,6 +175,12 @@ class StudentResource extends Resource
                 ])->from('md'),
             ])
             ->filters([
+                Tables\Filters\SelectFilter::make('student_type')
+                    ->label(__('Student Type'))
+                    ->options([
+                        'internal' => __('Internal'),
+                        'external' => __('External'),
+                    ]),
                 Tables\Filters\SelectFilter::make('gender')
                     ->label(__('Gender'))
                     ->options([
@@ -192,6 +211,11 @@ class StudentResource extends Resource
     public static function getRelations(): array
     {
         return [];
+    }
+
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        return parent::getEloquentQuery()->with(['user', 'classes', 'parents']);
     }
 
     public static function getPages(): array

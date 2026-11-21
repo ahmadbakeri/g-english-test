@@ -109,12 +109,8 @@ class StudentPaymentResource extends Resource
                 \Filament\Tables\Columns\Layout\Split::make([
                 TextColumn::make('student.name')
                     ->searchable(),
-                TextColumn::make('month')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('year')
-                    ->numeric()
-                    ->sortable(),
+                TextColumn::make('notes')->label('Keterangan')->wrap(),
+                TextColumn::make('due_date')->label('Jatuh Tempo')->date('d M Y')->sortable(),
                 TextColumn::make('amount')
                     ->numeric()
                     ->sortable(),

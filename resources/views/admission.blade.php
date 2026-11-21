@@ -68,97 +68,159 @@
                         </div>
                     @endif
 
+                    @if ($errors->any())
+                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-6">
+                            <strong>Terjadi kesalahan:</strong>
+                            <ul class="list-disc pl-5 mt-2">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
                     <form action="{{ route('admission.store') }}" method="POST" class="space-y-6">
                         @csrf
                         
-                        <div>
-                            <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Jenjang Pendidikan <span class="text-red-500">*</span></label>
-                            <div class="grid grid-cols-3 gap-3">
-                                <div>
-                                    <input type="radio" name="level" id="level_sd" value="SD" class="peer hidden" required>
-                                    <label for="level_sd" class="block cursor-pointer text-center bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-xl py-3 text-sm font-bold text-slate-500 peer-checked:bg-blue-50 peer-checked:border-genza-blue peer-checked:text-genza-blue dark:peer-checked:bg-blue-900/50 dark:peer-checked:text-blue-400 hover:bg-slate-100 transition-colors">SD</label>
-                                </div>
-                                <div>
-                                    <input type="radio" name="level" id="level_smp" value="SMP" class="peer hidden" required>
-                                    <label for="level_smp" class="block cursor-pointer text-center bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-xl py-3 text-sm font-bold text-slate-500 peer-checked:bg-blue-50 peer-checked:border-genza-blue peer-checked:text-genza-blue dark:peer-checked:bg-blue-900/50 dark:peer-checked:text-blue-400 hover:bg-slate-100 transition-colors">SMP</label>
-                                </div>
-                                <div>
-                                    <input type="radio" name="level" id="level_sma" value="SMA" class="peer hidden" required>
-                                    <label for="level_sma" class="block cursor-pointer text-center bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-xl py-3 text-sm font-bold text-slate-500 peer-checked:bg-blue-50 peer-checked:border-genza-blue peer-checked:text-genza-blue dark:peer-checked:bg-blue-900/50 dark:peer-checked:text-blue-400 hover:bg-slate-100 transition-colors">SMA</label>
-                                </div>
-                            </div>
-                            @error('level') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
+                        <!-- DATA SISWA -->
+                        <div class="mb-4">
+                            <h3 class="text-lg font-bold text-slate-800 dark:text-white border-b pb-2">Data Diri Siswa</h3>
                         </div>
 
                         <div>
                             <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Nama Lengkap Siswa <span class="text-red-500">*</span></label>
                             <input type="text" name="name" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-genza-blue" placeholder="Contoh: Budi Santoso" required value="{{ old('name') }}">
-                            @error('name') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Tempat Lahir <span class="text-red-500">*</span></label>
+                                <input type="text" name="birth_place" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3" required value="{{ old('birth_place') }}">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Tanggal Lahir <span class="text-red-500">*</span></label>
+                                <input type="date" name="birth_date" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3" required value="{{ old('birth_date') }}">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Jenis Kelamin <span class="text-red-500">*</span></label>
+                                <select name="gender" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3" required>
+                                    <option value="" disabled selected>Pilih...</option>
+                                    <option value="L" {{ old('gender') == 'L' ? 'selected' : '' }}>Laki-laki</option>
+                                    <option value="P" {{ old('gender') == 'P' ? 'selected' : '' }}>Perempuan</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Agama <span class="text-red-500">*</span></label>
+                                <input type="text" name="religion" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3" required value="{{ old('religion') }}">
+                            </div>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">No. HP / WhatsApp Siswa <span class="text-red-500">*</span></label>
-                            <input type="text" name="phone" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-genza-blue" placeholder="08..." required value="{{ old('phone') }}">
-                            @error('phone') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
+                            <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Alamat Rumah Lengkap <span class="text-red-500">*</span></label>
+                            <textarea name="address" rows="3" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3" required>{{ old('address') }}</textarea>
                         </div>
 
-                          <div class="mb-4">
-                              <h3 class="text-lg font-bold text-slate-800 dark:text-white">Data Ibu</h3>
-                          </div>
-                          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                              <div>
-                                  <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Nama Ibu <span class="text-red-500">*</span></label>
-                                  <input type="text" name="mother_name" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-genza-blue" placeholder="Nama Ibu" required value="{{ old('mother_name') }}">
-                                  @error('mother_name') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
-                              </div>
-                              <div>
-                                  <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">No. WA Ibu <span class="text-red-500">*</span></label>
-                                  <input type="text" name="mother_phone" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-genza-blue" placeholder="08..." required value="{{ old('mother_phone') }}">
-                                  @error('mother_phone') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
-                              </div>
-                              <div>
-                                  <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Email Ibu</label>
-                                  <input type="email" name="mother_email" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-genza-blue" placeholder="Email Ibu" value="{{ old('mother_email') }}">
-                                  @error('mother_email') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
-                              </div>
-                              <div>
-                                  <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Pekerjaan Ibu</label>
-                                  <input type="text" name="mother_job" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-genza-blue" placeholder="Pekerjaan Ibu" value="{{ old('mother_job') }}">
-                                  @error('mother_job') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
-                              </div>
-                          </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Email Siswa</label>
+                                <input type="email" name="email" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3" value="{{ old('email') }}">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">No. HP / WA Siswa <span class="text-red-500">*</span></label>
+                                <input type="text" name="phone" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3" placeholder="08..." required value="{{ old('phone') }}">
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Akun Sosmed (IG/Tiktok)</label>
+                            <input type="text" name="social_media" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3" placeholder="@username" value="{{ old('social_media') }}">
+                        </div>
 
-                          <div class="mb-4">
-                              <h3 class="text-lg font-bold text-slate-800 dark:text-white">Data Ayah</h3>
-                          </div>
-                          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                              <div>
-                                  <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Nama Ayah</label>
-                                  <input type="text" name="father_name" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-genza-blue" placeholder="Nama Ayah" value="{{ old('father_name') }}">
-                                  @error('father_name') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
-                              </div>
-                              <div>
-                                  <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">No. WA Ayah</label>
-                                  <input type="text" name="father_phone" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-genza-blue" placeholder="08..." value="{{ old('father_phone') }}">
-                                  @error('father_phone') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
-                              </div>
-                              <div>
-                                  <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Email Ayah</label>
-                                  <input type="email" name="father_email" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-genza-blue" placeholder="Email Ayah" value="{{ old('father_email') }}">
-                                  @error('father_email') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
-                              </div>
-                              <div>
-                                  <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Pekerjaan Ayah</label>
-                                  <input type="text" name="father_job" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-genza-blue" placeholder="Pekerjaan Ayah" value="{{ old('father_job') }}">
-                                  @error('father_job') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
-                              </div>
-                          </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Tingkat <span class="text-red-500">*</span></label>
+                                <select name="education_level" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3" required>
+                                    <option value="" disabled selected>Pilih Tingkat</option>
+                                    <option value="SD" {{ old('education_level') == 'SD' ? 'selected' : '' }}>SD</option>
+                                    <option value="SMP" {{ old('education_level') == 'SMP' ? 'selected' : '' }}>SMP</option>
+                                    <option value="SMA" {{ old('education_level') == 'SMA' ? 'selected' : '' }}>SMA</option>
+                                    <option value="Umum" {{ old('education_level') == 'Umum' ? 'selected' : '' }}>Umum</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Level Course <span class="text-red-500">*</span></label>
+                                <input type="text" name="course_level" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3" placeholder="Contoh: Basic/Intermediate" required value="{{ old('course_level') }}">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Sekolah Asal <span class="text-red-500">*</span></label>
+                                <input type="text" name="school_name" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3" required value="{{ old('school_name') }}">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Kelas <span class="text-red-500">*</span></label>
+                                <input type="text" name="class_name" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3" placeholder="Contoh: 5A" required value="{{ old('class_name') }}">
+                            </div>
+                        </div>
+
+                        <!-- DATA ORANG TUA -->
+                        <div class="mb-4 mt-8">
+                            <h3 class="text-lg font-bold text-slate-800 dark:text-white border-b pb-2">Data Orang Tua</h3>
+                        </div>
+                        
+                        <div class="p-4 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50/50 dark:bg-slate-800/50 space-y-4 mb-6">
+                            <h4 class="font-bold text-enza-blue text-sm">Data Ibu</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Nama Ibu <span class="text-red-500">*</span></label>
+                                    <input type="text" name="mother_name" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm" required value="{{ old('mother_name') }}">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Pekerjaan Ibu</label>
+                                    <input type="text" name="mother_job" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm" value="{{ old('mother_job') }}">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">No. HP / WA Ibu <span class="text-red-500">*</span></label>
+                                    <input type="text" name="mother_phone" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm" placeholder="08..." required value="{{ old('mother_phone') }}">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Email Ibu</label>
+                                    <input type="email" name="mother_email" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm" value="{{ old('mother_email') }}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="p-4 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50/50 dark:bg-slate-800/50 space-y-4">
+                            <h4 class="font-bold text-enza-blue text-sm">Data Ayah</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Nama Ayah</label>
+                                    <input type="text" name="father_name" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm" value="{{ old('father_name') }}">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Pekerjaan Ayah</label>
+                                    <input type="text" name="father_job" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm" value="{{ old('father_job') }}">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">No. HP / WA Ayah</label>
+                                    <input type="text" name="father_phone" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm" placeholder="08..." value="{{ old('father_phone') }}">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Email Ayah</label>
+                                    <input type="email" name="father_email" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm" value="{{ old('father_email') }}">
+                                </div>
+                            </div>
+                        </div>
 
                         <div class="pt-4 border-t border-slate-200 dark:border-slate-700">
-                            <button type="submit" class="w-full bg-genza-yellow text-genza-blue text-lg font-bold px-8 py-4 rounded-xl hover:bg-yellow-400 hover:-translate-y-1 transition-transform shadow-lg shadow-yellow-500/30">
+                            <button type="submit" class="w-full bg-genza-blue text-white text-lg font-semibold px-8 py-4 rounded-full hover:bg-blue-800 hover:-translate-y-0.5 transition-all duration-300 shadow-md">
                                 Kirim Data Pendaftaran
                             </button>
-                            <p class="text-center text-xs text-slate-500 mt-4">Dengan mengirim form ini, Anda menyetujui kami untuk menghubungi Anda via WhatsApp.</p>
+                            <p class="text-center text-xs text-slate-500 mt-4">Dengan mengirim form ini, Anda menyetujui kami untuk menghubungi Anda via WhatsApp. Akun orang tua akan otomatis dibuatkan oleh Admin saat Pendaftaran diterima.</p>
                         </div>
                     </form>
                 </div>

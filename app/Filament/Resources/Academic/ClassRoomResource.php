@@ -49,7 +49,7 @@ class ClassRoomResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        $query = parent::getEloquentQuery();
+        $query = parent::getEloquentQuery()->with(['academicYear', 'subject', 'tutor']);
         
         if (auth()->user()->isTutor() && auth()->user()->tutor) {
             $query->where('tutor_id', auth()->user()->tutor->id);

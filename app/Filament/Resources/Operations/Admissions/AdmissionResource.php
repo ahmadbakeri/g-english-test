@@ -12,6 +12,9 @@ use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Select;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
+use pxlrbt\FilamentExcel\Exports\ExcelExport;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -59,22 +62,54 @@ class AdmissionResource extends Resource
                         ->label(__('Registration No.'))
                         ->disabled()
                         ->dehydrated(false),
+                    Select::make('student_type')
+                        ->label(__('Student Type'))
+                        ->options([
+                            'internal' => __('Internal'),
+                            'external' => __('External'),
+                        ])
+                        ->default('internal')
+                        ->required(),
                     TextInput::make('name')
                         ->label(__('Full Name'))
                         ->required(),
+                    TextInput::make('birth_place')
+                        ->label(__('Place of Birth')),
+                    DatePicker::make('birth_date')
+                        ->label(__('Date of Birth')),
+                    Select::make('gender')
+                        ->label(__('Gender'))
+                        ->options([
+                            'L' => 'Laki-laki',
+                            'P' => 'Perempuan',
+                        ]),
+                    TextInput::make('religion')
+                        ->label(__('Religion')),
                     TextInput::make('email')
                         ->label(__('Email'))->translateLabel()
                         ->email(),
                     TextInput::make('phone')
                         ->label(__('Phone / WhatsApp No.'))
                         ->tel(),
-                    DatePicker::make('birth_date')
-                        ->label(__('Date of Birth')),
+                    TextInput::make('social_media')
+                        ->label(__('Social Media Account')),
                     Textarea::make('address')
                         ->label(__('Address'))
                         ->columnSpanFull(),
-                    TextInput::make('previous_school')
-                        ->label(__('Previous School')),
+                    Select::make('education_level')
+                        ->label(__('Education Level'))
+                        ->options([
+                            'SD' => 'SD',
+                            'SMP' => 'SMP',
+                            'SMA' => 'SMA',
+                            'Umum' => 'Umum',
+                        ]),
+                    TextInput::make('course_level')
+                        ->label(__('Course Level')),
+                    TextInput::make('class_name')
+                        ->label(__('Class (Kelas)')),
+                    TextInput::make('school_name')
+                        ->label(__('School Name')),
                 ])->columns(2),
                 \Filament\Schemas\Components\Section::make(__('Parent Data'))->schema([
                     \Filament\Schemas\Components\Fieldset::make(__('Mother\'s Data'))->schema([
@@ -185,6 +220,11 @@ class AdmissionResource extends Resource
                 TextColumn::make('name')
                     ->label(__('Name'))->translateLabel()
                     ->searchable(),
+                TextColumn::make('student_type')
+                    ->label(__('Type'))
+                    ->badge()
+                    ->color(fn (?string $state): string => $state === 'external' ? 'warning' : 'info')
+                    ->formatStateUsing(fn (?string $state): string => $state === 'external' ? __('External') : __('Internal')),
                 TextColumn::make('phone')
                     ->label(__('WhatsApp No.'))
                     ->searchable(),
@@ -213,12 +253,23 @@ class AdmissionResource extends Resource
                 ])->from('md'),
             ])
             ->filters([
+                \Filament\Tables\Filters\SelectFilter::make('student_type')
+                    ->label(__('Student Type'))
+                    ->options([
+                        'internal' => __('Internal'),
+                        'external' => __('External'),
+                    ]),
                 \Filament\Tables\Filters\SelectFilter::make('status')
                     ->options([
                         'pending' => __('Pending'),
                         'approved' => __('Approved'),
                         'rejected' => __('Rejected'),
                     ]),
+            ])
+            ->headerActions([
+                ExportAction::make()->exports([
+                    ExcelExport::make('table')->fromTable(),
+                ]),
             ])
             ->recordActions([
                 EditAction::make()->label(__('Edit')),
@@ -248,7 +299,8 @@ class AdmissionResource extends Resource
                         \App\Models\Student::create([
                             'name' => $record->name,
                             'nis' => $newNis,
-                            'gender' => 'unknown', // Default, bisa diedit nanti
+                            'student_type' => $record->student_type ?? 'internal',
+                            'gender' => $record->gender ?? 'L',
                             'birth_date' => $record->birth_date,
                             'address' => $record->address,
                             'phone' => $record->phone,
@@ -260,6 +312,13 @@ class AdmissionResource extends Resource
                             'father_phone' => $record->father_phone,
                             'father_email' => $record->father_email,
                             'father_job' => $record->father_job,
+                            'birth_place' => $record->birth_place,
+                            'religion' => $record->religion,
+                            'social_media' => $record->social_media,
+                            'education_level' => $record->education_level,
+                            'course_level' => $record->course_level,
+                            'class_name' => $record->class_name,
+                            'school_name' => $record->school_name,
                             'is_active' => true,
                         ]);
 

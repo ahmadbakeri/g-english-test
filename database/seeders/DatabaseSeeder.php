@@ -10,21 +10,34 @@ use App\Models\Subject;
 use App\Models\Student;
 use App\Models\Tutor;
 use App\Models\ClassRoom;
-use App\Models\Attendance;
-use App\Models\Journal;
-use App\Models\Honor;
-use App\Models\Test;
-use App\Models\TestScore;
 use App\Models\Setting;
 use App\Models\ClassSchedule;
+use App\Models\StudentPayment;
 use Illuminate\Support\Facades\Hash;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // ── Admin User ──
-        $admin = User::create([
+        // Hapus data secara eksplisit agar bersih
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        User::truncate();
+        Student::truncate();
+        Tutor::truncate();
+        ClassRoom::truncate();
+        Subject::truncate();
+        AcademicYear::truncate();
+        Semester::truncate();
+        StudentPayment::truncate();
+        ClassSchedule::truncate();
+        DB::table('student_parent')->truncate();
+        DB::table('class_student')->truncate();
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
+        // -- Admin User --
+        User::create([
             'name' => 'Super Admin',
             'username' => 'GEADMIN48',
             'email' => 'superadmin@g-english.com',
@@ -32,22 +45,34 @@ class DatabaseSeeder extends Seeder
             'role' => 'admin',
         ]);
 
-        $admin2 = User::create([
-            'name' => 'Admin',
-            'username' => 'GEA48001',
-            'email' => 'admin@g-english.com',
-            'password' => Hash::make('password'),
-            'role' => 'admin',
-        ]);
-
-        // ── Tutor Users ──
-        $tutorUsers = [
-            User::create(['name' => 'Tutor Andi', 'username' => 'GE48101', 'email' => 'andi@g-english.com', 'password' => Hash::make('password'), 'role' => 'tutor']),
-            User::create(['name' => 'Tutor Budi', 'username' => 'GE48102', 'email' => 'budi@g-english.com', 'password' => Hash::make('password'), 'role' => 'tutor']),
-            User::create(['name' => 'Tutor Citra', 'username' => 'GE48103', 'email' => 'citra@g-english.com', 'password' => Hash::make('password'), 'role' => 'tutor']),
+        // -- Tutor Users --
+        $tutorData = [
+            ['name' => 'Mr Bakeri', 'username' => 'GE48101', 'email' => 'bakeri@g-english.com'],
+            ['name' => 'Mr Ichsan', 'username' => 'GE48102', 'email' => 'ichsan@g-english.com'],
+            ['name' => 'Mr Rizhan', 'username' => 'GE48103', 'email' => 'rizhan@g-english.com'],
         ];
 
-        // ── Academic Year ──
+        $tutors = [];
+        foreach ($tutorData as $index => $td) {
+            $u = User::create([
+                'name' => $td['name'],
+                'username' => $td['username'],
+                'email' => $td['email'],
+                'password' => Hash::make('password'),
+                'role' => 'tutor'
+            ]);
+
+            $tutors[$td['name']] = Tutor::create([
+                'user_id' => $u->id,
+                'nip' => $td['username'],
+                'name' => $td['name'],
+                'phone' => '08123456780' . ($index + 1),
+                'specialization' => 'All Levels',
+                'is_active' => true,
+            ]);
+        }
+
+        // -- Academic Year --
         $ay = AcademicYear::create([
             'name' => '2025/2026',
             'is_active' => true,
@@ -61,7 +86,7 @@ class DatabaseSeeder extends Seeder
             'is_active' => true,
         ]);
 
-        // ── Subjects ──
+        // -- Subjects --
         $subject = Subject::create([
             'code' => 'SURVIVAL', 
             'name' => 'Survival English', 
@@ -69,95 +94,123 @@ class DatabaseSeeder extends Seeder
             'description' => 'Materi bahasa Inggris dasar untuk bertahan hidup.'
         ]);
 
-        // ── Tutors ──
-        $tutors = [];
-        foreach ($tutorUsers as $index => $u) {
-            $tutors[] = Tutor::create([
-                'user_id' => $u->id,
-                'nip' => 'GE4810' . ($index + 1), // "GE48101", "GE48102", "GE48103"
-                'name' => $u->name,
-                'phone' => '08123456780' . ($index + 1),
-                'specialization' => 'Survival English',
-                'is_active' => true,
-            ]);
-        }
+        // -- Students & Parents --
+        // Total Fee 4jt, diskon 45% = 2,2jt.
+        $studentData = [
+            ['name' => 'Carmen', 'level' => 'SMA', 'paid_amount' => 2200000, 'username' => 'GES481101'],
+            ['name' => 'Kyuhyun', 'level' => 'SD', 'paid_amount' => 2000000, 'username' => 'GES481102'],
+            ['name' => 'IU', 'level' => 'SMP', 'paid_amount' => 2500000, 'username' => 'GES481103'],
+            ['name' => 'Sang Il', 'level' => 'SD', 'paid_amount' => 2000000, 'username' => 'GES481104', 'father' => 'Kim San', 'mother' => 'Yoona', 'father_phone' => '08111222333', 'mother_phone' => '08111222444'],
+            ['name' => 'Sunyg Il', 'level' => 'SMP', 'paid_amount' => 1500000, 'username' => 'GES481105', 'father' => 'Kim San', 'mother' => 'Yoona', 'father_phone' => '08111222333', 'mother_phone' => '08111222444'],
+            ['name' => 'Yoon il', 'level' => 'SMA', 'paid_amount' => 1000000, 'username' => 'GES481106', 'father' => 'Kim San', 'mother' => 'Yoona', 'father_phone' => '08111222333', 'mother_phone' => '08111222444'],
+        ];
 
-        // ── Students ──
         $students = [];
-        $studentNames = ['Siswa Doni', 'Siswa Eka', 'Siswa Fani'];
-        foreach ($studentNames as $index => $name) {
-            // Student username will also be their NIS for login
-            $nis = 'GES48110' . ($index + 1); // "GES481101", etc.
+        foreach ($studentData as $index => $sd) {
+            $fatherName = $sd['father'] ?? 'Ayah ' . $sd['name'];
+            $fatherPhone = $sd['father_phone'] ?? '08122233300' . ($index + 1);
             
-            // Create user for student
+            $motherName = $sd['mother'] ?? 'Ibu ' . $sd['name'];
+            $motherPhone = $sd['mother_phone'] ?? '08133344400' . ($index + 1);
+            
+            // Create Student User
             $studentUser = User::create([
-                'name' => $name,
-                'username' => $nis,
-                'email' => strtolower(str_replace(' ', '', $name)) . '@g-english.com',
+                'name' => $sd['name'],
+                'username' => $sd['username'],
+                'email' => strtolower($sd['name']) . '@g-english.com',
                 'password' => Hash::make('password'),
                 'role' => 'siswa'
             ]);
 
-            $students[] = Student::create([
+            // The Student model boot method automatically creates parent accounts from father_phone and mother_phone!
+            $students[$sd['name']] = Student::create([
                 'user_id' => $studentUser->id,
-                'nis' => $nis,
-                'name' => $name, 
-                'gender' => $index % 2 == 0 ? 'L' : 'P', 
+                'nis' => $sd['username'],
+                'name' => $sd['name'], 
+                'gender' => $index % 2 == 0 ? 'P' : 'L', 
                 'birth_date' => '2015-01-0' . ($index + 1), 
                 'phone' => '08511122200' . ($index + 1), 
-                'parent_name' => 'Ortu ' . $name, 
-                'parent_phone' => '08133344400' . ($index + 1)
+                'father_name' => $fatherName, 
+                'father_phone' => $fatherPhone,
+                'mother_name' => $motherName,
+                'mother_phone' => $motherPhone
             ]);
+
+            // Track Payments
+            $totalFee = 3100000; // 4jt - 25% (1jt) + 100rb pendaftaran
+            if ($sd['name'] == 'IU') {
+                $totalFee = 2500000; 
+            }
+            
+            $paid = $sd['paid_amount'];
+            $remaining = $totalFee - $paid;
+
+            // Record the paid amount
+            StudentPayment::create([
+                'student_id' => $students[$sd['name']]->id,
+                'month' => null,
+                'year' => null,
+                'amount' => $paid,
+                'status' => 'paid',
+                'paid_at' => Carbon::now(),
+                'notes' => 'Pembayaran Kursus. (Total Biaya Rp '.number_format($totalFee,0,',','.').' - Diskon 25% & Pendaftaran Rp 100.000)'
+            ]);
+
+            // Record the remaining balance if any
+            if ($remaining > 0) {
+                StudentPayment::create([
+                    'student_id' => $students[$sd['name']]->id,
+                    'month' => null,
+                    'year' => null,
+                    'due_date' => Carbon::now()->addMonths(4),
+                    'amount' => $remaining,
+                    'status' => 'unpaid',
+                    'notes' => 'Sisa Tagihan / Saldo Pembayaran Kursus'
+                ]);
+            }
         }
 
-        // ── Classes ──
         $classData = [
-            ['name' => 'Survival English SD', 'schedule' => 'Senin & Rabu, 14:00-15:30', 'days' => ['Monday', 'Wednesday']],
-            ['name' => 'Survival English SMP', 'schedule' => 'Selasa & Kamis, 14:00-15:30', 'days' => ['Tuesday', 'Thursday']],
-            ['name' => 'Survival English SMA', 'schedule' => 'Jumat & Sabtu, 14:00-15:30', 'days' => ['Friday', 'Saturday']],
+            ['name' => 'Survival English SD', 'tutor' => 'Mr Bakeri', 'students' => ['Kyuhyun', 'Sang Il']],
+            ['name' => 'Survival English SMP', 'tutor' => 'Mr Ichsan', 'students' => ['IU', 'Sunyg Il']],
+            ['name' => 'Survival English SMA', 'tutor' => 'Mr Rizhan', 'students' => ['Carmen', 'Yoon il']],
         ];
 
-        $classes = [];
         foreach ($classData as $index => $cd) {
             $class = ClassRoom::create([
                 'name' => $cd['name'],
                 'academic_year_id' => $ay->id,
                 'subject_id' => $subject->id,
-                'tutor_id' => $tutors[$index]->id,
-                'schedule' => $cd['schedule'],
+                'tutor_id' => $tutors[$cd['tutor']]->id,
+                'schedule' => 'Senin & Rabu, 14:00-15:30',
                 'capacity' => 10,
                 'is_active' => true,
             ]);
 
-            // Assign 1 student per class
-            $class->students()->attach([
-                $students[$index]->id => ['enrolled_at' => '2025-07-14'],
-            ]);
-
-            // ── Class Schedules (Master Data) ──
-            $scheduleItems = [];
-            foreach ($cd['days'] as $day) {
-                $scheduleItems[] = [
-                    'day' => $day,
-                    'start_time' => '14:00',
-                    'end_time' => '15:30'
-                ];
+            // Assign students
+            $studentsToSync = [];
+            foreach ($cd['students'] as $studentName) {
+                $studentsToSync[$students[$studentName]->id] = ['enrolled_at' => '2025-07-14'];
             }
+            $class->students()->attach($studentsToSync);
 
             ClassSchedule::create([
                 'class_id' => $class->id,
-                'tutor_id' => $tutors[$index]->id,
-                'schedule_items' => $scheduleItems,
+                'tutor_id' => $tutors[$cd['tutor']]->id,
+                'schedule_items' => [
+                    ['day' => 'Monday', 'start_time' => '14:00', 'end_time' => '15:30'],
+                    ['day' => 'Wednesday', 'start_time' => '14:00', 'end_time' => '15:30']
+                ],
             ]);
-
-            $classes[] = $class;
         }
 
-        // ── Settings ──
-        Setting::create(['key' => 'app_name', 'value' => 'G-English', 'group' => 'general']);
-        Setting::create(['key' => 'app_description', 'value' => 'Sistem Administrasi G-English', 'group' => 'general']);
-        Setting::create(['key' => 'institution_name', 'value' => 'G-ENGLISH', 'group' => 'general']);
-        Setting::create(['key' => 'institution_address', 'value' => 'Jl. Pendidikan No. 1', 'group' => 'general']);
-        Setting::create(['key' => 'institution_phone', 'value' => '021-1234567', 'group' => 'general']);
+        // -- Settings --
+        if (Setting::count() == 0) {
+            Setting::create(['key' => 'app_name', 'value' => 'G-English', 'group' => 'general']);
+            Setting::create(['key' => 'app_description', 'value' => 'Sistem Administrasi G-English', 'group' => 'general']);
+            Setting::create(['key' => 'institution_name', 'value' => 'G-ENGLISH', 'group' => 'general']);
+            Setting::create(['key' => 'institution_address', 'value' => 'Jl. Pendidikan No. 1', 'group' => 'general']);
+            Setting::create(['key' => 'institution_phone', 'value' => '021-1234567', 'group' => 'general']);
+        }
     }
 }

@@ -16,12 +16,14 @@ class StudentPayment extends Model
         'year',
         'amount',
         'status',
+        'due_date',
         'paid_at',
         'notes',
     ];
 
     protected $casts = [
         'paid_at' => 'datetime',
+        'due_date' => 'date',
     ];
 
     public function student(): BelongsTo

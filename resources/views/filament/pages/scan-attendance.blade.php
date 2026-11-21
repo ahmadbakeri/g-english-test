@@ -16,9 +16,8 @@
             border: 1px solid #e2e8f0;
         }
 
-        /* Header */
         .scan-card-header {
-            background: linear-gradient(135deg, #1e3a8a, #0ea5e9);
+            background: linear-gradient(135deg, #0a4282, #fbb900);
             color: white;
             padding: 1.5rem;
             text-align: center;

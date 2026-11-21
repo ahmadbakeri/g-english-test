@@ -28,8 +28,10 @@ class AdminPanelProvider extends PanelProvider
             ->brandName('G-English')
             ->brandLogo(asset('images/logo.png'))
             ->brandLogoHeight('3rem')
+            ->font('Outfit')
             ->colors([
-                'primary' => Color::Blue,
+                'primary' => Color::hex('#0a4282'),
+                'secondary' => Color::hex('#fbb900'),
                 'danger' => Color::Rose,
                 'gray' => Color::Slate,
                 'info' => Color::Sky,

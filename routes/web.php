@@ -13,7 +13,7 @@ Route::get('/login', function () {
 Route::get('/pendaftaran-siswa', [\App\Http\Controllers\AdmissionController::class, 'create'])->name('admission');
 Route::post('/daftar', [\App\Http\Controllers\AdmissionController::class, 'store'])->name('admission.store');
 
-Route::get('/absen', \App\Livewire\FormAbsensi::class);
+//Route::get('/absen', \App\Livewire\FormAbsensi::class);
 
 Route::post('/login-action', function (\Illuminate\Http\Request $request) {
     $credentials = $request->validate([
@@ -29,6 +29,8 @@ Route::post('/login-action', function (\Illuminate\Http\Request $request) {
             return redirect()->to('/admin');
         } elseif ($role === 'tutor') {
             return redirect()->to('/tutor');
+        } elseif ($role === 'parent') {
+            return redirect()->to('/parent');
         } else {
             return redirect()->to('/student');
         }
@@ -61,3 +63,11 @@ Route::get('/reports/certificate/{id}', [\App\Http\Controllers\ReportController:
 Route::get('/reports/evaluation/{id}', [\App\Http\Controllers\ReportController::class, 'printEvaluation'])
     ->name('report.evaluation')
     ->middleware(['auth']);
+
+Route::get('/avatar-proxy', function (\Illuminate\Http\Request $request) {
+    $path = $request->query('path');
+    if (!$path) abort(404);
+    $content = \Illuminate\Support\Facades\Storage::disk('r2')->get($path);
+    $mimeType = \Illuminate\Support\Facades\Storage::disk('r2')->mimeType($path);
+    return response($content)->header('Content-Type', $mimeType);
+})->name('avatar.proxy')->middleware(['web']);
