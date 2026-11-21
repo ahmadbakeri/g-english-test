@@ -121,12 +121,15 @@
                 No more kamu malu ngomong Bahasa Inggris! Belajar natural seperti bahasa ibu, tanpa menghafal.
             </p>
 
-            <div class="mt-10 flex flex-col sm:flex-row justify-center items-center gap-4">
+            <div class="mt-10 flex flex-col sm:flex-row flex-wrap justify-center items-center gap-4">
                 <a href="{{ route('admission') }}" class="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 bg-genza-blue hover:bg-[#083568] text-white text-base sm:text-lg font-extrabold px-8 py-4 rounded-full border-2 border-genza-blue hover:-translate-y-0.5 transition-all shadow-xl shadow-[#0a4282]/30">
                     <span>Ambil Promo & Daftar</span>
                     <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-genza-yellow text-genza-blue">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                     </span>
+                </a>
+                <a href="{{ route('brain-champion.register') }}" class="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 bg-genza-yellow hover:bg-yellow-400 text-genza-blue text-base sm:text-lg font-black px-8 py-4 rounded-full border-2 border-genza-blue/15 hover:-translate-y-0.5 transition-all shadow-xl shadow-yellow-500/25">
+                    <span>🏆 Daftar Brain Champion</span>
                 </a>
                 <a href="#program" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white dark:bg-slate-800 text-genza-blue dark:text-white text-base sm:text-lg font-bold px-8 py-4 rounded-full hover:bg-slate-50 dark:hover:bg-slate-700 border-2 border-genza-blue/20 dark:border-slate-700 hover:border-genza-yellow dark:hover:border-genza-yellow hover:-translate-y-0.5 transition-all shadow-sm">
                     <span>Lihat Program</span>

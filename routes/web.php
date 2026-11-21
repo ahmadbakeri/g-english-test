@@ -12,6 +12,7 @@ Route::get('/login', function () {
 
 Route::get('/pendaftaran-siswa', [\App\Http\Controllers\AdmissionController::class, 'create'])->name('admission');
 Route::post('/daftar', [\App\Http\Controllers\AdmissionController::class, 'store'])->name('admission.store');
+Route::get('/brain-champion', \App\Livewire\BrainChampionRegistration::class)->name('brain-champion.register');
 
 //Route::get('/absen', \App\Livewire\FormAbsensi::class);
 
