@@ -65,13 +65,22 @@ Route::get('/reports/evaluation/{id}', [\App\Http\Controllers\ReportController::
     ->middleware(['auth']);
 
 Route::get('/avatar-proxy', function (\Illuminate\Http\Request $request) {
-    $path = $request->query('path');
-    if (!$path) abort(404);
+    $path = (string) $request->query('path', '');
+    if ($path === '' || str_contains($path, '..') || str_starts_with($path, '/') || str_starts_with($path, '\\')) {
+        abort(404);
+    }
+    if (!\Illuminate\Support\Facades\Storage::disk('r2')->exists($path)) {
+        abort(404);
+    }
     $content = \Illuminate\Support\Facades\Storage::disk('r2')->get($path);
-    $mimeType = \Illuminate\Support\Facades\Storage::disk('r2')->mimeType($path);
+    $mimeType = \Illuminate\Support\Facades\Storage::disk('r2')->mimeType($path) ?: 'application/octet-stream';
     return response($content)->header('Content-Type', $mimeType);
 })->name('avatar.proxy')->middleware(['web']);
 
 Route::post('/api/push/subscribe', [\App\Http\Controllers\PushSubscriptionController::class, 'store'])
     ->name('push.subscribe')
+    ->middleware(['web', 'auth']);
+
+Route::post('/api/push/unsubscribe', [\App\Http\Controllers\PushSubscriptionController::class, 'destroy'])
+    ->name('push.unsubscribe')
     ->middleware(['web', 'auth']);

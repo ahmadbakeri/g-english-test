@@ -28,4 +28,20 @@ class PushSubscriptionController extends Controller
 
         return response()->json(['success' => true], 200);
     }
+
+    public function destroy(Request $request)
+    {
+        $request->validate([
+            'endpoint' => 'required|url',
+        ]);
+
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['error' => 'Unauthenticated.'], 401);
+        }
+
+        $user->deletePushSubscription($request->input('endpoint'));
+
+        return response()->json(['success' => true], 200);
+    }
 }
