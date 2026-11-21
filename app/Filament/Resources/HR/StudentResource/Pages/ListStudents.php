@@ -89,6 +89,28 @@ class ListStudents extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            Actions\Action::make('print_brain_champion_roster')
+                ->label('Cetak Daftar Hadir Lomba (Per Kelas)')
+                ->icon('heroicon-o-printer')
+                ->color('warning')
+                ->form([
+                    \Filament\Forms\Components\Select::make('grade')
+                        ->label('Pilih Jenjang Kelas Brain Champion')
+                        ->options([
+                            'all' => 'Semua Kelas (Kelas 4 s/d Kelas 9)',
+                            '4' => 'Kelas 4 (SD / MI)',
+                            '5' => 'Kelas 5 (SD / MI)',
+                            '6' => 'Kelas 6 (SD / MI)',
+                            '7' => 'Kelas 7 (SMP / MTs)',
+                            '8' => 'Kelas 8 (SMP / MTs)',
+                            '9' => 'Kelas 9 (SMP / MTs)',
+                        ])
+                        ->default('all')
+                        ->required(),
+                ])
+                ->action(function (array $data) {
+                    return redirect()->to(route('report.brain-champion-roster', ['grade' => $data['grade'] ?? 'all']));
+                }),
             Actions\ExportAction::make()->exporter(\App\Filament\Exports\StudentExporter::class),
             Actions\CreateAction::make()->label(__('Add Student')),
         ];

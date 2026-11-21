@@ -331,6 +331,13 @@ class StudentResource extends Resource
                 \Filament\Actions\ActionGroup::make([
                     \Filament\Actions\ViewAction::make(),
                     \Filament\Actions\EditAction::make(),
+                    \Filament\Actions\Action::make('brain_champion_card')
+                        ->label('Cetak Kartu Peserta')
+                        ->icon('heroicon-o-identification')
+                        ->color('warning')
+                        ->visible(fn (Student $record): bool => $record->course_level === 'G-English Brain Champion' || !empty($record->competition_code))
+                        ->url(fn (Student $record): string => route('report.brain-champion-card', $record->id))
+                        ->openUrlInNewTab(),
                     \Filament\Actions\Action::make('certificate')
                         ->label(__('Certificate'))
                         ->icon('heroicon-o-academic-cap')

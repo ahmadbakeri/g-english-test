@@ -23,6 +23,10 @@ class StudentCbtExams extends Page
     {
         $user = auth()->user();
         if ($user && $user->student) {
+            if ($user->student->course_level === 'G-English Brain Champion' || !empty($user->student->competition_code)) {
+                $this->exams = collect();
+                return;
+            }
             $studentClasses = $user->student->classes()->pluck('classes.id')->toArray();
             $this->exams = \App\Models\CbtExam::with('subject')
                 ->whereIn('class_id', $studentClasses)

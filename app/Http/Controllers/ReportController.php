@@ -77,4 +77,56 @@ class ReportController extends Controller
 
         return $pdf->stream("Evaluasi_{$evaluation->student->name}_{$evaluation->subject->name}.pdf");
     }
+
+    public function printBrainChampionCard($studentId)
+    {
+        $student = \App\Models\Student::findOrFail($studentId);
+        $user = auth()->user();
+
+        if (!$user || (!$user->isAdmin() && !($user->role === 'school' && (int) $student->school_user_id === (int) $user->id))) {
+            abort(403, 'Unauthorized access to participant card.');
+        }
+
+        $code = $student->competition_code ?: $student->nis ?: ('BC-' . $student->id);
+        $qrSvg = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')
+            ->size(120)
+            ->margin(1)
+            ->generate($code);
+
+        $pdf = Pdf::loadView('reports.brain-champion-card', [
+            'student' => $student,
+            'qrCodeBase64' => base64_encode((string) $qrSvg),
+        ])->setPaper('a5', 'landscape');
+
+        return $pdf->stream("Kartu_Peserta_Brain_Champion_{$code}.pdf");
+    }
+
+    public function printBrainChampionRoster($grade)
+    {
+        $user = auth()->user();
+        if (!$user || !$user->isAdmin()) {
+            abort(403, 'Only administrators can print competition roll-call sheets.');
+        }
+
+        $allowedGrades = $grade === 'all'
+            ? [4, 5, 6, 7, 8, 9]
+            : (in_array((int) $grade, [4, 5, 6, 7, 8, 9], true) ? [(int) $grade] : abort(404));
+
+        $rostersByGrade = [];
+        foreach ($allowedGrades as $g) {
+            $rostersByGrade[$g] = \App\Models\Student::query()
+                ->where('course_level', \App\Livewire\BrainChampionRegistration::EVENT_TAG)
+                ->where('class_name', "Kelas {$g}")
+                ->orderByRaw('COALESCE(competition_code, nis) ASC')
+                ->limit(35)
+                ->get();
+        }
+
+        $pdf = Pdf::loadView('reports.brain-champion-roster', [
+            'rostersByGrade' => $rostersByGrade,
+            'selectedGrade' => $grade,
+        ])->setPaper('a4', 'portrait');
+
+        return $pdf->stream("Daftar_Hadir_Brain_Champion_Kelas_{$grade}.pdf");
+    }
 }

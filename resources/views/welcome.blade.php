@@ -137,9 +137,14 @@
                 </a>
             </div>
 
-            <div class="mt-8 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800/70 text-xs sm:text-sm text-rose-600 dark:text-rose-300 font-bold">
-                <svg class="w-4 h-4 text-rose-500 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
-                <span>KUOTA SANGAT TERBATAS (Hanya 5–15 Siswa per jenjang)</span>
+            <div class="mt-8 flex flex-col items-center gap-2.5">
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-50 dark:bg-amber-950/50 border border-amber-300 dark:border-amber-700/80 text-xs sm:text-sm text-genza-blue dark:text-genza-yellow font-extrabold">
+                    <span>🏆 G-ENGLISH BRAIN CHAMPION: Kompetisi Offline di Gedung • Sistem Gugur (Whiteboard &amp; Kertas — Soal Dibacakan Langsung)</span>
+                </div>
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800/70 text-xs sm:text-sm text-rose-600 dark:text-rose-300 font-bold">
+                    <svg class="w-4 h-4 text-rose-500 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+                    <span>KUOTA SANGAT TERBATAS (Hanya 5–15 Siswa Reguler &amp; 35 Peserta Brain Champion per jenjang)</span>
+                </div>
             </div>
         </div>
     </section>

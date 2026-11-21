@@ -8,8 +8,13 @@
                 <h2 class="g-welcome-title" style="font-size: 1.875rem; font-weight: 800; background: linear-gradient(to right, #0a4282, #2563eb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0;">
                     {{ auth()->user()->name }}
                 </h2>
-                <p class="g-welcome-subtitle" style="font-size: 0.925rem; color: #475569; margin: 0;" class="dark:text-slate-300">
-                    Portal Resmi Koordinator Sekolah (ID Login: <strong>{{ auth()->user()->username }}</strong>). Kelola biodata delegasi peserta sekolah Anda dan pantau sisa kuota kompetisi secara real-time.
+                <div style="margin-top: 0.15rem;">
+                    <span style="display: inline-block; padding: 0.2rem 0.75rem; border-radius: 9999px; background: rgba(251, 185, 0, 0.18); color: #0a4282; font-size: 0.75rem; font-weight: 800;" class="dark:text-amber-300">
+                        Kompetisi Offline di Gedung &bull; Sistem Gugur (Whiteboard &amp; Kertas — Soal Dibacakan Langsung)
+                    </span>
+                </div>
+                <p class="g-welcome-subtitle" style="font-size: 0.925rem; color: #475569; margin: 0.25rem 0 0 0;" class="dark:text-slate-300">
+                    Portal Resmi Koordinator Sekolah (ID Login: <strong>{{ auth()->user()->username }}</strong>). Kelola biodata delegasi peserta sekolah Anda dan cetak Kartu Peserta resmi untuk check-in di gedung kompetisi.
                 </p>
             </div>
             <div style="display: flex; align-items: center; gap: 0.75rem;">

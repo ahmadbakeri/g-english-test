@@ -36,6 +36,9 @@ class TakeCbtExam extends Page
         }
 
         $student = $user->student;
+        if ($student->course_level === 'G-English Brain Champion' || !empty($student->competition_code)) {
+            abort(403, 'Peserta G-English Brain Champion mengikuti kompetisi secara offline di gedung (Whiteboard & Kertas).');
+        }
         $mode = $this->exam->cbt_mode ?? 'google_form';
 
         if ($mode === 'google_form') {

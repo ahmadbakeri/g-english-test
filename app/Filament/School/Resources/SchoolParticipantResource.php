@@ -208,6 +208,12 @@ class SchoolParticipantResource extends Resource
                 ])->from('md'),
             ])
             ->recordActions([
+                \Filament\Actions\Action::make('print_card')
+                    ->label('Cetak Kartu Peserta')
+                    ->icon('heroicon-o-identification')
+                    ->color('success')
+                    ->url(fn (Student $record): string => route('report.brain-champion-card', $record->id))
+                    ->openUrlInNewTab(),
                 ActionGroup::make([
                     EditAction::make()
                         ->label('Edit Biodata')

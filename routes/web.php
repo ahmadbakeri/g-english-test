@@ -67,6 +67,14 @@ Route::get('/reports/evaluation/{id}', [\App\Http\Controllers\ReportController::
     ->name('report.evaluation')
     ->middleware(['auth']);
 
+Route::get('/reports/brain-champion-card/{student_id}', [\App\Http\Controllers\ReportController::class, 'printBrainChampionCard'])
+    ->name('report.brain-champion-card')
+    ->middleware(['auth']);
+
+Route::get('/reports/brain-champion-roster/{grade}', [\App\Http\Controllers\ReportController::class, 'printBrainChampionRoster'])
+    ->name('report.brain-champion-roster')
+    ->middleware(['auth']);
+
 Route::get('/avatar-proxy', function (\Illuminate\Http\Request $request) {
     $path = (string) $request->query('path', '');
     if ($path === '' || str_contains($path, '..') || str_starts_with($path, '/') || str_starts_with($path, '\\')) {
