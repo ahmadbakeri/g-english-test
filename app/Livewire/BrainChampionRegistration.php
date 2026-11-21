@@ -4,7 +4,10 @@ namespace App\Livewire;
 
 use App\Models\Admission;
 use App\Models\Student;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -19,22 +22,31 @@ class BrainChampionRegistration extends Component
     public string $school_name = '';
     public string $pic_name = '';
     public string $pic_phone = '';
+    public string $school_password = '';
+
     public string $lastSubmittedSchool = '';
     public string $lastSubmittedPicName = '';
     public string $lastSubmittedPicPhone = '';
     public string $lastSubmittedAt = '';
 
     /**
+     * School login credentials generated/updated on submission.
+     *
+     * @var array{login_url?: string, username?: string, password?: string, school_name?: string, pic_name?: string}
+     */
+    public array $schoolCredentials = [];
+
+    /**
      * Participants keyed by grade ('4','5','6','7','8','9') -> slot index (0..1 for SD, 0 for SMP)
      *
-     * @var array<int|string, array<int, array{name: string, gender: string, phone: string}>>
+     * @var array<int|string, array<int, array{nisn: string, name: string, gender: string, parent_name: string, parent_phone: string, phone: string}>>
      */
     public array $participants = [];
 
     /**
      * Newly registered participants summary from current session submission
      *
-     * @var array<int, array{registration_number: string, name: string, grade: int, class_name: string, school_name: string, username: string|null}>
+     * @var array<int, array{registration_number: string, competition_code: string, nisn: string, name: string, gender: string, parent_name: string, parent_phone: string, phone: string, grade: int, class_name: string, school_name: string, username: string|null}>
      */
     public array $registeredResults = [];
 
@@ -54,18 +66,30 @@ class BrainChampionRegistration extends Component
         $this->resetValidation();
     }
 
+    protected function emptySlot(array $existing = []): array
+    {
+        return [
+            'nisn' => (string) ($existing['nisn'] ?? ''),
+            'name' => (string) ($existing['name'] ?? ''),
+            'gender' => (string) ($existing['gender'] ?? 'L'),
+            'parent_name' => (string) ($existing['parent_name'] ?? ''),
+            'parent_phone' => (string) ($existing['parent_phone'] ?? ''),
+            'phone' => (string) ($existing['phone'] ?? ''),
+        ];
+    }
+
     protected function initializeParticipantSlots(): void
     {
         $slots = [];
         foreach ([4, 5, 6] as $grade) {
             $slots[$grade] = [
-                0 => ['name' => $this->participants[$grade][0]['name'] ?? '', 'gender' => $this->participants[$grade][0]['gender'] ?? 'L', 'phone' => $this->participants[$grade][0]['phone'] ?? ''],
-                1 => ['name' => $this->participants[$grade][1]['name'] ?? '', 'gender' => $this->participants[$grade][1]['gender'] ?? 'L', 'phone' => $this->participants[$grade][1]['phone'] ?? ''],
+                0 => $this->emptySlot($this->participants[$grade][0] ?? []),
+                1 => $this->emptySlot($this->participants[$grade][1] ?? []),
             ];
         }
         foreach ([7, 8, 9] as $grade) {
             $slots[$grade] = [
-                0 => ['name' => $this->participants[$grade][0]['name'] ?? '', 'gender' => $this->participants[$grade][0]['gender'] ?? 'L', 'phone' => $this->participants[$grade][0]['phone'] ?? ''],
+                0 => $this->emptySlot($this->participants[$grade][0] ?? []),
             ];
         }
         $this->participants = $slots;
@@ -149,18 +173,22 @@ class BrainChampionRegistration extends Component
             'school_name' => 'required|string|min:3|max:255',
             'pic_name' => 'required|string|min:2|max:255',
             'pic_phone' => 'required|string|min:8|max:25',
+            'school_password' => 'nullable|string|min:4|max:50',
         ], [
             'school_name.required' => 'Nama sekolah wajib diisi.',
-            'pic_name.required' => 'Nama Guru Pendamping / Orang Tua PIC wajib diisi.',
-            'pic_phone.required' => 'Nomor WhatsApp PIC wajib diisi.',
+            'pic_name.required' => 'Nama Guru Pendamping wajib diisi.',
+            'pic_phone.required' => 'Nomor WhatsApp Guru Pendamping wajib diisi.',
+            'school_password.min' => 'Password / PIN sekolah minimal 4 karakter.',
         ]);
 
         $activeGrades = $this->activeGrades;
         $cleanSchoolName = trim((string) preg_replace('/\s+/', ' ', $this->school_name));
         $normalizedSchool = self::normalizeSchoolName($cleanSchoolName);
+        $coordinatorPhone = preg_replace('/\s+/', '', trim($this->pic_phone)) ?: trim($this->pic_phone);
 
-        // Collect non-empty participant entries from active grades
+        // Collect & validate non-empty participant entries from active grades
         $entriesByGrade = [];
+        $validationErrors = [];
         $totalSubmitted = 0;
 
         foreach ($activeGrades as $grade) {
@@ -168,37 +196,93 @@ class BrainChampionRegistration extends Component
             $gradeSlots = $this->participants[$grade] ?? [];
 
             for ($idx = 0; $idx < $maxSlots; $idx++) {
-                $name = trim((string) ($gradeSlots[$idx]['name'] ?? ''));
-                if ($name !== '') {
-                    $gender = in_array($gradeSlots[$idx]['gender'] ?? 'L', ['L', 'P'], true)
-                        ? $gradeSlots[$idx]['gender']
-                        : 'L';
-                    $phone = trim((string) ($gradeSlots[$idx]['phone'] ?? ''));
+                $slot = $gradeSlots[$idx] ?? [];
+                $nisn = preg_replace('/\s+/', '', trim((string) ($slot['nisn'] ?? ''))) ?? '';
+                $name = trim((string) ($slot['name'] ?? ''));
+                $parentName = trim((string) ($slot['parent_name'] ?? ''));
+                $parentPhone = trim((string) ($slot['parent_phone'] ?? ''));
+                $phone = trim((string) ($slot['phone'] ?? ''));
+                $gender = in_array($slot['gender'] ?? 'L', ['L', 'P'], true) ? $slot['gender'] : 'L';
 
-                    $entriesByGrade[$grade][] = [
-                        'slot_index' => $idx,
-                        'name' => $name,
-                        'gender' => $gender,
-                        'phone' => $phone !== '' ? $phone : trim($this->pic_phone),
-                    ];
-                    $totalSubmitted++;
+                // Check if user started filling this slot
+                $hasAnyField = ($name !== '' || $nisn !== '' || $parentName !== '' || $parentPhone !== '');
+                if (!$hasAnyField) {
+                    continue;
                 }
+
+                $slotLabel = "Kelas {$grade} (Peserta " . ($idx + 1) . ')';
+
+                if ($nisn === '' || !preg_match('/^\d{10}$/', $nisn)) {
+                    $validationErrors["participants.{$grade}.{$idx}.nisn"] = "NISN {$slotLabel} wajib diisi 10 digit angka.";
+                }
+                if ($name === '') {
+                    $validationErrors["participants.{$grade}.{$idx}.name"] = "Nama Lengkap Siswa {$slotLabel} wajib diisi.";
+                }
+                if ($parentName === '') {
+                    $validationErrors["participants.{$grade}.{$idx}.parent_name"] = "Nama Orang Tua {$slotLabel} wajib diisi.";
+                }
+                if ($parentPhone === '') {
+                    $validationErrors["participants.{$grade}.{$idx}.parent_phone"] = "No. HP Orang Tua {$slotLabel} wajib diisi.";
+                }
+
+                $entriesByGrade[$grade][] = [
+                    'slot_index' => $idx,
+                    'nisn' => $nisn,
+                    'name' => $name,
+                    'gender' => $gender,
+                    'parent_name' => $parentName,
+                    'parent_phone' => $parentPhone,
+                    'phone' => $phone !== '' ? $phone : $parentPhone,
+                ];
+                $totalSubmitted++;
             }
+        }
+
+        if (!empty($validationErrors)) {
+            throw ValidationException::withMessages($validationErrors);
         }
 
         if ($totalSubmitted === 0) {
             throw ValidationException::withMessages([
-                'participants' => 'Minimal isi 1 nama siswa peserta pada kelas yang masih memiliki kuota tersedia.',
+                'participants' => 'Minimal isi 1 peserta lengkap (NISN 10 digit, Nama Siswa, Nama & No. HP Orang Tua) pada kelas yang masih tersedia.',
             ]);
         }
 
-        $createdRecords = DB::transaction(function () use ($entriesByGrade, $cleanSchoolName, $normalizedSchool) {
+        $plainPassword = trim($this->school_password) !== ''
+            ? trim($this->school_password)
+            : Str::upper(Str::random(6));
+
+        $createdRecords = DB::transaction(function () use ($entriesByGrade, $cleanSchoolName, $normalizedSchool, $coordinatorPhone, $plainPassword) {
             // Lock all Brain Champion admission rows to prevent race conditions under concurrent requests
             $lockedRows = Admission::query()
                 ->where('course_level', self::EVENT_TAG)
                 ->where('status', '!=', 'rejected')
                 ->lockForUpdate()
                 ->get();
+
+            // 1. Auto-provision / Find School User account (role = 'school', username = $coordinatorPhone)
+            $schoolEmail = preg_replace('/[^a-zA-Z0-9]/', '', $coordinatorPhone) . '@school.g-english.com';
+            $schoolUser = User::where('username', $coordinatorPhone)->first();
+
+            if (!$schoolUser) {
+                if (User::where('email', $schoolEmail)->exists()) {
+                    $schoolEmail = preg_replace('/[^a-zA-Z0-9]/', '', $coordinatorPhone) . '_' . rand(100, 999) . '@school.g-english.com';
+                }
+
+                $schoolUser = User::create([
+                    'username' => $coordinatorPhone,
+                    'name' => $cleanSchoolName,
+                    'email' => $schoolEmail,
+                    'password' => Hash::make($plainPassword),
+                    'role' => 'school',
+                ]);
+            } else {
+                $updates = ['password' => Hash::make($plainPassword)];
+                if ($schoolUser->role === 'parent' || $schoolUser->role === 'school') {
+                    $updates['name'] = $cleanSchoolName;
+                }
+                $schoolUser->update($updates);
+            }
 
             $results = [];
 
@@ -234,7 +318,10 @@ class BrainChampionRegistration extends Component
 
                     $admission = Admission::create([
                         'registration_number' => $regCode,
+                        'nisn' => $entry['nisn'],
+                        'competition_code' => $regCode,
                         'student_type' => 'external',
+                        'school_user_id' => $schoolUser->id,
                         'name' => $entry['name'],
                         'gender' => $entry['gender'],
                         'phone' => $entry['phone'],
@@ -243,21 +330,24 @@ class BrainChampionRegistration extends Component
                         'class_name' => $classLabel,
                         'school_name' => $cleanSchoolName,
                         'previous_school' => $cleanSchoolName,
-                        'parent_name' => trim($this->pic_name),
-                        'parent_phone' => trim($this->pic_phone),
-                        'mother_name' => trim($this->pic_name),
-                        'mother_phone' => trim($this->pic_phone),
+                        'parent_name' => $entry['parent_name'],
+                        'parent_phone' => $entry['parent_phone'],
+                        'mother_name' => $entry['parent_name'],
+                        'mother_phone' => $entry['parent_phone'],
                         'status' => 'approved',
                         'tuition_fee' => 0,
                         'registration_fee' => 0,
                         'has_discount' => false,
                         'total_fee' => 0,
                         'amount_paid' => 0,
-                        'notes' => self::EVENT_TAG . " (One Mind, One Champion) — {$classLabel} — Sekolah: {$cleanSchoolName}",
+                        'notes' => self::EVENT_TAG . " (One Mind, One Champion) — {$classLabel} — NISN: {$entry['nisn']} — Sekolah: {$cleanSchoolName} — Pendamping: {$this->pic_name} ({$coordinatorPhone})",
                     ]);
 
                     $student = Student::create([
+                        'school_user_id' => $schoolUser->id,
                         'nis' => $regCode,
+                        'nisn' => $entry['nisn'],
+                        'competition_code' => $regCode,
                         'student_type' => 'external',
                         'name' => $entry['name'],
                         'gender' => $entry['gender'],
@@ -266,18 +356,27 @@ class BrainChampionRegistration extends Component
                         'course_level' => self::EVENT_TAG,
                         'class_name' => $classLabel,
                         'school_name' => $cleanSchoolName,
-                        'parent_name' => trim($this->pic_name),
-                        'parent_phone' => trim($this->pic_phone),
+                        'parent_name' => $entry['parent_name'],
+                        'parent_phone' => $entry['parent_phone'],
+                        'mother_name' => $entry['parent_name'],
+                        'mother_phone' => $entry['parent_phone'],
                         'is_active' => true,
                     ]);
+
+                    // Link school user to student so school coordinator can also view registered students
+                    $student->parents()->syncWithoutDetaching([$schoolUser->id]);
 
                     // Add to in-memory locked collection so next iteration in same transaction increments properly
                     $lockedRows->push($admission);
 
                     $results[] = [
                         'registration_number' => $regCode,
+                        'competition_code' => $regCode,
+                        'nisn' => $entry['nisn'],
                         'name' => $student->name,
                         'gender' => $entry['gender'],
+                        'parent_name' => $entry['parent_name'],
+                        'parent_phone' => $entry['parent_phone'],
                         'phone' => $entry['phone'],
                         'grade' => (int) $grade,
                         'class_name' => $classLabel,
@@ -292,9 +391,17 @@ class BrainChampionRegistration extends Component
 
         $this->lastSubmittedSchool = $cleanSchoolName;
         $this->lastSubmittedPicName = trim($this->pic_name);
-        $this->lastSubmittedPicPhone = trim($this->pic_phone);
+        $this->lastSubmittedPicPhone = $coordinatorPhone;
         $this->lastSubmittedAt = now()->translatedFormat('d F Y, H:i') . ' WITA';
+        $this->schoolCredentials = [
+            'login_url' => route('login'),
+            'username' => $coordinatorPhone,
+            'password' => $plainPassword,
+            'school_name' => $cleanSchoolName,
+            'pic_name' => trim($this->pic_name),
+        ];
         $this->registeredResults = $createdRecords;
+        $this->participants = [];
         $this->initializeParticipantSlots();
     }
 
@@ -335,6 +442,7 @@ class BrainChampionRegistration extends Component
     public function resetRegistrationSuccess(): void
     {
         $this->registeredResults = [];
+        $this->schoolCredentials = [];
     }
 
     public function render()

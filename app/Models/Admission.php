@@ -11,7 +11,10 @@ class Admission extends Model
 
     protected $fillable = [
         'registration_number',
+        'nisn',
+        'competition_code',
         'student_type',
+        'school_user_id',
         'name',
         'email',
         'phone',

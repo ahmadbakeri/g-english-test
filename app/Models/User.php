@@ -53,7 +53,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         }
         
         if ($panel->getId() === 'parent') {
-            return $this->role === 'parent';
+            return in_array($this->role, ['parent', 'school'], true);
         }
         
         return false;
