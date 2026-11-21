@@ -14,13 +14,62 @@
     }
 
     /* Genza Design System Overrides */
+    :root {
+        --genza-primary: #0a4282;
+        --genza-secondary: #fbb900;
+    }
+
     .fi-btn {
         transition: all 0.3s ease-in-out !important;
         border-radius: 9999px !important; /* Pill shape for buttons */
+        font-weight: 600 !important;
     }
     .fi-btn:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 6px -1px rgba(10, 66, 130, 0.2), 0 2px 4px -1px rgba(10, 66, 130, 0.1) !important;
+        box-shadow: 0 4px 10px -1px rgba(10, 66, 130, 0.22), 0 2px 4px -1px rgba(10, 66, 130, 0.12) !important;
+    }
+    /* Primary Submit & Action Button Discipline (#0a4282) */
+    .fi-btn-color-primary,
+    button[type="submit"].fi-btn-color-primary {
+        background-color: #0a4282 !important;
+        color: #ffffff !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    }
+    .fi-btn-color-primary:hover {
+        background-color: #0d52a0 !important;
+        border-color: rgba(251, 185, 0, 0.5) !important;
+    }
+    .dark .fi-btn-color-primary {
+        background-color: #1d4ed8 !important;
+        color: #ffffff !important;
+    }
+    /* Secondary Accent Button Discipline (#fbb900 with high-contrast #0a4282 text, never low-contrast yellow on white) */
+    .fi-btn-color-secondary {
+        background-color: #fbb900 !important;
+        color: #0a4282 !important;
+        font-weight: 700 !important;
+    }
+    .fi-btn-color-secondary:hover {
+        background-color: #f59e0b !important;
+        color: #0a4282 !important;
+    }
+
+    /* Key Headings & Active Navigation Indicators */
+    .fi-header-heading {
+        color: #0a4282 !important;
+        font-weight: 800 !important;
+        letter-spacing: -0.02em !important;
+    }
+    .dark .fi-header-heading {
+        color: #f8fafc !important;
+    }
+    .fi-sidebar-item-active > a {
+        border-left: 3px solid #0a4282 !important;
+        background: linear-gradient(90deg, rgba(10, 66, 130, 0.08), rgba(10, 66, 130, 0.02)) !important;
+    }
+    .dark .fi-sidebar-item-active > a {
+        border-left: 3px solid #fbb900 !important;
+        background: linear-gradient(90deg, rgba(251, 185, 0, 0.12), rgba(255, 255, 255, 0.02)) !important;
     }
     
     .fi-ta-record, .fi-wi-stats-overview-stat {
@@ -359,36 +408,58 @@
     /* ---------------------------------------------------- */
 
     /* 1. Global Forms & Inputs */
-    .fi-input, .fi-select, .fi-textarea {
+    .fi-input, .fi-select, .fi-textarea, .fi-input-wrp {
         border-radius: 0.75rem !important; /* rounded-xl */
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        border: 1px solid rgba(0,0,0,0.1) !important;
+    }
+    .fi-input, .fi-select, .fi-textarea {
+        border: 1px solid rgba(15, 23, 42, 0.12) !important;
         background-color: #f8fafc !important;
         box-shadow: inset 0 2px 4px 0 rgba(0,0,0,0.02) !important;
     }
     
     .dark .fi-input, .dark .fi-select, .dark .fi-textarea {
-        background-color: rgba(15, 23, 42, 0.6) !important;
-        border-color: rgba(255,255,255,0.1) !important;
+        background-color: rgba(15, 23, 42, 0.65) !important;
+        border-color: rgba(255,255,255,0.12) !important;
     }
 
     .fi-input:focus, .fi-select:focus, .fi-textarea:focus,
-    .fi-input:focus-within, .fi-select:focus-within, .fi-textarea:focus-within {
-        border-color: rgb(var(--primary-500)) !important;
-        box-shadow: 0 0 0 4px rgba(var(--primary-500), 0.15) !important;
+    .fi-input:focus-within, .fi-select:focus-within, .fi-textarea:focus-within,
+    .fi-input-wrp:focus-within {
+        border-color: #0a4282 !important;
+        box-shadow: 0 0 0 3px rgba(10, 66, 130, 0.18) !important;
         background-color: #ffffff !important;
         transform: translateY(-1px);
     }
     
     .dark .fi-input:focus, .dark .fi-select:focus, .dark .fi-textarea:focus,
-    .dark .fi-input:focus-within, .dark .fi-select:focus-within, .dark .fi-textarea:focus-within {
-        background-color: rgba(15, 23, 42, 0.9) !important;
-        box-shadow: 0 0 0 4px rgba(var(--primary-400), 0.2) !important;
+    .dark .fi-input:focus-within, .dark .fi-select:focus-within, .dark .fi-textarea:focus-within,
+    .dark .fi-input-wrp:focus-within {
+        border-color: #fbb900 !important;
+        background-color: rgba(15, 23, 42, 0.92) !important;
+        box-shadow: 0 0 0 3px rgba(251, 185, 0, 0.22) !important;
     }
 
-    /* Input wrappers */
+    /* Input wrappers & Helper Text Styling */
     .fi-fo-field-wrp {
         transition: all 0.3s ease;
+    }
+    .fi-fo-field-wrp-label {
+        font-weight: 600 !important;
+        color: #1e293b !important;
+        letter-spacing: 0.01em !important;
+    }
+    .dark .fi-fo-field-wrp-label {
+        color: #e2e8f0 !important;
+    }
+    .fi-fo-field-wrp-helper-text {
+        font-size: 0.775rem !important;
+        line-height: 1.35 !important;
+        color: #64748b !important;
+        margin-top: 0.25rem !important;
+    }
+    .dark .fi-fo-field-wrp-helper-text {
+        color: #94a3b8 !important;
     }
     
     /* Checkbox & Radio */
@@ -398,14 +469,15 @@
     }
     .fi-checkbox:checked, .fi-radio:checked {
         transform: scale(1.1);
-        box-shadow: 0 0 10px rgba(var(--primary-500), 0.4) !important;
+        box-shadow: 0 0 10px rgba(10, 66, 130, 0.35) !important;
     }
 
-    /* 2. Global Tables & Data */
+    /* 2. Global Tables & Data Readability & Alignment */
     .fi-ta-table {
         border-collapse: separate !important;
         border-spacing: 0 0.5rem !important;
         background: transparent !important;
+        width: 100% !important;
     }
     
     .fi-ta-header {
@@ -413,68 +485,157 @@
     }
 
     /* Table Headers */
-    .fi-ta-table th {
-        background-color: rgba(var(--primary-50), 0.5) !important;
-        border-bottom: 2px solid rgba(var(--primary-200), 0.5) !important;
-        padding-top: 1rem !important;
-        padding-bottom: 1rem !important;
+    .fi-ta-table thead th {
+        background-color: rgba(10, 66, 130, 0.05) !important;
+        border-bottom: 2px solid rgba(10, 66, 130, 0.14) !important;
+        padding: 0.875rem 1rem !important;
         font-weight: 700 !important;
         text-transform: uppercase !important;
         letter-spacing: 0.05em !important;
         font-size: 0.75rem !important;
-        color: rgb(var(--primary-700)) !important;
+        color: #0a4282 !important;
+        vertical-align: middle !important;
     }
     
-    .dark .fi-ta-table th {
-        background-color: rgba(15, 23, 42, 0.5) !important;
-        border-bottom-color: rgba(255, 255, 255, 0.05) !important;
-        color: rgb(var(--primary-400)) !important;
+    .dark .fi-ta-table thead th {
+        background-color: rgba(15, 23, 42, 0.65) !important;
+        border-bottom-color: rgba(251, 185, 0, 0.25) !important;
+        color: #93c5fd !important;
     }
 
     /* Table Rows (Floating Rows effect) */
     .fi-ta-row {
         background-color: #ffffff !important;
         border-radius: 1rem !important;
-        box-shadow: 0 2px 5px -1px rgba(0, 0, 0, 0.03) !important;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        box-shadow: 0 2px 5px -1px rgba(15, 23, 42, 0.04) !important;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
     }
     
     .dark .fi-ta-row {
-        background-color: rgba(255, 255, 255, 0.03) !important;
+        background-color: rgba(30, 41, 59, 0.55) !important;
         box-shadow: none !important;
     }
 
     .fi-ta-row:hover {
-        transform: translateY(-2px) scale(1.001) !important;
-        box-shadow: 0 10px 15px -3px rgba(var(--primary-500), 0.1), 0 4px 6px -2px rgba(var(--primary-500), 0.05) !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 10px 18px -4px rgba(10, 66, 130, 0.12), 0 4px 6px -2px rgba(10, 66, 130, 0.05) !important;
         z-index: 10;
         position: relative;
     }
     
     .dark .fi-ta-row:hover {
-        background-color: rgba(255, 255, 255, 0.06) !important;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5) !important;
+        background-color: rgba(30, 41, 59, 0.85) !important;
+        box-shadow: 0 10px 18px -4px rgba(0, 0, 0, 0.55) !important;
     }
 
-    /* Table Cells */
-    .fi-ta-cell {
-        border-top: 1px solid rgba(0, 0, 0, 0.02) !important;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.02) !important;
+    /* Table Cells: Vertical Padding, Crisp Subtle Borders & Column Alignment */
+    .fi-ta-cell,
+    .fi-ta-row td {
+        padding-top: 0.75rem !important;
+        padding-bottom: 0.75rem !important;
+        vertical-align: middle !important;
+        border-top: 1px solid rgba(15, 23, 42, 0.05) !important;
+        border-bottom: 1px solid rgba(15, 23, 42, 0.05) !important;
     }
     
-    .dark .fi-ta-cell {
-        border-color: rgba(255, 255, 255, 0.02) !important;
+    .dark .fi-ta-cell,
+    .dark .fi-ta-row td {
+        border-top-color: rgba(255, 255, 255, 0.06) !important;
+        border-bottom-color: rgba(255, 255, 255, 0.06) !important;
     }
     
     .fi-ta-row td:first-child {
-        border-left: 1px solid rgba(0, 0, 0, 0.02) !important;
+        border-left: 1px solid rgba(15, 23, 42, 0.05) !important;
         border-top-left-radius: 1rem !important;
         border-bottom-left-radius: 1rem !important;
     }
     .fi-ta-row td:last-child {
-        border-right: 1px solid rgba(0, 0, 0, 0.02) !important;
+        border-right: 1px solid rgba(15, 23, 42, 0.05) !important;
         border-top-right-radius: 1rem !important;
         border-bottom-right-radius: 1rem !important;
+    }
+    .dark .fi-ta-row td:first-child {
+        border-left-color: rgba(255, 255, 255, 0.06) !important;
+    }
+    .dark .fi-ta-row td:last-child {
+        border-right-color: rgba(255, 255, 255, 0.06) !important;
+    }
+    .fi-ta-row:hover td {
+        border-top-color: rgba(251, 185, 0, 0.45) !important;
+        border-bottom-color: rgba(251, 185, 0, 0.45) !important;
+    }
+    .fi-ta-row:hover td:first-child {
+        border-left-color: rgba(251, 185, 0, 0.45) !important;
+    }
+    .fi-ta-row:hover td:last-child {
+        border-right-color: rgba(251, 185, 0, 0.45) !important;
+    }
+
+    /* Alignment Rules: Left-align text/names, Center-align badges/icons/actions, Right-align numbers/currency */
+    .fi-ta-text {
+        text-align: left;
+    }
+    .fi-ta-cell:has(.fi-badge),
+    .fi-ta-cell:has(.fi-ta-icon),
+    .fi-ta-actions-cell,
+    .fi-ta-cell:last-child:has(.fi-ta-actions) {
+        text-align: center !important;
+    }
+    .fi-ta-cell:has(.fi-badge) .fi-ta-col-wrp,
+    .fi-ta-cell:has(.fi-ta-icon) .fi-ta-col-wrp {
+        justify-content: center !important;
+    }
+    .fi-ta-actions {
+        justify-content: center !important;
+    }
+    .fi-ta-text-item-numeric,
+    [class*="fi-ta-text"][class*="numeric"],
+    .fi-ta-cell[class*="numeric"] {
+        text-align: right !important;
+        font-variant-numeric: tabular-nums !important;
+    }
+
+    /* Grouped Table Headers (Collapse/Expand Chevrons & Item Count Pills) */
+    .fi-ta-group-header-row td,
+    .fi-ta-group-header {
+        background: linear-gradient(90deg, rgba(10, 66, 130, 0.07), rgba(248, 250, 252, 0.9)) !important;
+        border: 1px solid rgba(10, 66, 130, 0.14) !important;
+        border-left: 4px solid #0a4282 !important;
+        border-radius: 0.875rem !important;
+        padding: 0.75rem 1.25rem !important;
+        cursor: pointer !important;
+        transition: all 0.25s ease !important;
+    }
+    .dark .fi-ta-group-header-row td,
+    .dark .fi-ta-group-header {
+        background: linear-gradient(90deg, rgba(15, 23, 42, 0.85), rgba(30, 41, 59, 0.75)) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-left: 4px solid #fbb900 !important;
+    }
+    .fi-ta-group-header-row:hover td,
+    .fi-ta-group-header:hover {
+        border-color: rgba(251, 185, 0, 0.6) !important;
+        box-shadow: 0 4px 12px -2px rgba(10, 66, 130, 0.12) !important;
+    }
+    .fi-ta-group-header h4,
+    .fi-ta-group-heading {
+        font-weight: 700 !important;
+        color: #0a4282 !important;
+        font-size: 0.925rem !important;
+        letter-spacing: 0.01em !important;
+    }
+    .dark .fi-ta-group-header h4,
+    .dark .fi-ta-group-heading {
+        color: #f8fafc !important;
+    }
+    .fi-ta-group-header .fi-icon-btn,
+    .fi-ta-group-header svg {
+        color: #0a4282 !important;
+        transition: transform 0.25s ease !important;
+    }
+    .dark .fi-ta-group-header .fi-icon-btn,
+    .dark .fi-ta-group-header svg {
+        color: #fbb900 !important;
     }
 
     /* Remove default ugly borders from the table container */
@@ -484,60 +645,111 @@
         background: transparent !important;
     }
 
-    /* 3. Global Sections & Cards */
+    /* 3. Global Sections, Form Headers & Modals */
     .fi-section, .fi-fo-section, .fi-in-section, .fi-ta-record, .fi-modal-window {
         border-radius: 1.25rem !important; /* rounded-2xl */
-        border: 1px solid rgba(0,0,0,0.05) !important;
-        background: rgba(255, 255, 255, 0.85) !important;
+        border: 1px solid rgba(15, 23, 42, 0.07) !important;
+        background: rgba(255, 255, 255, 0.88) !important;
         backdrop-filter: blur(12px) saturate(180%) !important;
         -webkit-backdrop-filter: blur(12px) saturate(180%) !important;
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.03), 0 8px 10px -6px rgba(0, 0, 0, 0.01) !important;
+        box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.04), 0 8px 10px -6px rgba(15, 23, 42, 0.02) !important;
         transition: all 0.3s ease-in-out !important;
     }
 
     .dark .fi-section, .dark .fi-fo-section, .dark .fi-in-section, .dark .fi-ta-record, .dark .fi-modal-window {
-        background: rgba(15, 23, 42, 0.75) !important;
-        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        background: rgba(15, 23, 42, 0.78) !important;
+        border: 1px solid rgba(255, 255, 255, 0.09) !important;
         box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5) !important;
     }
 
-    /* 4. Global Tabs */
-    .fi-tabs {
-        background-color: rgba(0, 0, 0, 0.03) !important;
+    /* Section & Modal Header Polish */
+    .fi-section-header,
+    .fi-modal-header {
+        border-bottom: 1px solid rgba(15, 23, 42, 0.06) !important;
+        padding: 1.125rem 1.5rem !important;
+        background: linear-gradient(90deg, rgba(10, 66, 130, 0.03), transparent) !important;
+        border-top-left-radius: 1.25rem !important;
+        border-top-right-radius: 1.25rem !important;
+    }
+    .dark .fi-section-header,
+    .dark .fi-modal-header {
+        border-bottom-color: rgba(255, 255, 255, 0.07) !important;
+        background: linear-gradient(90deg, rgba(251, 185, 0, 0.06), transparent) !important;
+    }
+    .fi-section-header-heading,
+    .fi-modal-heading {
+        font-weight: 700 !important;
+        color: #0a4282 !important;
+        letter-spacing: -0.01em !important;
+    }
+    .dark .fi-section-header-heading,
+    .dark .fi-modal-heading {
+        color: #f8fafc !important;
+    }
+    .fi-section-header-description,
+    .fi-modal-description {
+        color: #64748b !important;
+        font-size: 0.85rem !important;
+    }
+    .dark .fi-section-header-description,
+    .dark .fi-modal-description {
+        color: #94a3b8 !important;
+    }
+    .fi-section-header-icon {
+        background-color: rgba(10, 66, 130, 0.1) !important;
+        color: #0a4282 !important;
+        padding: 0.4rem !important;
+        border-radius: 0.65rem !important;
+    }
+    .dark .fi-section-header-icon {
+        background-color: rgba(251, 185, 0, 0.15) !important;
+        color: #fbb900 !important;
+    }
+    .fi-section-content {
+        padding: 1.5rem !important;
+    }
+
+    /* 4. Global Tabs & Form Tabs */
+    .fi-tabs, .fi-fo-tabs-tab-list {
+        background-color: rgba(15, 23, 42, 0.04) !important;
         border-radius: 1rem !important;
         padding: 0.375rem !important;
-        border: none !important;
+        border: 1px solid rgba(15, 23, 42, 0.05) !important;
         gap: 0.25rem !important;
     }
     
-    .dark .fi-tabs {
+    .dark .fi-tabs, .dark .fi-fo-tabs-tab-list {
         background-color: rgba(255, 255, 255, 0.05) !important;
+        border-color: rgba(255, 255, 255, 0.08) !important;
     }
 
     .fi-tabs-item {
         border-radius: 0.75rem !important;
-        transition: all 0.3s ease !important;
+        transition: all 0.25s ease !important;
         padding: 0.5rem 1rem !important;
+        font-weight: 600 !important;
     }
     
     .fi-tabs-item:hover {
-        background-color: rgba(0, 0, 0, 0.05) !important;
+        background-color: rgba(10, 66, 130, 0.06) !important;
     }
     
     .dark .fi-tabs-item:hover {
-        background-color: rgba(255, 255, 255, 0.05) !important;
+        background-color: rgba(255, 255, 255, 0.06) !important;
     }
 
     .fi-tabs-item.fi-active {
         background-color: #ffffff !important;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
-        color: rgb(var(--primary-600)) !important;
+        box-shadow: 0 4px 8px -1px rgba(10, 66, 130, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+        color: #0a4282 !important;
+        border-bottom: 2px solid #fbb900 !important;
     }
     
     .dark .fi-tabs-item.fi-active {
-        background-color: rgba(15, 23, 42, 1) !important;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3) !important;
-        color: rgb(var(--primary-400)) !important;
+        background-color: rgba(15, 23, 42, 0.95) !important;
+        box-shadow: 0 4px 8px -1px rgba(0, 0, 0, 0.4) !important;
+        color: #fbb900 !important;
+        border-bottom: 2px solid #fbb900 !important;
     }
 
     /* 5. Pagination Buttons */

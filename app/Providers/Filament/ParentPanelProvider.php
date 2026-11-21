@@ -28,8 +28,13 @@ class ParentPanelProvider extends PanelProvider
             ->path('parent')
             
             ->colors([
-                'primary' => Color::hex('#1a368b'), // Navy Blue
-                'secondary' => Color::hex('#fbb900'), // Yellow Gold
+                'primary' => Color::hex('#0a4282'),
+                'secondary' => Color::hex('#fbb900'),
+                'danger' => Color::Rose,
+                'gray' => Color::Slate,
+                'info' => Color::Sky,
+                'success' => Color::Emerald,
+                'warning' => Color::Amber,
             ])
             ->databaseNotifications()
             ->font('Outfit')
