@@ -16,19 +16,19 @@
 
         /* Glass Panel (DESIGN_SYSTEM.md Rule 3 & 6) */
         .glass-panel {
-            background: rgba(255, 255, 255, 0.85);
+            background: rgba(255, 255, 255, 0.88);
             backdrop-filter: blur(12px) saturate(180%);
             -webkit-backdrop-filter: blur(12px) saturate(180%);
-            border: 1px solid rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(15, 23, 42, 0.06);
             border-radius: 1.25rem;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
-            padding: 2rem;
-            margin-bottom: 1.5rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.04), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+            padding: 1.85rem;
+            margin-bottom: 1.35rem;
         }
         .dark .glass-panel {
-            background: rgba(30, 41, 59, 0.75);
+            background: rgba(30, 41, 59, 0.78);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.35), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
         }
 
         /* Grid Layouts */
@@ -68,12 +68,12 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            padding: 0.875rem 1.75rem;
+            padding: 0.85rem 1.75rem;
             border-radius: 9999px;
             font-weight: 700;
-            font-size: 1rem;
+            font-size: 0.975rem;
             cursor: pointer;
-            transition: all 0.25s ease-in-out;
+            transition: all 0.22s ease-in-out;
             border: none;
             text-decoration: none;
         }
@@ -100,7 +100,7 @@
             background: #ffffff;
             color: #334155;
             border: 1px solid #cbd5e1;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.04);
         }
         .dark .cbt-btn-secondary {
             background: #1e293b;
@@ -109,10 +109,12 @@
         }
         .cbt-btn-secondary:hover:not(:disabled) {
             background: #f8fafc;
+            border-color: #0a4282;
             transform: translateY(-2px);
         }
         .dark .cbt-btn-secondary:hover:not(:disabled) {
             background: #334155;
+            border-color: #fbb900;
         }
         .cbt-btn:disabled {
             opacity: 0.5;
@@ -131,26 +133,45 @@
 
         /* Typography & Header */
         .cbt-title {
-            font-size: 1.8rem;
+            font-size: 1.75rem;
             font-weight: 800;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.4rem;
             color: #0a4282;
         }
         .dark .cbt-title { color: #f8fafc; }
 
         .cbt-subtitle {
-            font-size: 1rem;
+            font-size: 0.975rem;
             color: #64748b;
             margin-bottom: 1.5rem;
         }
         .dark .cbt-subtitle { color: #94a3b8; }
 
+        .cbt-question-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.3rem 0.85rem;
+            border-radius: 9999px;
+            background: rgba(10, 66, 130, 0.1);
+            color: #0a4282;
+            font-size: 0.78rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 1rem;
+        }
+        .dark .cbt-question-badge {
+            background: rgba(251, 185, 0, 0.16);
+            color: #fbb900;
+        }
+
         .cbt-question-text {
-            font-size: 1.25rem;
+            font-size: 1.2rem;
             font-weight: 600;
-            margin-bottom: 2rem;
-            color: #1e293b;
-            line-height: 1.6;
+            margin-bottom: 1.75rem;
+            color: #0f172a;
+            line-height: 1.65;
         }
         .dark .cbt-question-text { color: #f1f5f9; }
 
@@ -158,17 +179,17 @@
         .cbt-options-list {
             display: flex;
             flex-direction: column;
-            gap: 1rem;
+            gap: 0.9rem;
         }
         .cbt-option-label {
             display: flex;
             align-items: center;
-            padding: 1.15rem 1.25rem;
+            padding: 1.1rem 1.25rem;
             border-radius: 1rem;
             border: 2px solid #e2e8f0;
             background: #ffffff;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.18s ease;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
         }
         .dark .cbt-option-label {
@@ -176,13 +197,13 @@
             background: #1e293b;
         }
         .cbt-option-label:hover {
-            border-color: #38bdf8;
-            background: #f0f9ff;
+            border-color: #0a4282;
+            background: #f0f7ff;
             transform: translateX(4px);
         }
         .dark .cbt-option-label:hover {
-            border-color: #38bdf8;
-            background: rgba(14, 165, 233, 0.12);
+            border-color: #fbb900;
+            background: rgba(251, 185, 0, 0.08);
         }
         .cbt-option-label.selected {
             border-color: #0a4282;
@@ -190,7 +211,7 @@
             box-shadow: 0 0 0 1px #0a4282;
         }
         .dark .cbt-option-label.selected {
-            background: rgba(59, 130, 246, 0.2);
+            background: rgba(10, 66, 130, 0.35);
             border-color: #fbb900;
             box-shadow: 0 0 0 1px #fbb900;
         }
@@ -201,12 +222,13 @@
             align-items: center;
             justify-content: center;
             background: #f1f5f9;
-            color: #475569;
-            font-weight: 700;
-            border-radius: 0.65rem;
-            margin-right: 1.25rem;
+            color: #334155;
+            font-weight: 800;
+            border-radius: 0.7rem;
+            margin-right: 1.15rem;
             flex-shrink: 0;
-            font-size: 1.05rem;
+            font-size: 1rem;
+            transition: all 0.18s ease;
         }
         .dark .cbt-option-badge {
             background: #0f172a;
@@ -214,7 +236,7 @@
         }
         .cbt-option-label.selected .cbt-option-badge {
             background: #0a4282;
-            color: #ffffff;
+            color: #fbb900;
         }
         .dark .cbt-option-label.selected .cbt-option-badge {
             background: #fbb900;
@@ -225,14 +247,15 @@
         .cbt-timer {
             display: inline-flex;
             align-items: center;
-            padding: 0.75rem 1.25rem;
+            padding: 0.65rem 1.25rem;
             background: rgba(244, 63, 94, 0.1);
             color: #e11d48;
             border: 2px solid rgba(244, 63, 94, 0.25);
             border-radius: 9999px;
             font-family: ui-monospace, monospace;
             font-weight: 800;
-            font-size: 1.25rem;
+            font-size: 1.2rem;
+            letter-spacing: 0.03em;
         }
         .dark .cbt-timer {
             background: rgba(244, 63, 94, 0.2);
@@ -242,24 +265,23 @@
 
         /* Navigation Grid Buttons (Aligned with exam.css data-status) */
         .cbt-nav-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 0.55rem;
         }
         .cbt-nav-btn {
-            width: 3rem;
-            height: 3rem;
+            height: 2.85rem;
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 0.75rem;
-            font-weight: 700;
-            font-size: 1rem;
+            font-weight: 800;
+            font-size: 0.95rem;
             background: #ffffff;
             border: 2px solid #cbd5e1;
             color: #334155;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.18s ease;
         }
         .dark .cbt-nav-btn {
             background: #1e293b;
@@ -267,7 +289,8 @@
             color: #cbd5e1;
         }
         .cbt-nav-btn:hover {
-            transform: scale(1.05);
+            transform: translateY(-2px);
+            border-color: #0a4282;
         }
         .cbt-nav-btn.answered {
             background: #0a4282;
@@ -282,23 +305,25 @@
         .cbt-nav-btn.active {
             outline: 3px solid #0ea5e9;
             outline-offset: 2px;
-            transform: scale(1.08);
+            transform: scale(1.06);
             z-index: 10;
         }
 
         .cbt-legend-item {
             display: flex;
             align-items: center;
-            font-size: 0.875rem;
+            font-size: 0.85rem;
+            font-weight: 600;
             margin-bottom: 0.5rem;
             color: #475569;
         }
         .dark .cbt-legend-item { color: #94a3b8; }
         .cbt-dot {
-            width: 0.75rem;
-            height: 0.75rem;
+            width: 0.8rem;
+            height: 0.8rem;
             border-radius: 50%;
-            margin-right: 0.5rem;
+            margin-right: 0.6rem;
+            flex-shrink: 0;
         }
 
         /* Google Form Iframe Wrapper */
@@ -307,7 +332,7 @@
             min-height: 75vh;
             border-radius: 1rem;
             overflow: hidden;
-            border: 1px solid rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(15, 23, 42, 0.08);
             background: #ffffff;
         }
         .dark .gform-iframe-wrapper {
@@ -339,17 +364,17 @@
         {{-- FINISHED STATE                                            --}}
         {{-- ========================================================= --}}
         @if($isFinished)
-            <div class="glass-panel" style="text-align: center; max-width: 600px; margin: 3rem auto;">
-                <div style="width: 5rem; height: 5rem; background: rgba(16, 185, 129, 0.15); color: #10b981; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem auto;">
+            <div class="glass-panel" style="text-align: center; max-width: 600px; margin: 2.5rem auto;">
+                <div style="width: 5rem; height: 5rem; background: rgba(16, 185, 129, 0.15); color: #10b981; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.35rem auto;">
                     <x-heroicon-o-check-badge style="width: 3rem; height: 3rem;" />
                 </div>
-                <h2 class="cbt-title" style="margin-bottom: 0.5rem;">Ujian Selesai!</h2>
-                <p class="cbt-subtitle">Jawaban ujian Anda telah berhasil disimpan.</p>
+                <h2 class="cbt-title" style="margin-bottom: 0.4rem;">Ujian Selesai!</h2>
+                <p class="cbt-subtitle">Jawaban ujian Anda telah berhasil disimpan ke sistem.</p>
 
                 @if($exam->show_result_immediately && $attempt && $attempt->score !== null)
-                    <div style="background: rgba(10, 66, 130, 0.08); border: 2px solid #0a4282; border-radius: 1.25rem; padding: 2rem; margin: 2rem 0; display: inline-block; min-width: 220px;">
-                        <p style="font-size: 0.875rem; color: #0ea5e9; text-transform: uppercase; font-weight: 700; margin-bottom: 0.5rem;">Skor Akhir</p>
-                        <p style="font-size: 4rem; font-weight: 900; color: #0a4282; line-height: 1;" class="dark:text-amber-400">{{ $attempt->score }}</p>
+                    <div style="background: rgba(10, 66, 130, 0.08); border: 2px solid #0a4282; border-radius: 1.25rem; padding: 1.75rem 2.25rem; margin: 1.5rem 0; display: inline-block; min-width: 220px;">
+                        <p style="font-size: 0.8rem; color: #0284c7; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 800; margin-bottom: 0.4rem;">Skor Akhir</p>
+                        <p style="font-size: 3.75rem; font-weight: 900; color: #0a4282; line-height: 1; margin: 0;" class="dark:text-amber-400">{{ $attempt->score }}</p>
                     </div>
                 @elseif($mode === 'google_form')
                     <div style="background: rgba(14, 165, 233, 0.1); border: 1px solid rgba(14, 165, 233, 0.3); border-radius: 1rem; padding: 1.25rem; margin: 1.5rem 0;">
@@ -362,7 +387,7 @@
                 <div style="margin-top: 1.5rem;">
                     <a href="{{ route('filament.student.pages.student-cbt-exams') }}" class="cbt-btn cbt-btn-primary">
                         <x-heroicon-m-arrow-left style="width: 1.25rem; height: 1.25rem; margin-right: 0.5rem;" />
-                        Kembali ke Daftar Ujian
+                        <span>Kembali ke Daftar Ujian</span>
                     </a>
                 </div>
             </div>
@@ -396,24 +421,24 @@
                     }
                 }">
                 <!-- Header Bar -->
-                <div class="glass-panel cbt-flex-between" style="padding: 1.25rem 2rem;">
+                <div class="glass-panel cbt-flex-between" style="padding: 1.25rem 1.75rem;">
                     <div>
-                        <span style="display: inline-block; padding: 0.2rem 0.75rem; border-radius: 9999px; background: rgba(14, 165, 233, 0.15); color: #0284c7; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.25rem;">
+                        <span style="display: inline-block; padding: 0.2rem 0.75rem; border-radius: 9999px; background: rgba(10, 66, 130, 0.12); color: #0a4282; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; margin-bottom: 0.3rem;" class="dark:text-amber-300">
                             Google Form CBT
                         </span>
                         <h2 style="font-weight: 800; font-size: 1.35rem; margin: 0;">{{ $exam->title }}</h2>
-                        <p style="color: #64748b; font-size: 0.875rem; margin: 0.25rem 0 0 0;">
+                        <p style="color: #64748b; font-size: 0.875rem; margin: 0.2rem 0 0 0;">
                             {{ $exam->subject->name ?? '' }} &bull; NIS: <strong>{{ $student->nis }}</strong> &bull; {{ $student->name }}
                         </p>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div style="display: flex; align-items: center; gap: 0.85rem; flex-wrap: wrap;">
                         <div class="cbt-timer">
-                            <x-heroicon-o-clock style="width: 1.5rem; height: 1.5rem; margin-right: 0.5rem;" />
+                            <x-heroicon-o-clock style="width: 1.4rem; height: 1.4rem; margin-right: 0.45rem;" />
                             <span x-text="timeLeft"></span>
                         </div>
                         <button type="button" wire:click="submitExam" class="cbt-btn cbt-btn-success">
-                            Selesai Mengerjakan
-                            <x-heroicon-m-check style="width: 1.25rem; height: 1.25rem; margin-left: 0.5rem;" />
+                            <span>Selesai Mengerjakan</span>
+                            <x-heroicon-m-check style="width: 1.2rem; height: 1.2rem; margin-left: 0.45rem;" />
                         </button>
                     </div>
                 </div>
@@ -448,33 +473,34 @@
         {{-- MODE B: INTERNAL EXCEL - PRE-START SCREEN                 --}}
         {{-- ========================================================= --}}
         @elseif(!$attempt)
-            <div class="glass-panel" style="max-width: 800px; margin: 2rem auto;">
+            <div class="glass-panel" style="max-width: 780px; margin: 1.5rem auto;">
+                <span class="cbt-question-badge">Real CBT Exam</span>
                 <h1 class="cbt-title">{{ $exam->title }}</h1>
                 <p class="cbt-subtitle">{{ $exam->subject->name ?? '' }}</p>
 
-                <div style="display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap;">
-                    <div style="flex: 1; min-width: 200px; padding: 1.25rem; background: rgba(14, 165, 233, 0.1); border: 1px solid rgba(14, 165, 233, 0.25); border-radius: 1rem;">
-                        <div style="font-size: 0.875rem; color: #0284c7; font-weight: 700; display: flex; align-items: center; margin-bottom: 0.5rem;">
-                            <x-heroicon-o-clock style="width: 1.25rem; height: 1.25rem; margin-right: 0.35rem;" /> Durasi Ujian
+                <div style="display: flex; gap: 1rem; margin-bottom: 1.75rem; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 200px; padding: 1.25rem; background: rgba(10, 66, 130, 0.08); border: 1px solid rgba(10, 66, 130, 0.2); border-radius: 1rem;">
+                        <div style="font-size: 0.825rem; color: #0a4282; font-weight: 800; text-transform: uppercase; display: flex; align-items: center; margin-bottom: 0.4rem;" class="dark:text-amber-400">
+                            <x-heroicon-o-clock style="width: 1.2rem; height: 1.2rem; margin-right: 0.35rem;" /> Durasi Ujian
                         </div>
-                        <div style="font-size: 1.5rem; font-weight: 800;">{{ $exam->duration_minutes }} Menit</div>
+                        <div style="font-size: 1.5rem; font-weight: 900;">{{ $exam->duration_minutes }} Menit</div>
                     </div>
-                    <div style="flex: 1; min-width: 200px; padding: 1.25rem; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 1rem;">
-                        <div style="font-size: 0.875rem; color: #059669; font-weight: 700; display: flex; align-items: center; margin-bottom: 0.5rem;">
-                            <x-heroicon-o-document-text style="width: 1.25rem; height: 1.25rem; margin-right: 0.35rem;" /> Jumlah Soal
+                    <div style="flex: 1; min-width: 200px; padding: 1.25rem; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 1rem;">
+                        <div style="font-size: 0.825rem; color: #059669; font-weight: 800; text-transform: uppercase; display: flex; align-items: center; margin-bottom: 0.4rem;">
+                            <x-heroicon-o-document-text style="width: 1.2rem; height: 1.2rem; margin-right: 0.35rem;" /> Jumlah Soal
                         </div>
-                        <div style="font-size: 1.5rem; font-weight: 800;">{{ count($questionsData) }} Soal</div>
+                        <div style="font-size: 1.5rem; font-weight: 900;">{{ count($questionsData) }} Soal</div>
                     </div>
                 </div>
 
-                <div style="margin-bottom: 2.5rem; padding: 1.5rem; border-left: 4px solid #0a4282; background: rgba(10, 66, 130, 0.05); border-radius: 0.75rem;">
-                    <h3 style="font-weight: 700; font-size: 1.1rem; margin-bottom: 0.5rem;">Petunjuk Pengerjaan:</h3>
-                    <p style="white-space: pre-line; line-height: 1.6; margin: 0;">{{ $exam->description ?? 'Pilihlah jawaban yang paling tepat. Jawaban Anda tersimpan otomatis di perangkat dan dikirim sekaligus saat menekan tombol Selesai & Kumpulkan.' }}</p>
+                <div style="margin-bottom: 2rem; padding: 1.35rem 1.5rem; border-left: 4px solid #0a4282; background: rgba(10, 66, 130, 0.05); border-radius: 0.85rem;">
+                    <h3 style="font-weight: 800; font-size: 1.025rem; margin-bottom: 0.4rem;">Petunjuk Pengerjaan:</h3>
+                    <p style="white-space: pre-line; line-height: 1.65; margin: 0; font-size: 0.95rem;">{{ $exam->description ?? 'Pilihlah jawaban yang paling tepat. Jawaban Anda tersimpan otomatis di perangkat dan dikirim sekaligus saat menekan tombol Selesai & Submit Ujian.' }}</p>
                 </div>
 
-                <button wire:click="startExam" class="cbt-btn cbt-btn-primary" style="width: 100%; padding: 1.25rem; font-size: 1.15rem;">
-                    Mulai Ujian Sekarang
-                    <x-heroicon-m-play style="width: 1.5rem; height: 1.5rem; margin-left: 0.5rem;" />
+                <button wire:click="startExam" class="cbt-btn cbt-btn-primary" style="width: 100%; padding: 1.15rem; font-size: 1.1rem;">
+                    <span>Mulai Ujian Sekarang</span>
+                    <x-heroicon-m-play style="width: 1.35rem; height: 1.35rem; margin-left: 0.5rem; color: #fbb900;" />
                 </button>
             </div>
 
@@ -570,23 +596,32 @@
                 <!-- Left Panel: Question -->
                 <div class="cbt-col-span-3">
                     <!-- Header / Timer -->
-                    <div class="glass-panel cbt-flex-between" style="padding: 1.25rem 2rem;">
+                    <div class="glass-panel cbt-flex-between" style="padding: 1.15rem 1.75rem;">
                         <div>
                             <h2 style="font-weight: 800; font-size: 1.25rem; margin: 0;">{{ $exam->title }}</h2>
-                            <p style="color: #64748b; font-size: 0.875rem; margin: 0.25rem 0 0 0;">
+                            <p style="color: #64748b; font-size: 0.85rem; margin: 0.2rem 0 0 0; font-weight: 600;">
                                 Soal <span x-text="currentIndex + 1"></span> dari <span x-text="questions.length"></span>
-                                &bull; Terjawab: <strong x-text="answeredCount()"></strong>/<span x-text="questions.length"></span>
+                                &bull; Terjawab: <strong style="color: #0a4282;" class="dark:text-amber-400" x-text="answeredCount()"></strong>/<span x-text="questions.length"></span>
                             </p>
                         </div>
                         <div class="cbt-timer">
-                            <x-heroicon-o-clock style="width: 1.5rem; height: 1.5rem; margin-right: 0.5rem;" />
+                            <x-heroicon-o-clock style="width: 1.4rem; height: 1.4rem; margin-right: 0.45rem;" />
                             <span x-text="timeLeft"></span>
                         </div>
                     </div>
 
                     <!-- Question Body -->
                     <template x-if="currentQuestion">
-                        <div class="glass-panel" style="padding: 2.25rem;">
+                        <div class="glass-panel" style="padding: 2rem;">
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+                                <span class="cbt-question-badge" style="margin-bottom: 0;">
+                                    Pertanyaan #<span x-text="currentIndex + 1"></span>
+                                </span>
+                                <span style="font-size: 0.8rem; font-weight: 700; color: #64748b;">
+                                    Bobot: <strong x-text="currentQuestion.points || 1"></strong> Poin
+                                </span>
+                            </div>
+
                             <div class="cbt-question-text" x-html="currentQuestion.question_text"></div>
 
                             <template x-if="currentQuestion.attachment_url">
@@ -606,7 +641,7 @@
                                          class="cbt-option-label"
                                          :class="{ 'selected': answers[currentQuestion.id] === optKey }">
                                         <span class="cbt-option-badge" x-text="optKey"></span>
-                                        <span style="font-size: 1.05rem; font-weight: 500;" x-text="optText"></span>
+                                        <span style="font-size: 1.025rem; font-weight: 600;" x-text="optText"></span>
                                     </div>
                                 </template>
                             </div>
@@ -614,13 +649,13 @@
                     </template>
 
                     <!-- Bottom Navigation Actions -->
-                    <div class="cbt-flex-between" style="margin-top: 1.25rem;">
+                    <div class="cbt-flex-between" style="margin-top: 1.15rem;">
                         <button type="button"
                                 @click="if (currentIndex > 0) currentIndex--"
                                 :disabled="currentIndex === 0"
                                 class="cbt-btn cbt-btn-secondary">
-                            <x-heroicon-m-arrow-left style="width: 1.25rem; height: 1.25rem; margin-right: 0.5rem;" />
-                            Sebelumnya
+                            <x-heroicon-m-arrow-left style="width: 1.15rem; height: 1.15rem; margin-right: 0.45rem;" />
+                            <span>Sebelumnya</span>
                         </button>
 
                         <template x-if="currentQuestion">
@@ -635,8 +670,8 @@
                                 x-show="currentIndex < questions.length - 1"
                                 @click="if (currentIndex < questions.length - 1) currentIndex++"
                                 class="cbt-btn cbt-btn-primary">
-                            Selanjutnya
-                            <x-heroicon-m-arrow-right style="width: 1.25rem; height: 1.25rem; margin-left: 0.5rem;" />
+                            <span>Selanjutnya</span>
+                            <x-heroicon-m-arrow-right style="width: 1.15rem; height: 1.15rem; margin-left: 0.45rem; color: #fbb900;" />
                         </button>
 
                         <button type="button"
@@ -645,17 +680,17 @@
                                 :disabled="submitting"
                                 class="cbt-btn cbt-btn-success">
                             <span x-text="submitting ? 'Mengirim Jawaban...' : 'Selesai & Submit Ujian'"></span>
-                            <x-heroicon-m-check style="width: 1.25rem; height: 1.25rem; margin-left: 0.5rem;" />
+                            <x-heroicon-m-check style="width: 1.15rem; height: 1.15rem; margin-left: 0.45rem;" />
                         </button>
                     </div>
                 </div>
 
                 <!-- Right Panel: Navigation Grid -->
                 <div class="cbt-col-span-1">
-                    <div class="glass-panel" style="position: sticky; top: 1.5rem;">
-                        <h3 style="font-weight: 800; font-size: 1.1rem; margin: 0 0 1.25rem 0; display: flex; align-items: center; border-bottom: 2px solid rgba(0,0,0,0.05); padding-bottom: 0.85rem;">
-                            <x-heroicon-m-squares-2x2 style="width: 1.25rem; height: 1.25rem; margin-right: 0.5rem; color: #0ea5e9;" />
-                            Navigasi Soal
+                    <div class="glass-panel" style="position: sticky; top: 1.5rem; padding: 1.5rem;">
+                        <h3 style="font-weight: 800; font-size: 1.05rem; margin: 0 0 1.15rem 0; display: flex; align-items: center; border-bottom: 1px solid rgba(148, 163, 184, 0.25); padding-bottom: 0.85rem;">
+                            <x-heroicon-m-squares-2x2 style="width: 1.25rem; height: 1.25rem; margin-right: 0.5rem; color: #0a4282;" class="dark:text-amber-400" />
+                            <span>Navigasi Soal</span>
                         </h3>
 
                         <div class="cbt-nav-container">
@@ -673,9 +708,9 @@
                             </template>
                         </div>
 
-                        <hr style="margin: 1.5rem 0; border: none; border-top: 1px solid rgba(100,116,139,0.2);">
+                        <hr style="margin: 1.35rem 0; border: none; border-top: 1px solid rgba(148, 163, 184, 0.25);">
 
-                        <div style="margin-bottom: 1.5rem;">
+                        <div style="margin-bottom: 1.35rem;">
                             <div class="cbt-legend-item">
                                 <span class="cbt-dot" style="background: #0a4282;"></span> Sudah Dijawab
                             </div>

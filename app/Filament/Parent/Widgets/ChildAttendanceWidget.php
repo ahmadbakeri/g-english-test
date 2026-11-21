@@ -17,13 +17,14 @@ class ChildAttendanceWidget extends BaseWidget
     public function table(Table $table): Table
     {
         $user = Auth::user();
-        $childStudentIds = $user->children->pluck('id')->toArray();
-        $childUserIds = $user->children->pluck('user_id')->filter()->toArray();
+        $children = $user->children;
+        $childStudentIds = $children->pluck('id')->toArray();
+        $childUserIds = $children->pluck('user_id')->filter()->toArray();
 
         return $table
             ->query(
                 \App\Models\Attendance::query()
-                    ->with(['student', 'user'])
+                    ->with(['student', 'user', 'classRoom'])
                     ->where(function ($q) use ($childStudentIds, $childUserIds) {
                         $q->whereIn('student_id', $childStudentIds);
                         if (!empty($childUserIds)) {
@@ -35,8 +36,10 @@ class ChildAttendanceWidget extends BaseWidget
             )
             ->columns([
                 Tables\Columns\TextColumn::make('student_name')
-                    ->label('Nama Siswa')
-                    ->getStateUsing(fn (\App\Models\Attendance $record) => $record->student?->name ?? $record->user?->name ?? '-'),
+                    ->label('Nama Anak')
+                    ->weight('bold')
+                    ->getStateUsing(fn (\App\Models\Attendance $record) => $record->student?->name ?? $record->user?->name ?? '-')
+                    ->description(fn (\App\Models\Attendance $record): string => $record->classRoom?->name ?? 'Presensi QR'),
                 Tables\Columns\TextColumn::make('date')
                     ->label('Tanggal')
                     ->date('d M Y')
@@ -44,14 +47,24 @@ class ChildAttendanceWidget extends BaseWidget
                 Tables\Columns\TextColumn::make('time_in')
                     ->label('Jam Masuk')
                     ->time('H:i')
+                    ->badge()
+                    ->color('gray')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('time_out')
                     ->label('Jam Keluar')
                     ->time('H:i')
+                    ->placeholder('-')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status')
                     ->label('Status')
                     ->badge()
+                    ->formatStateUsing(fn (string $state): string => match (strtolower($state)) {
+                        'present' => 'Hadir',
+                        'late' => 'Terlambat',
+                        'absent' => 'Alpa',
+                        'excused' => 'Izin',
+                        default => ucfirst($state),
+                    })
                     ->color(fn (string $state): string => match (strtolower($state)) {
                         'present' => 'success',
                         'late' => 'warning',
@@ -59,6 +72,11 @@ class ChildAttendanceWidget extends BaseWidget
                         'excused' => 'info',
                         default => 'gray',
                     }),
+            ])
+            ->filters([
+                Tables\Filters\SelectFilter::make('student_id')
+                    ->label('Pilih Anak')
+                    ->options($children->pluck('name', 'id')->toArray()),
             ]);
     }
 }

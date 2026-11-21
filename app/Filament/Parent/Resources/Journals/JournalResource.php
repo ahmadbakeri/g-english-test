@@ -4,13 +4,12 @@ namespace App\Filament\Parent\Resources\Journals;
 
 use App\Filament\Parent\Resources\Journals\Pages\ManageJournals;
 use App\Models\Journal;
-use App\Models\Attendance;
 use BackedEnum;
 use Filament\Resources\Resource;
-use Filament\Tables\Table;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\Layout\Split;
 use Filament\Tables\Columns\Layout\Stack;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
 class JournalResource extends Resource
@@ -40,28 +39,29 @@ class JournalResource extends Resource
 
         return $table
             ->modifyQueryUsing(function (Builder $query) use ($classIds) {
-                return $query->whereIn('class_id', $classIds)->latest('date');
+                return $query->with(['classRoom', 'tutor'])->whereIn('class_id', $classIds)->latest('date');
             })
             ->columns([
                 Split::make([
                     Stack::make([
+                        TextColumn::make('topic')
+                            ->label('Topik Pembelajaran')
+                            ->weight('bold')
+                            ->searchable()
+                            ->wrap(),
                         TextColumn::make('date')
                             ->label('Tanggal')
                             ->date('d M Y')
-                            ->weight('bold')
-                            ->sortable()
-                            ->searchable(),
-                        TextColumn::make('topic')
-                            ->label('Topik')
-                            ->searchable()
-                            ->wrap()
-                            ->limit(50)
-                            ->color('gray'),
+                            ->icon('heroicon-m-calendar-days')
+                            ->color('gray')
+                            ->sortable(),
                     ])->space(1),
 
                     Stack::make([
                         TextColumn::make('classRoom.name')
                             ->label('Kelas')
+                            ->badge()
+                            ->color('info')
                             ->icon('heroicon-m-academic-cap')
                             ->searchable(),
                         TextColumn::make('tutor.name')
@@ -74,29 +74,28 @@ class JournalResource extends Resource
                     Stack::make([
                         TextColumn::make('status')
                             ->label('Status')
-                            ->getStateUsing(function (Journal $record) {
-                                return $record->status ?? 'Draft';
-                            })
+                            ->getStateUsing(fn (Journal $record): string => $record->status ?? 'draft')
                             ->badge()
+                            ->formatStateUsing(fn (string $state): string => match (strtolower($state)) {
+                                'validated', 'published' => 'Tervalidasi',
+                                'submitted' => 'Diajukan',
+                                'rejected' => 'Ditolak',
+                                default => 'Draft',
+                            })
                             ->color(fn (string $state): string => match (strtolower($state)) {
-                                'published' => 'success',
-                                'draft' => 'warning',
+                                'validated', 'published' => 'success',
+                                'submitted' => 'warning',
+                                'rejected' => 'danger',
                                 default => 'gray',
                             }),
                     ])->alignment('end'),
                 ])->from('md'),
             ])
-            ->filters([
-                //
-            ])
-            ->actions([
-                //
-            ])
-            ->bulkActions([
-                //
-            ])
+            ->filters([])
+            ->actions([])
+            ->bulkActions([])
             ->emptyStateHeading('Belum Ada Jurnal')
-            ->emptyStateDescription('Belum ada catatan jurnal belajar untuk anak Anda saat ini.');
+            ->emptyStateDescription('Belum ada catatan jurnal belajar untuk kelas anak Anda saat ini.');
     }
 
     public static function getPages(): array
