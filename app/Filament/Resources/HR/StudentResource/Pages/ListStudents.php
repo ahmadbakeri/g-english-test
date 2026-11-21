@@ -89,6 +89,63 @@ class ListStudents extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            Actions\Action::make('download_brain_champion_template')
+                ->label('Download Template Excel (.xlsx)')
+                ->icon('heroicon-o-arrow-down-tray')
+                ->color('success')
+                ->action(function () {
+                    return \Maatwebsite\Excel\Facades\Excel::download(
+                        new \App\Exports\BrainChampionStudentTemplateExport(null),
+                        'template_peserta_brain_champion.xlsx'
+                    );
+                }),
+            Actions\Action::make('import_brain_champion_excel')
+                ->label('Upload / Import Excel (.xlsx)')
+                ->icon('heroicon-o-arrow-up-tray')
+                ->color('primary')
+                ->form([
+                    \Filament\Forms\Components\Select::make('school_user_id')
+                        ->label('Pilih Akun Sekolah (Opsional)')
+                        ->options(fn () => \App\Models\User::where('role', 'school')->pluck('name', 'id')->toArray())
+                        ->searchable(),
+                    \Filament\Forms\Components\TextInput::make('school_name')
+                        ->label('Nama Sekolah (Jika akun sekolah belum dipilih)')
+                        ->placeholder('Contoh: SDN 1 Tanjung'),
+                    \Filament\Forms\Components\FileUpload::make('excel_file')
+                        ->label('Upload File Excel Peserta (.xlsx)')
+                        ->disk('local')
+                        ->directory('brain_champion_imports')
+                        ->acceptedFileTypes([
+                            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                            'application/vnd.ms-excel',
+                            'text/csv',
+                        ])
+                        ->required(),
+                ])
+                ->action(function (array $data): void {
+                    $filePath = storage_path('app/' . $data['excel_file']);
+                    if (!file_exists($filePath)) {
+                        $filePath = \Illuminate\Support\Facades\Storage::disk('local')->path($data['excel_file']);
+                    }
+
+                    $schoolUser = !empty($data['school_user_id']) ? \App\Models\User::find($data['school_user_id']) : null;
+                    $importer = new \App\Imports\BrainChampionStudentImport(
+                        schoolUserId: $schoolUser?->id,
+                        schoolName: $schoolUser?->name ?: ($data['school_name'] ?? 'Sekolah Peserta'),
+                    );
+                    \Maatwebsite\Excel\Facades\Excel::import($importer, $filePath);
+
+                    $summary = "Ditambahkan: {$importer->createdCount} peserta, Diperbarui: {$importer->updatedCount} peserta.";
+                    if ($importer->skippedCount > 0) {
+                        $summary .= " Dilewati: {$importer->skippedCount} baris.";
+                    }
+
+                    \Filament\Notifications\Notification::make()
+                        ->title('Import Excel Brain Champion Selesai')
+                        ->body($summary)
+                        ->success()
+                        ->send();
+                }),
             Actions\Action::make('resend_school_account_email')
                 ->label('Kirim Ulang Akun Sekolah (Email)')
                 ->icon('heroicon-o-envelope')

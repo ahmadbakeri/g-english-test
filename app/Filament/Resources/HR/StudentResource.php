@@ -72,6 +72,9 @@ class StudentResource extends Resource
                         ->required()
                         ->unique(ignoreRecord: true)
                         ->maxLength(20),
+                    Forms\Components\TextInput::make('nisn')
+                        ->label('NISN (10 Digit)')
+                        ->maxLength(20),
                     Forms\Components\Select::make('student_type')
                         ->label(__('Student Type'))
                         ->options([
@@ -90,6 +93,9 @@ class StudentResource extends Resource
                             'L' => __('Male'),
                             'P' => __('Female'),
                         ]),
+                    Forms\Components\TextInput::make('religion')
+                        ->label('Agama (Religion)')
+                        ->maxLength(100),
                     Forms\Components\TextInput::make('birth_place')
                         ->label(__('Place of Birth')),
                     Forms\Components\DatePicker::make('birth_date')

@@ -2,15 +2,22 @@
 
 namespace App\Filament\School\Resources\SchoolParticipantResource\Pages;
 
+use App\Exports\BrainChampionStudentTemplateExport;
 use App\Filament\School\Resources\SchoolParticipantResource;
 use App\Filament\School\Widgets\SchoolQuotaOverviewWidget;
+use App\Imports\BrainChampionStudentImport;
 use App\Livewire\BrainChampionRegistration;
 use App\Models\Admission;
 use App\Models\Student;
+use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
+use Filament\Forms\Components\FileUpload;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ManageRecords;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ManageSchoolParticipants extends ManageRecords
 {
@@ -19,6 +26,58 @@ class ManageSchoolParticipants extends ManageRecords
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('download_template')
+                ->label('Download Template Excel (.xlsx)')
+                ->icon('heroicon-o-arrow-down-tray')
+                ->color('success')
+                ->action(function () {
+                    $schoolSlug = str()->slug(auth()->user()?->name ?: 'sekolah');
+                    return Excel::download(
+                        new BrainChampionStudentTemplateExport(auth()->id()),
+                        "template_brain_champion_{$schoolSlug}.xlsx"
+                    );
+                }),
+
+            Action::make('import_excel')
+                ->label('Upload / Import Excel (.xlsx)')
+                ->icon('heroicon-o-arrow-up-tray')
+                ->color('primary')
+                ->form([
+                    FileUpload::make('excel_file')
+                        ->label('Upload File Biodata Peserta (.xlsx)')
+                        ->disk('local')
+                        ->directory('brain_champion_imports')
+                        ->acceptedFileTypes([
+                            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                            'application/vnd.ms-excel',
+                            'text/csv',
+                        ])
+                        ->required(),
+                ])
+                ->action(function (array $data): void {
+                    $filePath = storage_path('app/' . $data['excel_file']);
+                    if (!file_exists($filePath)) {
+                        $filePath = Storage::disk('local')->path($data['excel_file']);
+                    }
+
+                    $importer = new BrainChampionStudentImport(
+                        schoolUserId: auth()->id(),
+                        schoolName: auth()->user()?->name,
+                    );
+                    Excel::import($importer, $filePath);
+
+                    $summary = "Ditambahkan: {$importer->createdCount} peserta, Diperbarui: {$importer->updatedCount} peserta.";
+                    if ($importer->skippedCount > 0) {
+                        $summary .= " Dilewati: {$importer->skippedCount} baris (" . implode('; ', array_slice($importer->skipReasons, 0, 3)) . ').';
+                    }
+
+                    Notification::make()
+                        ->title('Proses Import Excel Selesai')
+                        ->body($summary)
+                        ->success()
+                        ->send();
+                }),
+
             CreateAction::make()
                 ->label('Tambah Peserta Delegasi')
                 ->icon('heroicon-o-plus')
@@ -66,7 +125,6 @@ class ManageSchoolParticipants extends ManageRecords
                             ]);
                         }
 
-                        // Generate unique BC-K{grade}-XXX code
                         $prefix = "BC-K{$grade}-";
                         $existingCodes = Admission::where('registration_number', 'like', "{$prefix}%")
                             ->pluck('registration_number')
@@ -104,17 +162,25 @@ class ManageSchoolParticipants extends ManageRecords
                             'student_type' => 'external',
                             'school_user_id' => $user->id,
                             'name' => $name,
+                            'birth_place' => $data['birth_place'] ?? null,
+                            'birth_date' => $data['birth_date'] ?? null,
                             'gender' => $gender,
+                            'religion' => $data['religion'] ?? null,
                             'phone' => $phone,
+                            'address' => $data['address'] ?? null,
                             'education_level' => $educationLevel,
                             'course_level' => BrainChampionRegistration::EVENT_TAG,
                             'class_name' => $classLabel,
                             'school_name' => $schoolName,
                             'previous_school' => $schoolName,
+                            'father_name' => $data['father_name'] ?? null,
+                            'father_phone' => $data['father_phone'] ?? null,
+                            'father_job' => $data['father_job'] ?? null,
+                            'mother_name' => ($data['mother_name'] ?? null) ?: $parentName,
+                            'mother_phone' => ($data['mother_phone'] ?? null) ?: $parentPhone,
+                            'mother_job' => $data['mother_job'] ?? null,
                             'parent_name' => $parentName,
                             'parent_phone' => $parentPhone,
-                            'mother_name' => $parentName,
-                            'mother_phone' => $parentPhone,
                             'status' => 'approved',
                             'tuition_fee' => 0,
                             'registration_fee' => 0,
@@ -131,16 +197,24 @@ class ManageSchoolParticipants extends ManageRecords
                             'competition_code' => $regCode,
                             'student_type' => 'external',
                             'name' => $name,
+                            'birth_place' => $data['birth_place'] ?? null,
+                            'birth_date' => $data['birth_date'] ?? null,
                             'gender' => $gender,
+                            'religion' => $data['religion'] ?? null,
                             'phone' => $phone,
+                            'address' => $data['address'] ?? null,
                             'education_level' => $educationLevel,
                             'course_level' => BrainChampionRegistration::EVENT_TAG,
                             'class_name' => $classLabel,
                             'school_name' => $schoolName,
+                            'father_name' => $data['father_name'] ?? null,
+                            'father_phone' => $data['father_phone'] ?? null,
+                            'father_job' => $data['father_job'] ?? null,
+                            'mother_name' => ($data['mother_name'] ?? null) ?: $parentName,
+                            'mother_phone' => ($data['mother_phone'] ?? null) ?: $parentPhone,
+                            'mother_job' => $data['mother_job'] ?? null,
                             'parent_name' => $parentName,
                             'parent_phone' => $parentPhone,
-                            'mother_name' => $parentName,
-                            'mother_phone' => $parentPhone,
                             'is_active' => true,
                         ]);
 

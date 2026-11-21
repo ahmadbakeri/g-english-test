@@ -115,9 +115,9 @@ class SchoolParticipantResource extends Resource
     {
         return $schema
             ->components([
-                Section::make('Biodata Peserta G-English Brain Champion')
-                    ->description('Pastikan NISN (10 digit), Nama Lengkap, dan Kontak Orang Tua sesuai dengan dokumen resmi sekolah.')
-                    ->icon('heroicon-o-trophy')
+                Section::make('Data Siswa')
+                    ->description('Identitas lengkap peserta delegasi G-English Brain Champion.')
+                    ->icon('heroicon-o-identification')
                     ->schema([
                         Select::make('class_name')
                             ->label('Kategori Kelas')
@@ -125,6 +125,11 @@ class SchoolParticipantResource extends Resource
                             ->disableOptionWhen(fn (string $value, ?Student $record): bool => self::isClassOptionDisabled($value, $record))
                             ->required()
                             ->helperText('Kelas yang sudah mencapai kuota global 35/35 atau batas utusan sekolah otomatis dikunci.'),
+                        TextInput::make('school_name')
+                            ->label('Asal Sekolah')
+                            ->default(fn () => auth()->user()?->name)
+                            ->disabled()
+                            ->dehydrated(),
                         TextInput::make('nisn')
                             ->label('NISN (10 Digit)')
                             ->required()
@@ -135,6 +140,11 @@ class SchoolParticipantResource extends Resource
                             ->label('Nama Lengkap Siswa')
                             ->required()
                             ->maxLength(255),
+                        TextInput::make('birth_place')
+                            ->label('Tempat Lahir')
+                            ->maxLength(255),
+                        \Filament\Forms\Components\DatePicker::make('birth_date')
+                            ->label('Tanggal Lahir'),
                         Select::make('gender')
                             ->label('Jenis Kelamin')
                             ->options([
@@ -143,21 +153,53 @@ class SchoolParticipantResource extends Resource
                             ])
                             ->default('L')
                             ->required(),
+                        TextInput::make('religion')
+                            ->label('Agama')
+                            ->maxLength(100),
+                        TextInput::make('phone')
+                            ->label('No. HP / WA Siswa')
+                            ->tel()
+                            ->maxLength(25),
+                        \Filament\Forms\Components\Textarea::make('address')
+                            ->label('Alamat Lengkap Siswa')
+                            ->rows(2)
+                            ->columnSpanFull(),
+                    ])->columns(3),
+
+                Section::make('Data Orang Tua')
+                    ->description('Informasi lengkap Ayah, Ibu, dan Kontak Orang Tua / Wali peserta.')
+                    ->icon('heroicon-o-users')
+                    ->schema([
+                        TextInput::make('father_name')
+                            ->label('Nama Ayah')
+                            ->maxLength(255),
+                        TextInput::make('father_phone')
+                            ->label('No. HP / WA Ayah')
+                            ->tel()
+                            ->maxLength(25),
+                        TextInput::make('father_job')
+                            ->label('Pekerjaan Ayah')
+                            ->maxLength(255),
+                        TextInput::make('mother_name')
+                            ->label('Nama Ibu')
+                            ->maxLength(255),
+                        TextInput::make('mother_phone')
+                            ->label('No. HP / WA Ibu')
+                            ->tel()
+                            ->maxLength(25),
+                        TextInput::make('mother_job')
+                            ->label('Pekerjaan Ibu')
+                            ->maxLength(255),
                         TextInput::make('parent_name')
-                            ->label('Nama Orang Tua / Wali')
+                            ->label('Nama Kontak Utama (Orang Tua / Wali)')
                             ->required()
                             ->maxLength(255),
                         TextInput::make('parent_phone')
-                            ->label('No. HP / WA Orang Tua')
+                            ->label('No. HP / WA Kontak Utama')
                             ->tel()
                             ->required()
                             ->maxLength(25),
-                        TextInput::make('phone')
-                            ->label('No. HP / WA Siswa (Opsional)')
-                            ->tel()
-                            ->maxLength(25)
-                            ->columnSpanFull(),
-                    ])->columns(2),
+                    ])->columns(3),
             ]);
     }
 
@@ -232,11 +274,19 @@ class SchoolParticipantResource extends Resource
                                     'class_name' => $newClass,
                                     'nisn' => trim((string) $data['nisn']),
                                     'name' => trim((string) $data['name']),
+                                    'birth_place' => $data['birth_place'] ?? null,
+                                    'birth_date' => $data['birth_date'] ?? null,
                                     'gender' => $data['gender'] ?? 'L',
+                                    'religion' => $data['religion'] ?? null,
+                                    'address' => $data['address'] ?? null,
+                                    'father_name' => $data['father_name'] ?? null,
+                                    'father_phone' => $data['father_phone'] ?? null,
+                                    'father_job' => $data['father_job'] ?? null,
+                                    'mother_name' => ($data['mother_name'] ?? null) ?: trim((string) $data['parent_name']),
+                                    'mother_phone' => ($data['mother_phone'] ?? null) ?: trim((string) $data['parent_phone']),
+                                    'mother_job' => $data['mother_job'] ?? null,
                                     'parent_name' => trim((string) $data['parent_name']),
                                     'parent_phone' => trim((string) $data['parent_phone']),
-                                    'mother_name' => trim((string) $data['parent_name']),
-                                    'mother_phone' => trim((string) $data['parent_phone']),
                                     'phone' => trim((string) ($data['phone'] ?? '')) ?: trim((string) $data['parent_phone']),
                                 ]);
 
@@ -246,11 +296,19 @@ class SchoolParticipantResource extends Resource
                                         'class_name' => $newClass,
                                         'nisn' => $record->nisn,
                                         'name' => $record->name,
+                                        'birth_place' => $record->birth_place,
+                                        'birth_date' => $record->birth_date,
                                         'gender' => $record->gender,
+                                        'religion' => $record->religion,
+                                        'address' => $record->address,
+                                        'father_name' => $record->father_name,
+                                        'father_phone' => $record->father_phone,
+                                        'father_job' => $record->father_job,
+                                        'mother_name' => $record->mother_name,
+                                        'mother_phone' => $record->mother_phone,
+                                        'mother_job' => $record->mother_job,
                                         'parent_name' => $record->parent_name,
                                         'parent_phone' => $record->parent_phone,
-                                        'mother_name' => $record->parent_name,
-                                        'mother_phone' => $record->parent_phone,
                                         'phone' => $record->phone,
                                     ]);
                                 }
