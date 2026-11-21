@@ -169,7 +169,7 @@
                                         Akun Login Koordinator Sekolah
                                     </span>
                                     <h4 class="text-lg font-black text-white">{{ $schoolCredentials['school_name'] ?? $lastSubmittedSchool }}</h4>
-                                    <p class="text-xs text-blue-100">Pendamping: {{ $schoolCredentials['pic_name'] ?? $lastSubmittedPicName }}</p>
+                                    <p class="text-xs text-blue-100">Pendamping: {{ $schoolCredentials['pic_name'] ?? $lastSubmittedPicName }} &bull; Terkirim ke Email: <strong class="text-genza-yellow">{{ $schoolCredentials['email'] ?? $lastSubmittedEmail }}</strong></p>
                                 </div>
                                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                                     <div class="bg-white/10 backdrop-blur-sm rounded-xl px-3.5 py-2.5 border border-white/20">
@@ -312,7 +312,7 @@
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                             <div>
                                 <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Nama Sekolah <span class="text-rose-500">*</span></label>
                                 <input type="text"
@@ -335,6 +335,14 @@
                                        wire:model="pic_phone"
                                        class="bc-input w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm"
                                        placeholder="08..."
+                                       required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Email Sekolah / Pendamping <span class="text-rose-500">*</span></label>
+                                <input type="email"
+                                       wire:model="school_email"
+                                       class="bc-input w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm"
+                                       placeholder="sekolah@email.com"
                                        required>
                             </div>
                             <div>

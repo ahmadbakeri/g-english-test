@@ -2,11 +2,13 @@
 
 namespace App\Livewire;
 
+use App\Mail\SchoolAccountCredentialsMail;
 use App\Models\Admission;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
@@ -22,17 +24,19 @@ class BrainChampionRegistration extends Component
     public string $school_name = '';
     public string $pic_name = '';
     public string $pic_phone = '';
+    public string $school_email = '';
     public string $school_password = '';
 
     public string $lastSubmittedSchool = '';
     public string $lastSubmittedPicName = '';
     public string $lastSubmittedPicPhone = '';
+    public string $lastSubmittedEmail = '';
     public string $lastSubmittedAt = '';
 
     /**
      * School login credentials generated/updated on submission.
      *
-     * @var array{login_url?: string, username?: string, password?: string, school_name?: string, pic_name?: string}
+     * @var array{login_url?: string, username?: string, password?: string, email?: string, school_name?: string, pic_name?: string}
      */
     public array $schoolCredentials = [];
 
@@ -173,11 +177,14 @@ class BrainChampionRegistration extends Component
             'school_name' => 'required|string|min:3|max:255',
             'pic_name' => 'required|string|min:2|max:255',
             'pic_phone' => 'required|string|min:8|max:25',
+            'school_email' => 'required|email|max:255',
             'school_password' => 'nullable|string|min:4|max:50',
         ], [
             'school_name.required' => 'Nama sekolah wajib diisi.',
             'pic_name.required' => 'Nama Guru Pendamping wajib diisi.',
             'pic_phone.required' => 'Nomor WhatsApp Guru Pendamping wajib diisi.',
+            'school_email.required' => 'Alamat Email Sekolah / Pendamping wajib diisi untuk pengiriman akun login.',
+            'school_email.email' => 'Format alamat email tidak valid.',
             'school_password.min' => 'Password / PIN sekolah minimal 4 karakter.',
         ]);
 
@@ -185,6 +192,7 @@ class BrainChampionRegistration extends Component
         $cleanSchoolName = trim((string) preg_replace('/\s+/', ' ', $this->school_name));
         $normalizedSchool = self::normalizeSchoolName($cleanSchoolName);
         $coordinatorPhone = preg_replace('/\s+/', '', trim($this->pic_phone)) ?: trim($this->pic_phone);
+        $cleanSchoolEmail = strtolower(trim($this->school_email));
 
         // Collect & validate non-empty participant entries from active grades
         $entriesByGrade = [];
@@ -252,7 +260,7 @@ class BrainChampionRegistration extends Component
             ? trim($this->school_password)
             : Str::upper(Str::random(6));
 
-        $createdRecords = DB::transaction(function () use ($entriesByGrade, $cleanSchoolName, $normalizedSchool, $coordinatorPhone, $plainPassword) {
+        $createdRecords = DB::transaction(function () use ($entriesByGrade, $cleanSchoolName, $normalizedSchool, $coordinatorPhone, $cleanSchoolEmail, $plainPassword) {
             // Lock all Brain Champion admission rows to prevent race conditions under concurrent requests
             $lockedRows = Admission::query()
                 ->where('course_level', self::EVENT_TAG)
@@ -261,25 +269,31 @@ class BrainChampionRegistration extends Component
                 ->get();
 
             // 1. Auto-provision / Find School User account (role = 'school', username = $coordinatorPhone)
-            $schoolEmail = preg_replace('/[^a-zA-Z0-9]/', '', $coordinatorPhone) . '@school.g-english.com';
             $schoolUser = User::where('username', $coordinatorPhone)->first();
+            $resolvedEmail = $cleanSchoolEmail;
 
             if (!$schoolUser) {
-                if (User::where('email', $schoolEmail)->exists()) {
-                    $schoolEmail = preg_replace('/[^a-zA-Z0-9]/', '', $coordinatorPhone) . '_' . rand(100, 999) . '@school.g-english.com';
+                if (User::where('email', $resolvedEmail)->exists()) {
+                    $schoolUser = User::where('email', $resolvedEmail)->first();
                 }
+            }
 
+            if (!$schoolUser) {
                 $schoolUser = User::create([
                     'username' => $coordinatorPhone,
                     'name' => $cleanSchoolName,
-                    'email' => $schoolEmail,
+                    'email' => $resolvedEmail,
                     'password' => Hash::make($plainPassword),
                     'role' => 'school',
                 ]);
             } else {
                 $updates = ['password' => Hash::make($plainPassword)];
-                if ($schoolUser->role === 'parent' || $schoolUser->role === 'school') {
+                if (in_array($schoolUser->role, ['parent', 'school'], true)) {
                     $updates['name'] = $cleanSchoolName;
+                    $updates['role'] = 'school';
+                }
+                if (!User::where('email', $resolvedEmail)->where('id', '!=', $schoolUser->id)->exists()) {
+                    $updates['email'] = $resolvedEmail;
                 }
                 $schoolUser->update($updates);
             }
@@ -392,15 +406,29 @@ class BrainChampionRegistration extends Component
         $this->lastSubmittedSchool = $cleanSchoolName;
         $this->lastSubmittedPicName = trim($this->pic_name);
         $this->lastSubmittedPicPhone = $coordinatorPhone;
+        $this->lastSubmittedEmail = $cleanSchoolEmail;
         $this->lastSubmittedAt = now()->translatedFormat('d F Y, H:i') . ' WITA';
         $this->schoolCredentials = [
             'login_url' => route('login'),
             'username' => $coordinatorPhone,
             'password' => $plainPassword,
+            'email' => $cleanSchoolEmail,
             'school_name' => $cleanSchoolName,
             'pic_name' => trim($this->pic_name),
         ];
         $this->registeredResults = $createdRecords;
+
+        if ($cleanSchoolEmail !== '') {
+            Mail::to($cleanSchoolEmail)->queue(new SchoolAccountCredentialsMail(
+                schoolName: $cleanSchoolName,
+                coordinatorName: trim($this->pic_name),
+                loginUrl: url('/login'),
+                username: $coordinatorPhone,
+                plainPassword: $plainPassword,
+                participants: $createdRecords,
+            ));
+        }
+
         $this->participants = [];
         $this->initializeParticipantSlots();
     }

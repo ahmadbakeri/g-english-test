@@ -89,6 +89,67 @@ class ListStudents extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            Actions\Action::make('resend_school_account_email')
+                ->label('Kirim Ulang Akun Sekolah (Email)')
+                ->icon('heroicon-o-envelope')
+                ->color('info')
+                ->form([
+                    \Filament\Forms\Components\Select::make('school_user_id')
+                        ->label('Pilih Akun Sekolah (Brain Champion)')
+                        ->options(fn () => \App\Models\User::where('role', 'school')->pluck('name', 'id')->toArray())
+                        ->searchable()
+                        ->live()
+                        ->afterStateUpdated(function ($state, callable $set) {
+                            $u = $state ? \App\Models\User::find($state) : null;
+                            if ($u) {
+                                $set('email', $u->email);
+                            }
+                        })
+                        ->required(),
+                    \Filament\Forms\Components\TextInput::make('email')
+                        ->label('Email Tujuan')
+                        ->email()
+                        ->required(),
+                    \Filament\Forms\Components\TextInput::make('new_password')
+                        ->label('Password / PIN Baru')
+                        ->default(\Illuminate\Support\Str::upper(\Illuminate\Support\Str::random(6)))
+                        ->required(),
+                ])
+                ->action(function (array $data): void {
+                    $schoolUser = \App\Models\User::findOrFail($data['school_user_id']);
+                    $schoolUser->update([
+                        'email' => strtolower(trim((string) $data['email'])),
+                        'password' => \Illuminate\Support\Facades\Hash::make($data['new_password']),
+                    ]);
+
+                    $participants = Student::where('school_user_id', $schoolUser->id)
+                        ->where('course_level', 'G-English Brain Champion')
+                        ->get()
+                        ->map(fn (Student $s) => [
+                            'competition_code' => $s->competition_code ?: $s->nis,
+                            'nisn' => $s->nisn,
+                            'name' => $s->name,
+                            'class_name' => $s->class_name,
+                            'gender' => $s->gender,
+                        ])
+                        ->toArray();
+
+                    \Illuminate\Support\Facades\Mail::to($schoolUser->email)->queue(
+                        new \App\Mail\SchoolAccountCredentialsMail(
+                            schoolName: $schoolUser->name,
+                            coordinatorName: 'Koordinator ' . $schoolUser->name,
+                            loginUrl: url('/login'),
+                            username: (string) $schoolUser->username,
+                            plainPassword: (string) $data['new_password'],
+                            participants: $participants,
+                        )
+                    );
+
+                    \Filament\Notifications\Notification::make()
+                        ->title("Email akun sekolah berhasil dikirim ke {$schoolUser->email}")
+                        ->success()
+                        ->send();
+                }),
             Actions\Action::make('print_brain_champion_roster')
                 ->label('Cetak Daftar Hadir Lomba (Per Kelas)')
                 ->icon('heroicon-o-printer')
