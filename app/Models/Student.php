@@ -56,12 +56,27 @@ class Student extends Model
         static::created(function (Student $student) {
             // Create user account automatically
             if (!$student->user_id) {
-                $latestUser = User::where('role', 'siswa')->whereNotNull('username')->orderBy('id', 'desc')->first();
-                $nextNum = $latestUser ? intval($latestUser->username) + 1 : 481001;
+                $maxNum = User::where('role', 'siswa')
+                    ->whereNotNull('username')
+                    ->pluck('username')
+                    ->filter(fn ($u) => ctype_digit((string) $u))
+                    ->map(fn ($u) => (int) $u)
+                    ->max();
+
+                $nextNum = $maxNum && $maxNum >= 481000 ? $maxNum + 1 : 481001;
+                while (User::where('username', (string) $nextNum)->exists()) {
+                    $nextNum++;
+                }
+
+                $baseEmail = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $student->nis ?: 'student')) . '@g-english.com';
+                if (User::where('email', $baseEmail)->exists()) {
+                    $baseEmail = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $student->nis ?: 'student')) . '_' . $nextNum . '@g-english.com';
+                }
+
                 $user = User::create([
                     'username' => (string) $nextNum,
                     'name' => $student->name,
-                    'email' => strtolower($student->nis) . '@g-english.com',
+                    'email' => $baseEmail,
                     'password' => \Illuminate\Support\Facades\Hash::make('password'),
                     'role' => 'siswa',
                 ]);

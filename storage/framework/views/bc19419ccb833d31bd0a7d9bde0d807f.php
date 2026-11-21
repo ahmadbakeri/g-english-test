@@ -1,0 +1,1 @@
+<?php echo $__env->make("filament.components.animations", array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\ahmad\Downloads\Laravel\g-english\storage\framework\views/f2ec03c50c62434774455e95a61df496.blade.php ENDPATH**/ ?>

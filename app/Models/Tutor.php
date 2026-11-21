@@ -57,12 +57,28 @@ class Tutor extends Model
         static::created(function (Tutor $tutor) {
             // Create user account automatically if not set
             if (!$tutor->user_id) {
-                $latestUser = User::where('role', 'tutor')->whereNotNull('username')->orderBy('id', 'desc')->first();
-                $nextNum = $latestUser ? intval($latestUser->username) + 1 : 48001;
+                $maxNum = User::where('role', 'tutor')
+                    ->whereNotNull('username')
+                    ->pluck('username')
+                    ->filter(fn ($u) => ctype_digit((string) $u))
+                    ->map(fn ($u) => (int) $u)
+                    ->max();
+
+                $nextNum = $maxNum && $maxNum >= 48000 ? $maxNum + 1 : 48001;
+                while (User::where('username', (string) $nextNum)->exists()) {
+                    $nextNum++;
+                }
+
+                $slug = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $tutor->name)) ?: 'tutor';
+                $baseEmail = $slug . '@g-english.com';
+                if (User::where('email', $baseEmail)->exists()) {
+                    $baseEmail = $slug . '_' . $nextNum . '@g-english.com';
+                }
+
                 $user = User::create([
                     'username' => (string) $nextNum,
                     'name' => $tutor->name,
-                    'email' => strtolower(str_replace(' ', '', $tutor->name)) . '@g-english.com',
+                    'email' => $baseEmail,
                     'password' => \Illuminate\Support\Facades\Hash::make('password'),
                     'role' => 'tutor',
                 ]);

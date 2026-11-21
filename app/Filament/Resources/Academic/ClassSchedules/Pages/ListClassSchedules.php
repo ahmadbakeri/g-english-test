@@ -15,9 +15,9 @@ class ListClassSchedules extends ListRecords
     {
         return [
             Action::make('qr_code')
-                ->label(__('Show QR Code'))
+                ->label(__('Scan Attendance'))
                 ->icon('heroicon-o-qr-code')
-                ->url(fn (): string => route('filament.admin.pages.display-qr-attendance'))
+                ->url(fn (): string => \App\Filament\Pages\ScanAttendance::getUrl())
                 ->openUrlInNewTab(),
 
             CreateAction::make(),

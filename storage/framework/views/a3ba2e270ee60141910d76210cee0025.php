@@ -1,0 +1,1 @@
+<?php echo $__env->make("filament.components.theme-toggle", array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\ahmad\Downloads\Laravel\g-english\storage\framework\views/8c7bc8b3f0c9c8e3088d2ba53f12a27c.blade.php ENDPATH**/ ?>
