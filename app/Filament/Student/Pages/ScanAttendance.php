@@ -94,25 +94,18 @@ class ScanAttendance extends Page
 
         $date = now()->format('Y-m-d');
         
-        $query = Attendance::where('role_type', $roleType)->where('date', $date);
-        if ($studentId) $query->where('student_id', $studentId);
-        if ($tutorId) $query->where('tutor_id', $tutorId);
-        if ($userId) $query->where('user_id', $userId);
+        $query = Attendance::where('date', $date)->where('role_type', $roleType);
+        if ($roleType === 'student') {
+            $query->where('student_id', $studentId);
+        } elseif ($roleType === 'tutor') {
+            $query->where('tutor_id', $tutorId);
+        } else {
+            $query->where('user_id', $userId);
+        }
         
-        $existingAttendance = $query->first();
-
-        if ($existingAttendance) {
-            if ($existingAttendance->time_out) {
-                $this->dispatch('scan-result', ['type' => 'error', 'message' => __(':name has already checked out today.', ['name' => $name])]);
-                return;
-            } else {
-                // Perform check-out
-                $existingAttendance->update([
-                    'time_out' => now()->format('H:i:s'),
-                ]);
-                $this->dispatch('scan-result', ['type' => 'success', 'message' => __('Check-out successful: :name', ['name' => $name])]);
-                return;
-            }
+        if ($query->exists()) {
+            $this->dispatch('scan-result', ['type' => 'error', 'message' => __(':name has already checked in today.', ['name' => $name])]);
+            return;
         }
 
         $status = 'present';

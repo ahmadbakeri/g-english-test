@@ -44,6 +44,16 @@ class AttendanceResource extends Resource
         return false;
     }
 
+    public static function canViewAny(): bool
+    {
+        return true;
+    }
+
+    public static function canView(\Illuminate\Database\Eloquent\Model $record): bool
+    {
+        return true;
+    }
+
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
         return parent::getEloquentQuery()->where('student_id', auth()->user()->student->id);

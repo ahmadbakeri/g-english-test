@@ -19,7 +19,14 @@ class ParentStatsWidget extends BaseWidget
         $childrenCount = $children->count();
 
         // Calculate total attendances this month for all children
-        $attendanceCount = \App\Models\Attendance::whereIn('user_id', $children->pluck('user_id'))
+        $childStudentIds = $children->pluck('id')->toArray();
+        $childUserIds = $children->pluck('user_id')->filter()->toArray();
+        $attendanceCount = \App\Models\Attendance::where(function ($q) use ($childStudentIds, $childUserIds) {
+                $q->whereIn('student_id', $childStudentIds);
+                if (!empty($childUserIds)) {
+                    $q->orWhereIn('user_id', $childUserIds);
+                }
+            })
             ->whereMonth('date', now()->month)
             ->whereYear('date', now()->year)
             ->count();

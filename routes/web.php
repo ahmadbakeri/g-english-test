@@ -71,3 +71,7 @@ Route::get('/avatar-proxy', function (\Illuminate\Http\Request $request) {
     $mimeType = \Illuminate\Support\Facades\Storage::disk('r2')->mimeType($path);
     return response($content)->header('Content-Type', $mimeType);
 })->name('avatar.proxy')->middleware(['web']);
+
+Route::post('/api/push/subscribe', [\App\Http\Controllers\PushSubscriptionController::class, 'store'])
+    ->name('push.subscribe')
+    ->middleware(['web', 'auth']);
