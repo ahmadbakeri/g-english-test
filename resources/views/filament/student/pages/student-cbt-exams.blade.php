@@ -245,12 +245,12 @@
                         
                         <div class="exam-card-footer">
                             @if($canTake)
-                                <a href="{{ route('exam.start', ['exam' => $exam->id]) }}" class="btn-take-exam">
+                                <a href="{{ route('filament.student.pages.take-cbt-exam.{record}', ['record' => $exam->id]) }}" class="btn-take-exam">
                                     {{ $hasAttempt ? 'Lanjutkan Ujian (Resume)' : 'Mulai Ujian' }}
                                     <x-heroicon-m-arrow-right style="width: 1.25rem; height: 1.25rem; margin-left: 0.5rem;" />
                                 </a>
                             @elseif($isCompleted)
-                                <a href="{{ route('exam.result', ['attempt' => $attempt->id]) }}" class="btn-take-exam" style="background: #10b981;">
+                                <a href="{{ route('filament.student.pages.take-cbt-exam.{record}', ['record' => $exam->id]) }}" class="btn-take-exam" style="background: #10b981;">
                                     Lihat Hasil
                                     <x-heroicon-m-clipboard-document-check style="width: 1.25rem; height: 1.25rem; margin-left: 0.5rem;" />
                                 </a>

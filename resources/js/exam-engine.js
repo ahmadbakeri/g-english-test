@@ -15,6 +15,14 @@ class ExamEngine {
     }
 
     init() {
+        this.storageKey = `g_english_cbt_attempt_${this.config.attemptId}`;
+        try {
+            const saved = localStorage.getItem(this.storageKey);
+            if (saved) {
+                this.state.answers = { ...this.state.answers, ...JSON.parse(saved) };
+            }
+        } catch (e) {}
+
         // Initial setup
         if (this.state.totalQuestions > 0) {
             this.showQuestion(1);
@@ -28,21 +36,9 @@ class ExamEngine {
             if (btnNext) btnNext.disabled = true;
         }
 
-        // Fetch initial time
-        this.fetchTimeRemaining();
-
-        // Setup Auto-save interval
-        setInterval(() => this.autoSave(), this.config.autoSaveInterval * 1000);
-
         // Setup Local countdown timer
         setInterval(() => this.tickTimer(), 1000);
 
-        // Sync timer with server every 5 minutes
-        setInterval(() => this.fetchTimeRemaining(), 5 * 60 * 1000);
-
-        // Anti-cheat: Visibility change (DISABLED per user request)
-        // document.addEventListener('visibilitychange', () => this.handleVisibilityChange());
-        
         // Anti-cheat: Disable right click, copy, paste, inspect element
         this.setupKeyboardMouseLock();
 
@@ -125,12 +121,12 @@ class ExamEngine {
     }
 
     selectAnswer(qNum, qId, answer) {
-        this.state.answers[qNum] = answer;
+        this.state.answers[qId] = answer;
         this.updateNavGrid(qNum, 'answered');
         this.updateAnsweredCount();
-        
-        // Push to server immediately for important actions, or wait for autosave
-        this.saveSingleAnswer(qId, answer);
+        try {
+            localStorage.setItem(this.storageKey, JSON.stringify(this.state.answers));
+        } catch (e) {}
     }
 
     toggleDoubt(qNum) {
@@ -293,9 +289,10 @@ class ExamEngine {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': this.config.csrfToken
                 },
-                body: JSON.stringify({}) // Answers are already auto-saved
+                body: JSON.stringify({ answers: this.state.answers })
             });
             const data = await res.json();
+            try { localStorage.removeItem(this.storageKey); } catch (e) {}
             
             if (data.redirect) {
                 window.location.href = data.redirect;
