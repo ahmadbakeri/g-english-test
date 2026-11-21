@@ -250,11 +250,13 @@ class StudentResource extends Resource
                         ->label(__('Photo'))
                         ->circular()
                         ->disk('public')
+                        ->grow(false)
                         ->defaultImageUrl(fn ($record) => 'https://ui-avatars.com/api/?name=' . urlencode($record->name) . '&color=0a4282&background=dbeafe'),
                     Tables\Columns\TextColumn::make('user.username')
                         ->label(__('No. Siswa'))
                         ->badge()
                         ->color('gray')
+                        ->grow(false)
                         ->searchable()
                         ->sortable(),
                     Tables\Columns\TextColumn::make('name')
@@ -267,6 +269,7 @@ class StudentResource extends Resource
                     Tables\Columns\TextColumn::make('student_type')
                         ->label(__('Type'))
                         ->badge()
+                        ->grow(false)
                         ->color(fn (?string $state): string => $state === 'external' ? 'warning' : 'info')
                         ->formatStateUsing(fn (?string $state): string => $state === 'external' ? __('External') : __('Internal')),
                     Tables\Columns\TextColumn::make('school_name')
@@ -278,16 +281,19 @@ class StudentResource extends Resource
                         ->label('Kelas')
                         ->badge()
                         ->color('info')
+                        ->grow(false)
                         ->getStateUsing(fn (Student $record): string => self::resolveClassLabel($record))
                         ->searchable()
                         ->toggleable(),
                     Tables\Columns\TextColumn::make('gender')
                         ->label(__('Gender'))
                         ->badge()
+                        ->grow(false)
                         ->color(fn (?string $state): string => $state === 'L' ? 'info' : 'danger'),
                     Tables\Columns\TextColumn::make('phone')
                         ->label(__('Phone'))
                         ->placeholder('-')
+                        ->grow(false)
                         ->searchable(),
                     Tables\Columns\TextColumn::make('parent_summary')
                         ->label('Orang Tua / Wali')
@@ -295,10 +301,12 @@ class StudentResource extends Resource
                         ->toggleable(),
                     Tables\Columns\IconColumn::make('is_active')
                         ->label(__('Active'))
+                        ->grow(false)
                         ->boolean(),
                     Tables\Columns\TextColumn::make('created_at')
                         ->label(__('Registered'))
                         ->dateTime('d/m/Y')
+                        ->grow(false)
                         ->sortable()
                         ->toggleable(isToggledHiddenByDefault: true),
                 ])->from('md'),

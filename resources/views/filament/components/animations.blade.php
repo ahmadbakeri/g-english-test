@@ -74,7 +74,7 @@
     
     .fi-ta-record, .fi-wi-stats-overview-stat {
         border-radius: 1rem !important; /* rounded-2xl */
-        transition: all 0.3s ease-in-out !important;
+        transition: box-shadow 0.3s ease-in-out, border-color 0.3s ease-in-out !important;
     }
     .fi-wi-stats-overview-stat:hover {
         transform: translateY(-2px);
@@ -82,14 +82,6 @@
     }
     .fi-ta-record:hover {
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04) !important;
-    }
-    .fi-ta-record:has([aria-expanded="true"]),
-    .fi-ta-record:has(.fi-dropdown-panel:not([style*="display: none"])),
-    .fi-ta-record:focus-within {
-        position: relative !important;
-        z-index: 40 !important;
-        backdrop-filter: none !important;
-        -webkit-backdrop-filter: none !important;
     }
     
     .dark .fi-ta-record:hover, .dark .fi-wi-stats-overview-stat:hover {
@@ -515,15 +507,12 @@
         color: #93c5fd !important;
     }
 
-    /* Table Rows (Floating Rows effect without transform stacking-context trap) */
+    /* Table Rows (Floating Rows effect - NO transform/backdrop-filter so Floating UI x-anchor coordinates stay exact) */
     .fi-ta-row {
         background-color: #ffffff !important;
         border-radius: 1rem !important;
         box-shadow: 0 2px 5px -1px rgba(15, 23, 42, 0.04) !important;
         transition: background-color 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease !important;
-        transform: none !important;
-        position: relative;
-        z-index: 1;
     }
     
     .dark .fi-ta-row {
@@ -532,9 +521,7 @@
     }
 
     .fi-ta-row:hover {
-        transform: none !important;
         box-shadow: 0 10px 18px -4px rgba(10, 66, 130, 0.12), 0 4px 6px -2px rgba(10, 66, 130, 0.05) !important;
-        z-index: 5;
     }
     
     .dark .fi-ta-row:hover {
@@ -542,23 +529,13 @@
         box-shadow: 0 10px 18px -4px rgba(0, 0, 0, 0.55) !important;
     }
 
-    /* Elevate active row when its ActionGroup dropdown is open so menu never slips behind subsequent rows */
-    .fi-ta-row:has([aria-expanded="true"]),
-    .fi-ta-row:has(.fi-dropdown-panel:not([style*="display: none"])),
-    .fi-ta-row:focus-within {
-        position: relative !important;
-        z-index: 40 !important;
-    }
-
-    /* ActionGroup & Global Dropdown Panels: opaque surface + top z-index */
+    /* ActionGroup & Global Dropdown Panels: solid surface + z-index: 50, never override position/top/left */
     .fi-dropdown-panel {
-        z-index: 9999 !important;
+        z-index: 50 !important;
         background-color: #ffffff !important;
         border: 1px solid rgba(15, 23, 42, 0.1) !important;
         border-radius: 0.875rem !important;
         box-shadow: 0 15px 30px -5px rgba(15, 23, 42, 0.16), 0 8px 10px -6px rgba(15, 23, 42, 0.08) !important;
-        backdrop-filter: none !important;
-        -webkit-backdrop-filter: none !important;
     }
     .dark .fi-dropdown-panel {
         background-color: #0f172a !important;
@@ -569,7 +546,7 @@
     /* Table Cells: Vertical & Compact Horizontal Padding, Crisp Subtle Borders & Column Alignment */
     .fi-ta-cell,
     .fi-ta-row td {
-        padding: 0.65rem 0.65rem !important;
+        padding: 0.6rem 0.5rem !important;
         vertical-align: middle !important;
         border-top: 1px solid rgba(15, 23, 42, 0.05) !important;
         border-bottom: 1px solid rgba(15, 23, 42, 0.05) !important;
@@ -612,22 +589,18 @@
         border-right-color: rgba(251, 185, 0, 0.45) !important;
     }
 
-    /* Alignment Rules: Left-align text/names, Center-align badges/icons/actions, Right-align numbers/currency */
+    /* Alignment Rules: Left-align text/names, Right-align action triggers & numbers/currency */
     .fi-ta-text {
         text-align: left;
     }
-    .fi-ta-cell:has(.fi-badge),
-    .fi-ta-cell:has(.fi-ta-icon),
     .fi-ta-actions-cell,
     .fi-ta-cell:last-child:has(.fi-ta-actions) {
-        text-align: center !important;
-    }
-    .fi-ta-cell:has(.fi-badge) .fi-ta-col-wrp,
-    .fi-ta-cell:has(.fi-ta-icon) .fi-ta-col-wrp {
-        justify-content: center !important;
+        text-align: right !important;
+        width: 1% !important;
+        white-space: nowrap !important;
     }
     .fi-ta-actions {
-        justify-content: center !important;
+        justify-content: flex-end !important;
     }
     .fi-ta-text-item-numeric,
     [class*="fi-ta-text"][class*="numeric"],
@@ -679,36 +652,29 @@
         color: #fbb900 !important;
     }
 
-    /* Remove default ugly borders & prevent horizontal scrollbar / dropdown clipping on desktop tables */
+    /* Remove default borders from table container */
     .fi-ta-content,
     .fi-ta-content-ctn,
     .fi-ta-ctn {
         border: none !important;
         box-shadow: none !important;
         background: transparent !important;
-    }
-    @media (min-width: 1024px) {
-        .fi-ta-content,
-        .fi-ta-content-ctn,
-        .fi-ta-ctn {
-            overflow-x: visible !important;
-            overflow-y: visible !important;
-        }
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        transform: none !important;
     }
 
-    /* 3. Global Sections, Form Headers & Modals */
+    /* 3. Global Sections, Form Headers & Modals (No backdrop-filter/transform on .fi-section/.fi-ta-record so Floating UI x-anchor works) */
     .fi-section, .fi-fo-section, .fi-in-section, .fi-ta-record, .fi-modal-window {
         border-radius: 1.25rem !important; /* rounded-2xl */
         border: 1px solid rgba(15, 23, 42, 0.07) !important;
-        background: rgba(255, 255, 255, 0.88) !important;
-        backdrop-filter: blur(12px) saturate(180%) !important;
-        -webkit-backdrop-filter: blur(12px) saturate(180%) !important;
+        background: rgba(255, 255, 255, 0.95) !important;
         box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.04), 0 8px 10px -6px rgba(15, 23, 42, 0.02) !important;
-        transition: all 0.3s ease-in-out !important;
+        transition: background-color 0.3s ease-in-out, border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out !important;
     }
 
     .dark .fi-section, .dark .fi-fo-section, .dark .fi-in-section, .dark .fi-ta-record, .dark .fi-modal-window {
-        background: rgba(15, 23, 42, 0.78) !important;
+        background: rgba(15, 23, 42, 0.92) !important;
         border: 1px solid rgba(255, 255, 255, 0.09) !important;
         box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5) !important;
     }
