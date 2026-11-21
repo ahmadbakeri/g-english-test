@@ -1,0 +1,273 @@
+<?php
+
+namespace App\Filament\School\Resources;
+
+use App\Filament\School\Resources\SchoolParticipantResource\Pages\ManageSchoolParticipants;
+use App\Filament\School\Widgets\SchoolQuotaOverviewWidget;
+use App\Livewire\BrainChampionRegistration;
+use App\Models\Admission;
+use App\Models\Student;
+use BackedEnum;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
+use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\Layout\Split;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
+
+class SchoolParticipantResource extends Resource
+{
+    protected static ?string $model = Student::class;
+
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-trophy';
+    protected static ?string $slug = 'school-participants';
+    protected static ?string $navigationLabel = 'Delegasi Peserta';
+    protected static ?string $modelLabel = 'Peserta Brain Champion';
+    protected static ?string $pluralModelLabel = 'Delegasi Peserta Brain Champion';
+    protected static ?int $navigationSort = 1;
+
+    public static function canViewAny(): bool
+    {
+        return auth()->check() && auth()->user()->role === 'school';
+    }
+
+    public static function canCreate(): bool
+    {
+        return auth()->check() && auth()->user()->role === 'school';
+    }
+
+    public static function canEdit(\Illuminate\Database\Eloquent\Model $record): bool
+    {
+        return auth()->check() && (int) $record->school_user_id === (int) auth()->id();
+    }
+
+    public static function canDelete(\Illuminate\Database\Eloquent\Model $record): bool
+    {
+        return false;
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->where('school_user_id', auth()->id())
+            ->where('course_level', BrainChampionRegistration::EVENT_TAG);
+    }
+
+    public static function getAllowedClassOptions(): array
+    {
+        $user = auth()->user();
+        $level = SchoolQuotaOverviewWidget::resolveSchoolLevelForUser($user);
+        $grades = $level === 'SMP' ? [7, 8, 9] : [4, 5, 6];
+
+        $options = [];
+        foreach ($grades as $g) {
+            $options["Kelas {$g}"] = "Kelas {$g}";
+        }
+        return $options;
+    }
+
+    public static function isClassOptionDisabled(string $classLabel, ?Student $record = null): bool
+    {
+        if ($record && trim((string) $record->class_name) === $classLabel) {
+            return false;
+        }
+
+        if (!preg_match('/Kelas\s*(\d+)/i', $classLabel, $m)) {
+            return true;
+        }
+        $grade = (int) $m[1];
+        $maxPerSchool = BrainChampionRegistration::maxPerSchoolForGrade($grade);
+        $user = auth()->user();
+        $normalizedSchool = BrainChampionRegistration::normalizeSchoolName((string) ($user?->name ?? ''));
+
+        $globalUsed = Admission::where('course_level', BrainChampionRegistration::EVENT_TAG)
+            ->where('status', '!=', 'rejected')
+            ->where('class_name', $classLabel)
+            ->count();
+
+        if ($globalUsed >= BrainChampionRegistration::MAX_QUOTA_PER_GRADE) {
+            return true;
+        }
+
+        $schoolUsed = Admission::where('course_level', BrainChampionRegistration::EVENT_TAG)
+            ->where('status', '!=', 'rejected')
+            ->where('class_name', $classLabel)
+            ->where(function ($q) use ($user, $normalizedSchool) {
+                $q->where('school_user_id', $user?->id);
+                if ($normalizedSchool !== '') {
+                    $q->orWhereRaw('TRIM(UPPER(school_name)) = ?', [$normalizedSchool]);
+                }
+            })
+            ->count();
+
+        return $schoolUsed >= $maxPerSchool;
+    }
+
+    public static function form(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Section::make('Biodata Peserta G-English Brain Champion')
+                    ->description('Pastikan NISN (10 digit), Nama Lengkap, dan Kontak Orang Tua sesuai dengan dokumen resmi sekolah.')
+                    ->icon('heroicon-o-trophy')
+                    ->schema([
+                        Select::make('class_name')
+                            ->label('Kategori Kelas')
+                            ->options(fn () => self::getAllowedClassOptions())
+                            ->disableOptionWhen(fn (string $value, ?Student $record): bool => self::isClassOptionDisabled($value, $record))
+                            ->required()
+                            ->helperText('Kelas yang sudah mencapai kuota global 35/35 atau batas utusan sekolah otomatis dikunci.'),
+                        TextInput::make('nisn')
+                            ->label('NISN (10 Digit)')
+                            ->required()
+                            ->maxLength(10)
+                            ->minLength(10)
+                            ->rule('regex:/^\d{10}$/'),
+                        TextInput::make('name')
+                            ->label('Nama Lengkap Siswa')
+                            ->required()
+                            ->maxLength(255),
+                        Select::make('gender')
+                            ->label('Jenis Kelamin')
+                            ->options([
+                                'L' => 'Laki-laki (L)',
+                                'P' => 'Perempuan (P)',
+                            ])
+                            ->default('L')
+                            ->required(),
+                        TextInput::make('parent_name')
+                            ->label('Nama Orang Tua / Wali')
+                            ->required()
+                            ->maxLength(255),
+                        TextInput::make('parent_phone')
+                            ->label('No. HP / WA Orang Tua')
+                            ->tel()
+                            ->required()
+                            ->maxLength(25),
+                        TextInput::make('phone')
+                            ->label('No. HP / WA Siswa (Opsional)')
+                            ->tel()
+                            ->maxLength(25)
+                            ->columnSpanFull(),
+                    ])->columns(2),
+            ]);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                Split::make([
+                    TextColumn::make('competition_code')
+                        ->label('Kode Peserta')
+                        ->getStateUsing(fn (Student $record): string => $record->competition_code ?: ($record->nis ?: '-'))
+                        ->badge()
+                        ->color('primary')
+                        ->searchable()
+                        ->sortable(),
+                    TextColumn::make('nisn')
+                        ->label('NISN')
+                        ->badge()
+                        ->color('gray')
+                        ->placeholder('-')
+                        ->searchable(),
+                    TextColumn::make('name')
+                        ->label('Nama Siswa')
+                        ->weight('bold')
+                        ->description(fn (Student $record): string => $record->school_name ?: (auth()->user()->name ?? '-'))
+                        ->searchable()
+                        ->sortable(),
+                    TextColumn::make('class_name')
+                        ->label('Kelas')
+                        ->badge()
+                        ->color('info')
+                        ->sortable(),
+                    TextColumn::make('gender')
+                        ->label('L/P')
+                        ->badge()
+                        ->color(fn (?string $state): string => $state === 'P' ? 'danger' : 'info'),
+                    TextColumn::make('parent_name')
+                        ->label('Nama Orang Tua')
+                        ->description(fn (Student $record): string => 'WA Ortu: ' . ($record->parent_phone ?: '-'))
+                        ->searchable(),
+                    TextColumn::make('parent_phone')
+                        ->label('No. HP Ortu')
+                        ->toggleable(isToggledHiddenByDefault: true),
+                    TextColumn::make('phone')
+                        ->label('No. HP Siswa')
+                        ->placeholder('-')
+                        ->toggleable(),
+                ])->from('md'),
+            ])
+            ->recordActions([
+                ActionGroup::make([
+                    EditAction::make()
+                        ->label('Edit Biodata')
+                        ->using(function (Student $record, array $data): Student {
+                            return DB::transaction(function () use ($record, $data) {
+                                $newClass = trim((string) ($data['class_name'] ?? $record->class_name));
+                                if ($newClass !== trim((string) $record->class_name)) {
+                                    if (self::isClassOptionDisabled($newClass, $record)) {
+                                        throw ValidationException::withMessages([
+                                            'class_name' => "Kuota {$newClass} sudah penuh (35/35) atau batas delegasi sekolah Anda pada kelas tersebut sudah terpenuhi.",
+                                        ]);
+                                    }
+                                }
+
+                                $record->update([
+                                    'class_name' => $newClass,
+                                    'nisn' => trim((string) $data['nisn']),
+                                    'name' => trim((string) $data['name']),
+                                    'gender' => $data['gender'] ?? 'L',
+                                    'parent_name' => trim((string) $data['parent_name']),
+                                    'parent_phone' => trim((string) $data['parent_phone']),
+                                    'mother_name' => trim((string) $data['parent_name']),
+                                    'mother_phone' => trim((string) $data['parent_phone']),
+                                    'phone' => trim((string) ($data['phone'] ?? '')) ?: trim((string) $data['parent_phone']),
+                                ]);
+
+                                $code = $record->competition_code ?: $record->nis;
+                                if ($code) {
+                                    Admission::where('registration_number', $code)->update([
+                                        'class_name' => $newClass,
+                                        'nisn' => $record->nisn,
+                                        'name' => $record->name,
+                                        'gender' => $record->gender,
+                                        'parent_name' => $record->parent_name,
+                                        'parent_phone' => $record->parent_phone,
+                                        'mother_name' => $record->parent_name,
+                                        'mother_phone' => $record->parent_phone,
+                                        'phone' => $record->phone,
+                                    ]);
+                                }
+
+                                Notification::make()
+                                    ->title('Biodata peserta berhasil diperbarui.')
+                                    ->success()
+                                    ->send();
+
+                                return $record;
+                            });
+                        }),
+                ])
+                    ->icon('heroicon-m-ellipsis-vertical')
+                    ->color('gray')
+                    ->tooltip('Aksi'),
+            ]);
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => ManageSchoolParticipants::route('/'),
+        ];
+    }
+}

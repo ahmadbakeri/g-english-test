@@ -161,7 +161,9 @@
     /* Specific Colors based on URL - Colorful & Aesthetic */
     
     /* Dashboard */
-    a[href$="/admin"] .fi-sidebar-item-icon { color: #3b82f6; filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.4)); }
+    a[href$="/admin"] .fi-sidebar-item-icon,
+    a[href$="/school"] .fi-sidebar-item-icon { color: #3b82f6; filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.4)); }
+    a[href*="school-participants"] .fi-sidebar-item-icon { color: #f59e0b; filter: drop-shadow(0 0 4px rgba(245, 158, 11, 0.4)); }
     
     /* Shield & Roles */
     a[href*="roles"] .fi-sidebar-item-icon { color: #84cc16; filter: drop-shadow(0 0 4px rgba(132, 204, 22, 0.4)); }

@@ -30,7 +30,9 @@ Route::post('/login-action', function (\Illuminate\Http\Request $request) {
             return redirect()->to('/admin');
         } elseif ($role === 'tutor') {
             return redirect()->to('/tutor');
-        } elseif (in_array($role, ['parent', 'school'], true)) {
+        } elseif ($role === 'school') {
+            return redirect()->to('/school');
+        } elseif ($role === 'parent') {
             return redirect()->to('/parent');
         } else {
             return redirect()->to('/student');
