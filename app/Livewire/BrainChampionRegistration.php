@@ -13,10 +13,21 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
+use Livewire\WithFileUploads;
+use Maatwebsite\Excel\Concerns\FromArray;
+use Maatwebsite\Excel\Concerns\ToArray;
+use Maatwebsite\Excel\Concerns\WithColumnWidths;
+use Maatwebsite\Excel\Concerns\WithHeadingRow;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Facades\Excel;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 #[Layout('brain-champion')]
 class BrainChampionRegistration extends Component
 {
+    use WithFileUploads;
+
     public const EVENT_TAG = 'G-English Brain Champion';
     public const MAX_QUOTA_PER_GRADE = 35;
 
@@ -26,6 +37,10 @@ class BrainChampionRegistration extends Component
     public string $pic_phone = '';
     public string $school_email = '';
     public string $school_password = '';
+
+    public $excelFile = null;
+    public ?string $excelNotice = null;
+    public string $excelNoticeType = 'success';
 
     public string $lastSubmittedSchool = '';
     public string $lastSubmittedPicName = '';
@@ -43,7 +58,7 @@ class BrainChampionRegistration extends Component
     /**
      * Participants keyed by grade ('4','5','6','7','8','9') -> slot index (0..1 for SD, 0 for SMP)
      *
-     * @var array<int|string, array<int, array{nisn: string, name: string, gender: string, parent_name: string, parent_phone: string, phone: string}>>
+     * @var array<int|string, array<int, array{nisn: string, name: string, gender: string, father_name: string, father_phone: string, mother_name: string, mother_phone: string, parent_name: string, parent_phone: string, phone: string}>>
      */
     public array $participants = [];
 
@@ -62,6 +77,7 @@ class BrainChampionRegistration extends Component
     public function updatedSchoolLevel(): void
     {
         $this->resetValidation();
+        $this->excelNotice = null;
         $this->initializeParticipantSlots();
     }
 
@@ -76,6 +92,10 @@ class BrainChampionRegistration extends Component
             'nisn' => (string) ($existing['nisn'] ?? ''),
             'name' => (string) ($existing['name'] ?? ''),
             'gender' => (string) ($existing['gender'] ?? 'L'),
+            'father_name' => (string) ($existing['father_name'] ?? ''),
+            'father_phone' => (string) ($existing['father_phone'] ?? ''),
+            'mother_name' => (string) ($existing['mother_name'] ?? ''),
+            'mother_phone' => (string) ($existing['mother_phone'] ?? ''),
             'parent_name' => (string) ($existing['parent_name'] ?? ''),
             'parent_phone' => (string) ($existing['parent_phone'] ?? ''),
             'phone' => (string) ($existing['phone'] ?? ''),
@@ -97,6 +117,196 @@ class BrainChampionRegistration extends Component
             ];
         }
         $this->participants = $slots;
+    }
+
+    public function downloadExcelTemplate()
+    {
+        $isSmp = $this->school_level === 'SMP';
+        $rows = $isSmp
+            ? [
+                ['Kelas 7', '', '', 'L', '', '', '', '', ''],
+                ['Kelas 8', '', '', 'P', '', '', '', '', ''],
+                ['Kelas 9', '', '', 'L', '', '', '', '', ''],
+            ]
+            : [
+                ['Kelas 4', '', '', 'L', '', '', '', '', ''],
+                ['Kelas 4', '', '', 'P', '', '', '', '', ''],
+                ['Kelas 5', '', '', 'L', '', '', '', '', ''],
+                ['Kelas 5', '', '', 'P', '', '', '', '', ''],
+                ['Kelas 6', '', '', 'L', '', '', '', '', ''],
+                ['Kelas 6', '', '', 'P', '', '', '', '', ''],
+            ];
+
+        $export = new class($rows) implements FromArray, WithHeadings, WithStyles, WithColumnWidths
+        {
+            public function __construct(protected array $rows) {}
+
+            public function headings(): array
+            {
+                return [
+                    'kelas',
+                    'nisn',
+                    'nama_siswa',
+                    'jenis_kelamin_L_P',
+                    'nama_ayah',
+                    'no_hp_ayah',
+                    'nama_ibu',
+                    'no_hp_ibu',
+                    'no_hp_siswa',
+                ];
+            }
+
+            public function array(): array
+            {
+                return $this->rows;
+            }
+
+            public function styles(Worksheet $sheet)
+            {
+                return [
+                    1 => [
+                        'font' => ['bold' => true, 'color' => ['argb' => 'FFFFFFFF']],
+                        'fill' => [
+                            'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                            'color' => ['argb' => 'FF0A4282'],
+                        ],
+                    ],
+                ];
+            }
+
+            public function columnWidths(): array
+            {
+                return [
+                    'A' => 14,
+                    'B' => 16,
+                    'C' => 28,
+                    'D' => 18,
+                    'E' => 24,
+                    'F' => 18,
+                    'G' => 24,
+                    'H' => 18,
+                    'I' => 18,
+                ];
+            }
+        };
+
+        $levelSlug = strtolower($this->school_level);
+        return Excel::download($export, "template_brain_champion_{$levelSlug}.xlsx");
+    }
+
+    public function updatedExcelFile(): void
+    {
+        $this->excelNotice = null;
+
+        $this->validate([
+            'excelFile' => 'required|file|mimes:xlsx,xls,csv|max:5120',
+        ], [
+            'excelFile.mimes' => 'Format file harus berupa Excel (.xlsx, .xls) atau .csv.',
+        ]);
+
+        try {
+            $sheets = Excel::toArray(
+                new class implements ToArray, WithHeadingRow
+                {
+                    public function array(array $array): array
+                    {
+                        return $array;
+                    }
+                },
+                $this->excelFile->getRealPath()
+            );
+        } catch (\Throwable $e) {
+            $this->excelNoticeType = 'error';
+            $this->excelNotice = 'Gagal membaca file Excel: pastikan menggunakan template resmi (.xlsx).';
+            return;
+        }
+
+        $rows = $sheets[0] ?? [];
+        $activeGrades = $this->activeGrades;
+        $quotaSummary = $this->quotaSummary;
+
+        // Clear current active grade inputs before auto-filling
+        foreach ($activeGrades as $g) {
+            $maxSlots = self::maxPerSchoolForGrade($g);
+            for ($i = 0; $i < $maxSlots; $i++) {
+                $this->participants[$g][$i] = $this->emptySlot();
+            }
+        }
+
+        $nextSlotByGrade = array_fill_keys($activeGrades, 0);
+        $filledCount = 0;
+        $skippedReasons = [];
+
+        foreach ($rows as $idx => $row) {
+            $rowNum = $idx + 2;
+            $nisn = preg_replace('/\s+/', '', trim((string) ($row['nisn'] ?? ''))) ?? '';
+            $name = trim((string) ($row['nama_siswa'] ?? ''));
+
+            if ($nisn === '' && $name === '') {
+                continue;
+            }
+
+            $rawKelas = trim((string) ($row['kelas'] ?? ''));
+            $grade = preg_match('/(\d+)/', $rawKelas, $m) ? (int) $m[1] : 0;
+
+            if (!in_array($grade, $activeGrades, true)) {
+                $skippedReasons[] = "Baris {$rowNum}: Kelas '{$rawKelas}' tidak sesuai jenjang {$this->school_level}";
+                continue;
+            }
+
+            $q = $quotaSummary[$grade] ?? null;
+            if (!$q || $q['is_full']) {
+                $skippedReasons[] = "Baris {$rowNum} ({$name}): Kuota Kelas {$grade} sudah penuh (35/35)";
+                continue;
+            }
+
+            $slotIdx = $nextSlotByGrade[$grade] ?? 0;
+            if ($slotIdx >= $q['available_slots']) {
+                $skippedReasons[] = "Baris {$rowNum} ({$name}): Melebihi sisa slot Kelas {$grade} ({$q['available_slots']} slot)";
+                continue;
+            }
+
+            $rawGender = strtoupper(trim((string) ($row['jenis_kelamin_l_p'] ?? $row['jenis_kelamin_L_P'] ?? 'L')));
+            $gender = in_array($rawGender, ['L', 'P'], true) ? $rawGender : 'L';
+            $fatherName = trim((string) ($row['nama_ayah'] ?? ''));
+            $fatherPhone = trim((string) ($row['no_hp_ayah'] ?? ''));
+            $motherName = trim((string) ($row['nama_ibu'] ?? ''));
+            $motherPhone = trim((string) ($row['no_hp_ibu'] ?? ''));
+            $studentPhone = trim((string) ($row['no_hp_siswa'] ?? ''));
+
+            $parentName = $motherName !== '' ? $motherName : $fatherName;
+            $parentPhone = $motherPhone !== '' ? $motherPhone : $fatherPhone;
+
+            $this->participants[$grade][$slotIdx] = [
+                'nisn' => $nisn,
+                'name' => $name,
+                'gender' => $gender,
+                'father_name' => $fatherName,
+                'father_phone' => $fatherPhone,
+                'mother_name' => $motherName,
+                'mother_phone' => $motherPhone,
+                'parent_name' => $parentName,
+                'parent_phone' => $parentPhone,
+                'phone' => $studentPhone,
+            ];
+
+            $nextSlotByGrade[$grade] = $slotIdx + 1;
+            $filledCount++;
+        }
+
+        if ($filledCount > 0) {
+            $this->excelNoticeType = 'success';
+            $msg = "Berhasil mengisi otomatis {$filledCount} data peserta dari Excel! Silakan periksa kembali lalu klik tombol Daftar di bawah.";
+            if (!empty($skippedReasons)) {
+                $msg .= ' (Dilewati: ' . implode('; ', array_slice($skippedReasons, 0, 3)) . ')';
+            }
+            $this->excelNotice = $msg;
+        } else {
+            $this->excelNoticeType = 'warning';
+            $this->excelNotice = !empty($skippedReasons)
+                ? 'Tidak ada baris yang dapat diisi: ' . implode('; ', array_slice($skippedReasons, 0, 3))
+                : 'File Excel masih kosong. Isi kolom nisn, nama_siswa, dan data orang tua terlebih dahulu.';
+        }
     }
 
     /**
@@ -207,12 +417,15 @@ class BrainChampionRegistration extends Component
                 $slot = $gradeSlots[$idx] ?? [];
                 $nisn = preg_replace('/\s+/', '', trim((string) ($slot['nisn'] ?? ''))) ?? '';
                 $name = trim((string) ($slot['name'] ?? ''));
-                $parentName = trim((string) ($slot['parent_name'] ?? ''));
-                $parentPhone = trim((string) ($slot['parent_phone'] ?? ''));
+                $fatherName = trim((string) ($slot['father_name'] ?? ''));
+                $fatherPhone = trim((string) ($slot['father_phone'] ?? ''));
+                $motherName = trim((string) ($slot['mother_name'] ?? ''));
+                $motherPhone = trim((string) ($slot['mother_phone'] ?? ''));
+                $parentName = trim((string) ($slot['parent_name'] ?? '')) ?: ($motherName !== '' ? $motherName : $fatherName);
+                $parentPhone = trim((string) ($slot['parent_phone'] ?? '')) ?: ($motherPhone !== '' ? $motherPhone : $fatherPhone);
                 $phone = trim((string) ($slot['phone'] ?? ''));
                 $gender = in_array($slot['gender'] ?? 'L', ['L', 'P'], true) ? $slot['gender'] : 'L';
 
-                // Check if user started filling this slot
                 $hasAnyField = ($name !== '' || $nisn !== '' || $parentName !== '' || $parentPhone !== '');
                 if (!$hasAnyField) {
                     continue;
@@ -227,10 +440,10 @@ class BrainChampionRegistration extends Component
                     $validationErrors["participants.{$grade}.{$idx}.name"] = "Nama Lengkap Siswa {$slotLabel} wajib diisi.";
                 }
                 if ($parentName === '') {
-                    $validationErrors["participants.{$grade}.{$idx}.parent_name"] = "Nama Orang Tua {$slotLabel} wajib diisi.";
+                    $validationErrors["participants.{$grade}.{$idx}.parent_name"] = "Nama Orang Tua (Ibu / Ayah) {$slotLabel} wajib diisi.";
                 }
                 if ($parentPhone === '') {
-                    $validationErrors["participants.{$grade}.{$idx}.parent_phone"] = "No. HP Orang Tua {$slotLabel} wajib diisi.";
+                    $validationErrors["participants.{$grade}.{$idx}.parent_phone"] = "No. HP Orang Tua (Ibu / Ayah) {$slotLabel} wajib diisi.";
                 }
 
                 $entriesByGrade[$grade][] = [
@@ -238,6 +451,10 @@ class BrainChampionRegistration extends Component
                     'nisn' => $nisn,
                     'name' => $name,
                     'gender' => $gender,
+                    'father_name' => $fatherName ?: null,
+                    'father_phone' => $fatherPhone ?: null,
+                    'mother_name' => $motherName ?: $parentName,
+                    'mother_phone' => $motherPhone ?: $parentPhone,
                     'parent_name' => $parentName,
                     'parent_phone' => $parentPhone,
                     'phone' => $phone !== '' ? $phone : $parentPhone,
@@ -261,21 +478,17 @@ class BrainChampionRegistration extends Component
             : Str::upper(Str::random(6));
 
         $createdRecords = DB::transaction(function () use ($entriesByGrade, $cleanSchoolName, $normalizedSchool, $coordinatorPhone, $cleanSchoolEmail, $plainPassword) {
-            // Lock all Brain Champion admission rows to prevent race conditions under concurrent requests
             $lockedRows = Admission::query()
                 ->where('course_level', self::EVENT_TAG)
                 ->where('status', '!=', 'rejected')
                 ->lockForUpdate()
                 ->get();
 
-            // 1. Auto-provision / Find School User account (role = 'school', username = $coordinatorPhone)
             $schoolUser = User::where('username', $coordinatorPhone)->first();
             $resolvedEmail = $cleanSchoolEmail;
 
-            if (!$schoolUser) {
-                if (User::where('email', $resolvedEmail)->exists()) {
-                    $schoolUser = User::where('email', $resolvedEmail)->first();
-                }
+            if (!$schoolUser && User::where('email', $resolvedEmail)->exists()) {
+                $schoolUser = User::where('email', $resolvedEmail)->first();
             }
 
             if (!$schoolUser) {
@@ -344,10 +557,12 @@ class BrainChampionRegistration extends Component
                         'class_name' => $classLabel,
                         'school_name' => $cleanSchoolName,
                         'previous_school' => $cleanSchoolName,
+                        'father_name' => $entry['father_name'],
+                        'father_phone' => $entry['father_phone'],
+                        'mother_name' => $entry['mother_name'],
+                        'mother_phone' => $entry['mother_phone'],
                         'parent_name' => $entry['parent_name'],
                         'parent_phone' => $entry['parent_phone'],
-                        'mother_name' => $entry['parent_name'],
-                        'mother_phone' => $entry['parent_phone'],
                         'status' => 'approved',
                         'tuition_fee' => 0,
                         'registration_fee' => 0,
@@ -370,17 +585,16 @@ class BrainChampionRegistration extends Component
                         'course_level' => self::EVENT_TAG,
                         'class_name' => $classLabel,
                         'school_name' => $cleanSchoolName,
+                        'father_name' => $entry['father_name'],
+                        'father_phone' => $entry['father_phone'],
+                        'mother_name' => $entry['mother_name'],
+                        'mother_phone' => $entry['mother_phone'],
                         'parent_name' => $entry['parent_name'],
                         'parent_phone' => $entry['parent_phone'],
-                        'mother_name' => $entry['parent_name'],
-                        'mother_phone' => $entry['parent_phone'],
                         'is_active' => true,
                     ]);
 
-                    // Link school user to student so school coordinator can also view registered students
                     $student->parents()->syncWithoutDetaching([$schoolUser->id]);
-
-                    // Add to in-memory locked collection so next iteration in same transaction increments properly
                     $lockedRows->push($admission);
 
                     $results[] = [
@@ -429,6 +643,7 @@ class BrainChampionRegistration extends Component
             ));
         }
 
+        $this->excelNotice = null;
         $this->participants = [];
         $this->initializeParticipantSlots();
     }

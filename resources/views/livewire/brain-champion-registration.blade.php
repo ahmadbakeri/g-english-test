@@ -160,7 +160,6 @@
                         </div>
                     </div>
 
-                    <!-- Auto-Provisioned School Login Credential Card -->
                     @if(!empty($schoolCredentials))
                         <div class="mb-6 p-5 rounded-2xl bg-gradient-to-r from-[#0a4282] to-[#0f529e] text-white border-2 border-genza-yellow/60 shadow-lg">
                             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -191,7 +190,6 @@
                         </div>
                     @endif
 
-                    <!-- Summary Table Ready to Screenshot / Print -->
                     <div class="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-700 mb-6">
                         <table class="w-full text-left border-collapse text-xs sm:text-sm">
                             <thead>
@@ -274,7 +272,7 @@
                         </div>
                     @endif
 
-                    <!-- SECTION A: SCHOOL & COORDINATOR CARD -->
+                    <!-- SECTION A: SCHOOL & COORDINATOR CARD (2-ROW CLEAN RESPONSIVE GRID) -->
                     <section class="p-5 sm:p-6 rounded-2xl bg-slate-50/80 dark:bg-slate-900/55 border border-slate-200/80 dark:border-slate-700 space-y-5">
                         <div class="flex items-center gap-3 pb-3 border-b border-slate-200 dark:border-slate-700">
                             <div class="w-9 h-9 rounded-xl bg-genza-blue text-genza-yellow flex items-center justify-center font-black text-sm shrink-0 shadow-sm">01</div>
@@ -287,7 +285,7 @@
                         <!-- Reactive Jenjang Toggle (SD/MI vs SMP/MTs) -->
                         <div>
                             <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Jenjang Sekolah <span class="text-rose-500">*</span></label>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <label class="relative flex items-start gap-3.5 p-4 rounded-2xl border-2 cursor-pointer transition-all bg-white dark:bg-slate-900 {{ $school_level === 'SD' ? 'border-genza-blue dark:border-genza-yellow ring-2 ring-[#0a4282]/15 dark:ring-[#fbb900]/20' : 'border-slate-200 dark:border-slate-700' }}">
                                     <input type="radio" wire:model.live="school_level" value="SD" class="mt-1 accent-[#0a4282]">
                                     <div>
@@ -312,64 +310,102 @@
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                        <!-- Row 1: Nama Sekolah & Nama Guru Pendamping (2 Columns) -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div>
-                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Nama Sekolah <span class="text-rose-500">*</span></label>
+                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 truncate mb-1.5">Nama Sekolah <span class="text-rose-500">*</span></label>
                                 <input type="text"
                                        wire:model.live.debounce.300ms="school_name"
                                        class="bc-input w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm"
                                        placeholder="{{ $school_level === 'SD' ? 'Contoh: SDN 1 Tanjung' : 'Contoh: SMPN 1 Tanjung' }}"
                                        required>
+                                <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Ketik nama resmi sekolah untuk mengecek sisa slot sekolah Anda.</p>
                             </div>
                             <div>
-                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Nama Guru Pendamping <span class="text-rose-500">*</span></label>
+                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 truncate mb-1.5">Nama Guru Pendamping <span class="text-rose-500">*</span></label>
                                 <input type="text"
                                        wire:model="pic_name"
                                        class="bc-input w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm"
-                                       placeholder="Nama Lengkap Pendamping"
+                                       placeholder="Contoh: Ibu Rina Marlina, S.Pd."
                                        required>
+                                <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Guru koordinator / penanggung jawab delegasi sekolah.</p>
                             </div>
+                        </div>
+
+                        <!-- Row 2: No. WA Pendamping, Email Sekolah, & Password/PIN (3 Columns, aligned top edges) -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
                             <div>
-                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">No. WA Pendamping (Username) <span class="text-rose-500">*</span></label>
+                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 truncate mb-1.5">No. WA Pendamping (Username) <span class="text-rose-500">*</span></label>
                                 <input type="text"
                                        wire:model="pic_phone"
                                        class="bc-input w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm"
-                                       placeholder="08..."
+                                       placeholder="Contoh: 081234567890"
                                        required>
+                                <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Digunakan sebagai Username login portal sekolah.</p>
                             </div>
                             <div>
-                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Email Sekolah / Pendamping <span class="text-rose-500">*</span></label>
+                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 truncate mb-1.5">Email Sekolah / Pendamping <span class="text-rose-500">*</span></label>
                                 <input type="email"
                                        wire:model="school_email"
                                        class="bc-input w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm"
-                                       placeholder="sekolah@email.com"
+                                       placeholder="Contoh: koordinator@sekolah.sch.id"
                                        required>
+                                <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Akses login &amp; kode peserta dikirim otomatis ke email ini.</p>
                             </div>
                             <div>
-                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Password / PIN Sekolah</label>
+                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 truncate mb-1.5">Password / PIN Sekolah</label>
                                 <input type="text"
                                        wire:model="school_password"
                                        class="bc-input w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm"
                                        placeholder="Kosongkan = Auto PIN 6 Digit">
+                                <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Opsional. Dibuat otomatis jika dikosongkan.</p>
                             </div>
                         </div>
                     </section>
 
-                    <!-- SECTION B: GRADE PARTICIPANT CARDS -->
+                    <!-- SECTION B: EXCEL AUTO-FILL TOOLBAR & GRADE PARTICIPANT CARDS -->
                     <section class="space-y-5">
-                        <div class="flex items-center justify-between flex-wrap gap-2">
-                            <div class="flex items-center gap-3">
-                                <div class="w-9 h-9 rounded-xl bg-genza-blue text-genza-yellow flex items-center justify-center font-black text-sm shrink-0 shadow-sm">02</div>
+                        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-5 rounded-2xl bg-gradient-to-r from-blue-50/90 via-slate-50 to-amber-50/60 dark:from-slate-900 dark:via-slate-900/90 dark:to-slate-800 border-2 border-genza-blue/20 dark:border-slate-700">
+                            <div class="flex items-start gap-3.5">
+                                <div class="w-10 h-10 rounded-xl bg-genza-blue text-genza-yellow flex items-center justify-center font-black text-sm shrink-0 shadow-sm mt-0.5">02</div>
                                 <div>
-                                    <h3 class="text-lg font-extrabold text-genza-blue dark:text-white">
+                                    <h3 class="text-base sm:text-lg font-extrabold text-genza-blue dark:text-white">
                                         Biodata Peserta Per Kelas ({{ $school_level === 'SD' ? 'SD/MI: Kelas 4, 5, 6' : 'SMP/MTs: Kelas 7, 8, 9' }})
                                     </h3>
-                                    <p class="text-xs text-slate-500 dark:text-slate-400">
-                                        Lengkapi NISN (10 digit), Nama Siswa, Jenis Kelamin, Nama Orang Tua, dan No. HP Orang Tua.
+                                    <p class="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
+                                        Isi manual di bawah <strong>ATAU</strong> unduh Template Excel lalu upload untuk mengisi formulir secara otomatis!
                                     </p>
                                 </div>
                             </div>
+
+                            <!-- Pill Buttons: Download Template Excel & Upload Excel (Isi Otomatis) -->
+                            <div class="flex flex-wrap items-center gap-2.5 shrink-0">
+                                <button type="button"
+                                        wire:click="downloadExcelTemplate"
+                                        wire:loading.attr="disabled"
+                                        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs sm:text-sm shadow-md shadow-emerald-600/20 hover:-translate-y-0.5 transition-all cursor-pointer">
+                                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                    <span>Download Template Excel (.xlsx)</span>
+                                </button>
+
+                                <label class="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-genza-blue hover:bg-[#083568] text-white font-extrabold text-xs sm:text-sm shadow-md shadow-[#0a4282]/25 hover:-translate-y-0.5 transition-all cursor-pointer">
+                                    <svg class="w-4 h-4 text-genza-yellow shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                                    <span wire:loading.remove wire:target="excelFile">Upload Excel (Isi Otomatis)</span>
+                                    <span wire:loading wire:target="excelFile">Membaca Excel...</span>
+                                    <input type="file" wire:model="excelFile" accept=".xlsx,.xls,.csv" class="hidden">
+                                </label>
+                            </div>
                         </div>
+
+                        @if($excelNotice)
+                            <div class="p-4 rounded-2xl border text-xs sm:text-sm font-bold flex items-start justify-between gap-3 {{ $excelNoticeType === 'success' ? 'bg-emerald-50 dark:bg-emerald-950/60 border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200' : ($excelNoticeType === 'warning' ? 'bg-amber-50 dark:bg-amber-950/60 border-amber-300 dark:border-amber-800 text-amber-900 dark:text-amber-200' : 'bg-rose-50 dark:bg-rose-950/60 border-rose-300 dark:border-rose-800 text-rose-800 dark:text-rose-200') }}">
+                                <div class="flex items-center gap-2.5">
+                                    <svg class="w-5 h-5 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path></svg>
+                                    <span>{{ $excelNotice }}</span>
+                                </div>
+                                <button type="button" wire:click="$set('excelNotice', null)" class="opacity-70 hover:opacity-100">✕</button>
+                            </div>
+                        @endif
 
                         @foreach($activeGrades as $grade)
                             @php
@@ -448,9 +484,10 @@
                                                 @endif
                                             </div>
 
-                                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                                            <!-- Row 1 of Participant Slot: NISN, Nama Siswa, Jenis Kelamin, No. HP Siswa -->
+                                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 mb-3.5">
                                                 <div>
-                                                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">NISN (10 Digit) <span class="text-rose-500">*</span></label>
+                                                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 truncate mb-1">NISN (10 Digit) <span class="text-rose-500">*</span></label>
                                                     <input type="text"
                                                            maxlength="10"
                                                            inputmode="numeric"
@@ -461,7 +498,7 @@
                                                 </div>
 
                                                 <div>
-                                                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">Nama Lengkap Siswa <span class="text-rose-500">*</span></label>
+                                                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 truncate mb-1">Nama Lengkap Siswa <span class="text-rose-500">*</span></label>
                                                     <input type="text"
                                                            wire:model="participants.{{ $grade }}.{{ $slotIdx }}.name"
                                                            @disabled($slotLocked)
@@ -470,7 +507,7 @@
                                                 </div>
 
                                                 <div>
-                                                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">Jenis Kelamin <span class="text-rose-500">*</span></label>
+                                                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 truncate mb-1">Jenis Kelamin <span class="text-rose-500">*</span></label>
                                                     <select wire:model="participants.{{ $grade }}.{{ $slotIdx }}.gender"
                                                             @disabled($slotLocked)
                                                             class="bc-input w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm disabled:cursor-not-allowed">
@@ -480,30 +517,51 @@
                                                 </div>
 
                                                 <div>
-                                                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">Nama Orang Tua <span class="text-rose-500">*</span></label>
+                                                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 truncate mb-1">No. HP Siswa (Opsional)</label>
                                                     <input type="text"
-                                                           wire:model="participants.{{ $grade }}.{{ $slotIdx }}.parent_name"
+                                                           wire:model="participants.{{ $grade }}.{{ $slotIdx }}.phone"
                                                            @disabled($slotLocked)
                                                            class="bc-input w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm disabled:cursor-not-allowed"
-                                                           placeholder="{{ $slotLocked ? 'Terkunci' : 'Nama Ayah / Ibu / Wali' }}">
+                                                           placeholder="{{ $slotLocked ? 'Terkunci' : '08... (Opsional)' }}">
+                                                </div>
+                                            </div>
+
+                                            <!-- Row 2 of Participant Slot: Data Ayah & Data Ibu -->
+                                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+                                                <div>
+                                                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 truncate mb-1">Nama Ibu / Wali <span class="text-rose-500">*</span></label>
+                                                    <input type="text"
+                                                           wire:model="participants.{{ $grade }}.{{ $slotIdx }}.mother_name"
+                                                           @disabled($slotLocked)
+                                                           class="bc-input w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm disabled:cursor-not-allowed"
+                                                           placeholder="{{ $slotLocked ? 'Terkunci' : 'Nama Ibu Kandung / Wali' }}">
                                                 </div>
 
                                                 <div>
-                                                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">No. HP Orang Tua <span class="text-rose-500">*</span></label>
+                                                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 truncate mb-1">No. HP / WA Ibu <span class="text-rose-500">*</span></label>
                                                     <input type="text"
-                                                           wire:model="participants.{{ $grade }}.{{ $slotIdx }}.parent_phone"
+                                                           wire:model="participants.{{ $grade }}.{{ $slotIdx }}.mother_phone"
                                                            @disabled($slotLocked)
                                                            class="bc-input w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm disabled:cursor-not-allowed"
                                                            placeholder="{{ $slotLocked ? 'Terkunci' : '08...' }}">
                                                 </div>
 
                                                 <div>
-                                                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">No. HP Siswa (Opsional)</label>
+                                                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 truncate mb-1">Nama Ayah (Opsional)</label>
                                                     <input type="text"
-                                                           wire:model="participants.{{ $grade }}.{{ $slotIdx }}.phone"
+                                                           wire:model="participants.{{ $grade }}.{{ $slotIdx }}.father_name"
                                                            @disabled($slotLocked)
                                                            class="bc-input w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm disabled:cursor-not-allowed"
-                                                           placeholder="{{ $slotLocked ? 'Terkunci' : '08... (Opsional)' }}">
+                                                           placeholder="{{ $slotLocked ? 'Terkunci' : 'Nama Ayah Kandung' }}">
+                                                </div>
+
+                                                <div>
+                                                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 truncate mb-1">No. HP / WA Ayah (Opsional)</label>
+                                                    <input type="text"
+                                                           wire:model="participants.{{ $grade }}.{{ $slotIdx }}.father_phone"
+                                                           @disabled($slotLocked)
+                                                           class="bc-input w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm disabled:cursor-not-allowed"
+                                                           placeholder="{{ $slotLocked ? 'Terkunci' : '08...' }}">
                                                 </div>
                                             </div>
                                         </div>
