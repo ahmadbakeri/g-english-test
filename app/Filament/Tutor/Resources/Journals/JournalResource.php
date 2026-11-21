@@ -5,6 +5,7 @@ namespace App\Filament\Tutor\Resources\Journals;
 use App\Filament\Tutor\Resources\Journals\Pages\ManageJournals;
 use App\Models\Journal;
 use BackedEnum;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -15,20 +16,20 @@ use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Components\ImageEntry;
+use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\IconEntry;
+use Filament\Infolists\Components\ImageEntry;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Forms\Components\FileUpload;
 use Filament\Support\Icons\Heroicon;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -66,37 +67,67 @@ class JournalResource extends Resource
     {
         return $schema
             ->components([
-                Select::make('class_id')
-                    ->relationship('classRoom', 'name', fn (Builder $query) => $query->where('tutor_id', auth()->user()->tutor->id))
-                    ->required(),
-                Hidden::make('tutor_id')
-                    ->default(fn () => auth()->user()->tutor->id)
-                    ->required(),
-                DatePicker::make('date')
-                    ->required(),
-                TextInput::make('topic')
-                    ->required(),
-                Textarea::make('description')
-                    ->columnSpanFull(),
-                Textarea::make('materials')
-                    ->columnSpanFull(),
-                FileUpload::make('photo')
-                    ->label(__('Documentation Photo'))
-                    ->image()
-                    ->multiple()
-                    ->directory('journals')
-                    ->columnSpanFull(),
-                TextInput::make('link')
-                    ->label(__('Resource Link (e.g. YouTube)'))
-                    ->url()
-                    ->columnSpanFull(),
-                TextInput::make('status')
-                    ->required()
-                    ->default('draft'),
-                TextInput::make('jp_count')
-                    ->required()
-                    ->numeric()
-                    ->default(2),
+                \Filament\Schemas\Components\Section::make('Detail Pertemuan & Beban Kerja')
+                    ->description('Pilih kelas, tanggal mengajar, topik pertemuan, dan jumlah Jam Pelajaran (JP).')
+                    ->icon('heroicon-o-book-open')
+                    ->schema([
+                        Select::make('class_id')
+                            ->label(__('Class Room'))
+                            ->relationship('classRoom', 'name', fn (Builder $query) => $query->where('tutor_id', auth()->user()->tutor->id))
+                            ->required(),
+                        Hidden::make('tutor_id')
+                            ->default(fn () => auth()->user()->tutor->id)
+                            ->required(),
+                        DatePicker::make('date')
+                            ->label(__('Date'))
+                            ->required()
+                            ->default(now()),
+                        TextInput::make('jp_count')
+                            ->label('Beban Kerja (JP)')
+                            ->required()
+                            ->numeric()
+                            ->suffix('JP')
+                            ->default(2),
+                        Select::make('status')
+                            ->label(__('Status'))
+                            ->options([
+                                'draft' => 'Draft',
+                                'submitted' => 'Diajukan',
+                                'validated' => 'Divalidasi',
+                                'rejected' => 'Ditolak',
+                            ])
+                            ->required()
+                            ->default('draft'),
+                        TextInput::make('topic')
+                            ->label(__('Topic'))
+                            ->required()
+                            ->columnSpanFull(),
+                    ])->columns(2),
+
+                \Filament\Schemas\Components\Section::make('Materi & Dokumentasi')
+                    ->description('Catatan aktivitas kelas, materi bahan ajar, foto dokumentasi, dan tautan eksternal.')
+                    ->icon('heroicon-o-document-text')
+                    ->schema([
+                        Textarea::make('description')
+                            ->label(__('Activity Description'))
+                            ->rows(2)
+                            ->columnSpanFull(),
+                        Textarea::make('materials')
+                            ->label(__('Material / Subject Matter'))
+                            ->rows(2)
+                            ->columnSpanFull(),
+                        FileUpload::make('photo')
+                            ->label(__('Documentation Photo'))
+                            ->image()
+                            ->multiple()
+                            ->directory('journals')
+                            ->columnSpanFull(),
+                        TextInput::make('link')
+                            ->label(__('Resource Link (e.g. YouTube)'))
+                            ->prefixIcon('heroicon-o-link')
+                            ->url()
+                            ->columnSpanFull(),
+                    ]),
             ]);
     }
 
@@ -144,50 +175,82 @@ class JournalResource extends Resource
         return $table
             ->columns([
                 \Filament\Tables\Columns\Layout\Split::make([
-                TextColumn::make('classRoom.name')
-                    ->label(__('Class Room'))
-                    ->sortable()
-                    ->searchable(),
-                TextColumn::make('date')
-                    ->date()
-                    ->sortable(),
-                TextColumn::make('topic')
-                    ->searchable(),
-                ImageColumn::make('photo')
-                    ->label(__('Photo')),
-                IconColumn::make('link')
-                    ->label(__('Link'))
-                    ->icon(fn ($state) => $state ? 'heroicon-o-link' : null)
-                    ->url(fn ($state) => $state)
-                    ->openUrlInNewTab(),
-                TextColumn::make('status')
-                    ->searchable(),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('deleted_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('jp_count')
-                    ->numeric()
-                    ->sortable(),
+                    TextColumn::make('date')
+                        ->label(__('Date'))
+                        ->date('d M Y')
+                        ->sortable(),
+                    TextColumn::make('topic')
+                        ->label(__('Topic'))
+                        ->weight('bold')
+                        ->description(fn (Journal $record): string => $record->classRoom?->name ?? '-')
+                        ->searchable(),
+                    TextColumn::make('classRoom.name')
+                        ->label(__('Class Room'))
+                        ->badge()
+                        ->color('info')
+                        ->sortable()
+                        ->searchable(),
+                    TextColumn::make('jp_count')
+                        ->label('JP')
+                        ->numeric()
+                        ->badge()
+                        ->color('gray')
+                        ->suffix(' JP')
+                        ->sortable(),
+                    ImageColumn::make('photo')
+                        ->label(__('Photo'))
+                        ->circular(),
+                    IconColumn::make('link')
+                        ->label(__('Link'))
+                        ->icon(fn ($state) => $state ? 'heroicon-o-link' : null)
+                        ->url(fn ($state) => $state)
+                        ->openUrlInNewTab(),
+                    TextColumn::make('status')
+                        ->label(__('Status'))
+                        ->badge()
+                        ->color(fn (string $state): string => match ($state) {
+                            'draft' => 'gray',
+                            'submitted' => 'warning',
+                            'validated' => 'success',
+                            'rejected' => 'danger',
+                            default => 'gray',
+                        })
+                        ->formatStateUsing(fn (string $state): string => match ($state) {
+                            'draft' => 'Draft',
+                            'submitted' => 'Diajukan',
+                            'validated' => 'Divalidasi',
+                            'rejected' => 'Ditolak',
+                            default => $state,
+                        })
+                        ->searchable(),
+                    TextColumn::make('created_at')
+                        ->dateTime()
+                        ->sortable()
+                        ->toggleable(isToggledHiddenByDefault: true),
+                    TextColumn::make('updated_at')
+                        ->dateTime()
+                        ->sortable()
+                        ->toggleable(isToggledHiddenByDefault: true),
+                    TextColumn::make('deleted_at')
+                        ->dateTime()
+                        ->sortable()
+                        ->toggleable(isToggledHiddenByDefault: true),
                 ])->from('md'),
             ])
             ->filters([
                 TrashedFilter::make(),
             ])
             ->recordActions([
-                ViewAction::make(),
-                EditAction::make(),
-                DeleteAction::make(),
-                ForceDeleteAction::make(),
-                RestoreAction::make(),
+                ActionGroup::make([
+                    ViewAction::make(),
+                    EditAction::make(),
+                    DeleteAction::make(),
+                    ForceDeleteAction::make(),
+                    RestoreAction::make(),
+                ])
+                    ->icon('heroicon-m-ellipsis-vertical')
+                    ->color('gray')
+                    ->tooltip('Aksi'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
@@ -205,8 +268,6 @@ class JournalResource extends Resource
         ];
     }
 
-
-    
     public static function canViewAny(): bool
     {
         return true;

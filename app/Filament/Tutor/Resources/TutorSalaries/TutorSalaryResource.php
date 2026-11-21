@@ -5,10 +5,7 @@ namespace App\Filament\Tutor\Resources\TutorSalaries;
 use App\Filament\Tutor\Resources\TutorSalaries\Pages\ManageTutorSalaries;
 use App\Models\TutorSalary;
 use BackedEnum;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
@@ -45,34 +42,41 @@ class TutorSalaryResource extends Resource
 
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
-        return parent::getEloquentQuery()->where('tutor_id', auth()->user()->tutor->id);
+        return parent::getEloquentQuery()->with(['tutor'])->where('tutor_id', auth()->user()->tutor->id);
     }
 
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->components([
-                Select::make('tutor_id')
-                    ->relationship('tutor', 'name')
-                    ->required(),
-                TextInput::make('month')
-                    ->required()
-                    ->numeric(),
-                TextInput::make('year')
-                    ->required()
-                    ->numeric(),
-                TextInput::make('total_jp')
-                    ->required()
-                    ->numeric()
-                    ->default(0),
-                TextInput::make('total_amount')
-                    ->required()
-                    ->numeric()
-                    ->default(0),
-                TextInput::make('status')
-                    ->required()
-                    ->default('pending'),
-                DatePicker::make('paid_at'),
+                \Filament\Schemas\Components\Section::make('Rincian Slip Honor')
+                    ->description('Informasi periode bulan, total jam pelajaran (JP), dan nominal honor.')
+                    ->icon('heroicon-o-banknotes')
+                    ->schema([
+                        Select::make('tutor_id')
+                            ->relationship('tutor', 'name')
+                            ->required(),
+                        TextInput::make('month')
+                            ->required()
+                            ->numeric(),
+                        TextInput::make('year')
+                            ->required()
+                            ->numeric(),
+                        TextInput::make('total_jp')
+                            ->required()
+                            ->numeric()
+                            ->suffix('JP')
+                            ->default(0),
+                        TextInput::make('total_amount')
+                            ->required()
+                            ->prefix('Rp')
+                            ->numeric()
+                            ->default(0),
+                        TextInput::make('status')
+                            ->required()
+                            ->default('pending'),
+                        DatePicker::make('paid_at'),
+                    ])->columns(2),
             ]);
     }
 
@@ -105,43 +109,81 @@ class TutorSalaryResource extends Resource
 
     public static function table(Table $table): Table
     {
+        $months = [
+            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April', 5 => 'Mei', 6 => 'Juni',
+            7 => 'Juli', 8 => 'Agustus', 9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
+        ];
+
         return $table
             ->columns([
                 \Filament\Tables\Columns\Layout\Split::make([
-                TextColumn::make('tutor.name')
-                    ->searchable(),
-                TextColumn::make('month')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('year')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('total_jp')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('total_amount')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('status')
-                    ->searchable(),
-                TextColumn::make('paid_at')
-                    ->date()
-                    ->sortable(),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    TextColumn::make('tutor.name')
+                        ->label(__('Tutor'))
+                        ->weight('bold')
+                        ->description(fn (TutorSalary $record): string => 'Periode: ' . ($months[$record->month] ?? $record->month) . ' ' . $record->year)
+                        ->searchable(),
+                    TextColumn::make('month')
+                        ->label(__('Month'))
+                        ->formatStateUsing(fn (int $state): string => $months[$state] ?? (string) $state)
+                        ->sortable(),
+                    TextColumn::make('year')
+                        ->label(__('Year'))
+                        ->numeric()
+                        ->sortable(),
+                    TextColumn::make('total_jp')
+                        ->label(__('Total JP'))
+                        ->numeric()
+                        ->badge()
+                        ->color('info')
+                        ->suffix(' JP')
+                        ->sortable(),
+                    TextColumn::make('total_amount')
+                        ->label(__('Total Salary'))
+                        ->money('IDR', locale: 'id')
+                        ->weight('bold')
+                        ->alignEnd()
+                        ->sortable(),
+                    TextColumn::make('status')
+                        ->label(__('Status'))
+                        ->badge()
+                        ->formatStateUsing(fn (string $state): string => $state === 'paid' ? 'Dibayar' : 'Pending')
+                        ->color(fn (string $state): string => match ($state) {
+                            'pending' => 'warning',
+                            'paid' => 'success',
+                            default => 'gray',
+                        })
+                        ->searchable(),
+                    TextColumn::make('paid_at')
+                        ->label(__('Paid Date'))
+                        ->date('d M Y')
+                        ->placeholder('-')
+                        ->sortable(),
+                    TextColumn::make('created_at')
+                        ->dateTime()
+                        ->sortable()
+                        ->toggleable(isToggledHiddenByDefault: true),
+                    TextColumn::make('updated_at')
+                        ->dateTime()
+                        ->sortable()
+                        ->toggleable(isToggledHiddenByDefault: true),
                 ])->from('md'),
             ])
             ->filters([
                 //
             ])
             ->recordActions([
-                ViewAction::make(),
+                ActionGroup::make([
+                    ViewAction::make(),
+                    \Filament\Actions\Action::make('print')
+                        ->label(__('Print Payslip'))
+                        ->icon('heroicon-o-printer')
+                        ->color('success')
+                        ->url(fn (TutorSalary $record) => route('report.tutor-salary', $record->id))
+                        ->openUrlInNewTab(),
+                ])
+                    ->icon('heroicon-m-ellipsis-vertical')
+                    ->color('gray')
+                    ->tooltip('Aksi'),
             ])
             ->toolbarActions([]);
     }
@@ -153,8 +195,6 @@ class TutorSalaryResource extends Resource
         ];
     }
 
-    
-    
     public static function canViewAny(): bool
     {
         return true;

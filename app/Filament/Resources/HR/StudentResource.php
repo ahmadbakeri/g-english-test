@@ -63,9 +63,12 @@ class StudentResource extends Resource
     {
         return $schema->columns(1)->components([
             \Filament\Schemas\Components\Section::make(__('Student Data'))
+                ->description('Identitas utama siswa, kategori program (Internal/Eksternal), serta informasi sekolah dan kelas.')
+                ->icon('heroicon-o-identification')
                 ->schema([
                     Forms\Components\TextInput::make('nis')
                         ->label(__('No. Siswa (NIS)'))
+                        ->prefixIcon('heroicon-o-hashtag')
                         ->required()
                         ->unique(ignoreRecord: true)
                         ->maxLength(20),
@@ -93,6 +96,7 @@ class StudentResource extends Resource
                         ->label(__('Date of Birth')),
                     Forms\Components\TextInput::make('phone')
                         ->label(__('Phone No.'))
+                        ->prefixIcon('heroicon-o-phone')
                         ->tel(),
                     Forms\Components\Select::make('education_level')
                         ->label(__('Education Level'))
@@ -102,17 +106,17 @@ class StudentResource extends Resource
                             'SMA' => 'SMA',
                             'Umum' => 'Umum',
                         ]),
+                    Forms\Components\TextInput::make('course_level')
+                        ->label(__('Course Level')),
                     Forms\Components\TextInput::make('school_name')
                         ->label('Sekolah Asal (School Name)'),
                     Forms\Components\TextInput::make('class_name')
                         ->label('Kelas (Class)'),
-                    Forms\Components\TextInput::make('course_level')
-                        ->label(__('Course Level')),
                     Forms\Components\Textarea::make('address')
                         ->label(__('Address'))
-                        ->rows(3)
+                        ->rows(2)
                         ->columnSpanFull(),
-                ])->columns(2),
+                ])->columns(3),
 
             \Filament\Schemas\Components\Section::make('Data Orang Tua / Wali')
                 ->description('Data Ayah, Ibu, dan Wali disinkronkan otomatis ke akun Portal Orang Tua (student_parent).')
@@ -154,6 +158,8 @@ class StudentResource extends Resource
                 ]),
 
             \Filament\Schemas\Components\Section::make(__('Status'))
+                ->description('Foto profil siswa dan status keaktifan akademik.')
+                ->icon('heroicon-o-shield-check')
                 ->schema([
                     Forms\Components\FileUpload::make('photo')
                         ->label(__('Photo'))
@@ -240,14 +246,22 @@ class StudentResource extends Resource
             ->groupingSettingsInDropdownOnDesktop()
             ->columns([
                 \Filament\Tables\Columns\Layout\Split::make([
-                    Tables\Columns\ImageColumn::make('photo')->label(__('Photo'))->circular()->disk('public')
-                        ->defaultImageUrl(fn ($record) => 'https://ui-avatars.com/api/?name=' . urlencode($record->name) . '&color=2563eb&background=dbeafe'),
+                    Tables\Columns\ImageColumn::make('photo')
+                        ->label(__('Photo'))
+                        ->circular()
+                        ->disk('public')
+                        ->defaultImageUrl(fn ($record) => 'https://ui-avatars.com/api/?name=' . urlencode($record->name) . '&color=0a4282&background=dbeafe'),
                     Tables\Columns\TextColumn::make('user.username')
                         ->label(__('No. Siswa'))
+                        ->badge()
+                        ->color('gray')
                         ->searchable()
                         ->sortable(),
                     Tables\Columns\TextColumn::make('name')
-                        ->label(__('Name'))->translateLabel()
+                        ->label(__('Name'))
+                        ->translateLabel()
+                        ->weight('bold')
+                        ->description(fn (Student $record): string => 'NIS: ' . ($record->nis ?: '-'))
                         ->searchable()
                         ->sortable(),
                     Tables\Columns\TextColumn::make('student_type')
@@ -262,6 +276,8 @@ class StudentResource extends Resource
                         ->toggleable(),
                     Tables\Columns\TextColumn::make('class_name')
                         ->label('Kelas')
+                        ->badge()
+                        ->color('info')
                         ->getStateUsing(fn (Student $record): string => self::resolveClassLabel($record))
                         ->searchable()
                         ->toggleable(),
@@ -271,6 +287,7 @@ class StudentResource extends Resource
                         ->color(fn (?string $state): string => $state === 'L' ? 'info' : 'danger'),
                     Tables\Columns\TextColumn::make('phone')
                         ->label(__('Phone'))
+                        ->placeholder('-')
                         ->searchable(),
                     Tables\Columns\TextColumn::make('parent_summary')
                         ->label('Orang Tua / Wali')
@@ -303,15 +320,20 @@ class StudentResource extends Resource
                     ->label(__('Active Status')),
             ])
             ->actions([
-                \Filament\Actions\Action::make('certificate')
-                    ->label(__('Certificate'))
-                    ->icon('heroicon-o-academic-cap')
-                    ->color('success')
-                    ->url(fn ($record) => route('report.certificate', $record->id))
-                    ->openUrlInNewTab(),
-                \Filament\Actions\ViewAction::make(),
-                \Filament\Actions\EditAction::make(),
-                \Filament\Actions\DeleteAction::make(),
+                \Filament\Actions\ActionGroup::make([
+                    \Filament\Actions\ViewAction::make(),
+                    \Filament\Actions\EditAction::make(),
+                    \Filament\Actions\Action::make('certificate')
+                        ->label(__('Certificate'))
+                        ->icon('heroicon-o-academic-cap')
+                        ->color('success')
+                        ->url(fn ($record) => route('report.certificate', $record->id))
+                        ->openUrlInNewTab(),
+                    \Filament\Actions\DeleteAction::make(),
+                ])
+                    ->icon('heroicon-m-ellipsis-vertical')
+                    ->color('gray')
+                    ->tooltip('Aksi'),
             ])
             ->bulkActions([
                 \Filament\Actions\BulkActionGroup::make([

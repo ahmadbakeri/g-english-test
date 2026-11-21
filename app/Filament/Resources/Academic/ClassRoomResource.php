@@ -3,14 +3,13 @@
 namespace App\Filament\Resources\Academic;
 
 use App\Filament\Resources\Academic\ClassRoomResource\Pages;
+use App\Models\AcademicYear;
 use App\Models\ClassRoom;
 use App\Models\Subject;
 use App\Models\Tutor;
-use App\Models\AcademicYear;
-use App\Models\Student;
 use Filament\Forms;
-use Filament\Schemas\Schema;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -49,66 +48,96 @@ class ClassRoomResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        $query = parent::getEloquentQuery()->with(['academicYear', 'subject', 'tutor']);
-        
+        $query = parent::getEloquentQuery()->with(['academicYear', 'subject', 'tutor', 'schedules']);
+
         if (auth()->user()->isTutor() && auth()->user()->tutor) {
             $query->where('tutor_id', auth()->user()->tutor->id);
         }
-        
+
         return $query;
     }
 
     public static function form(Schema $schema): Schema
     {
         return $schema->columns(1)->components([
-            \Filament\Schemas\Components\Section::make(__('Class Room Data'))->schema([
-                Forms\Components\TextInput::make('name')->label(__('Class Name'))->required(),
-                Forms\Components\Select::make('academic_year_id')->label(__('Academic Year'))
-                    ->options(AcademicYear::pluck('name', 'id'))->searchable(),
-                Forms\Components\Select::make('subject_id')->label(__('Subject'))->translateLabel()
-                    ->options(Subject::pluck('name', 'id'))->searchable(),
-                Forms\Components\Select::make('tutor_id')->label(__('Homeroom Teacher (Optional)'))
-                    ->options(Tutor::where('is_active', true)->pluck('name', 'id'))->searchable(),
-                Forms\Components\TextInput::make('capacity')->label(__('Capacity'))->numeric()->default(20),
-                Forms\Components\Toggle::make('is_active')->label(__('Active'))->default(true),
-            ])->columns(2),
+            \Filament\Schemas\Components\Section::make(__('Class Room Data'))
+                ->description('Konfigurasi nama rombongan belajar, tahun akademik, mata pelajaran, wali kelas, dan kuota kursi.')
+                ->icon('heroicon-o-building-library')
+                ->schema([
+                    Forms\Components\TextInput::make('name')
+                        ->label(__('Class Name'))
+                        ->required(),
+                    Forms\Components\Select::make('academic_year_id')
+                        ->label(__('Academic Year'))
+                        ->options(AcademicYear::pluck('name', 'id'))
+                        ->searchable(),
+                    Forms\Components\Select::make('subject_id')
+                        ->label(__('Subject'))
+                        ->translateLabel()
+                        ->options(Subject::pluck('name', 'id'))
+                        ->searchable(),
+                    Forms\Components\Select::make('tutor_id')
+                        ->label(__('Homeroom Teacher (Optional)'))
+                        ->options(Tutor::where('is_active', true)->pluck('name', 'id'))
+                        ->searchable(),
+                    Forms\Components\TextInput::make('capacity')
+                        ->label(__('Capacity'))
+                        ->numeric()
+                        ->suffix('Siswa')
+                        ->default(20),
+                    Forms\Components\Toggle::make('is_active')
+                        ->label(__('Active'))
+                        ->default(true),
+                ])->columns(3),
 
-            \Filament\Schemas\Components\Section::make(__('Class Schedule'))->schema([
-                Forms\Components\Repeater::make('schedules')
-                    ->label('')
-                    ->relationship()
-                    ->schema([
-                        Forms\Components\Select::make('day')
-                            ->label(__('Day'))
-                            ->options([
-                                'Monday' => __('Monday'),
-                                'Tuesday' => __('Tuesday'),
-                                'Wednesday' => __('Wednesday'),
-                                'Thursday' => __('Thursday'),
-                                'Friday' => __('Friday'),
-                                'Saturday' => __('Saturday'),
-                                'Sunday' => __('Sunday'),
-                            ])->required(),
-                        Forms\Components\TimePicker::make('start_time')->label(__('Start Time'))->translateLabel()->required(),
-                        Forms\Components\TimePicker::make('end_time')->label(__('End Time'))->translateLabel()->required(),
-                        Forms\Components\Select::make('tutor_id')
-                            ->label(__('Teaching Tutor'))
-                            ->options(Tutor::where('is_active', true)->pluck('name', 'id'))
-                            ->searchable()
-                            ->nullable(),
-                    ])->columns(4)
-                    ->addActionLabel('Tambah Jadwal')
-                    ->defaultItems(1),
-            ]),
+            \Filament\Schemas\Components\Section::make(__('Class Schedule'))
+                ->description('Atur hari, jam mulai/selesai, dan tutor pengajar untuk setiap sesi mingguan.')
+                ->icon('heroicon-o-calendar-days')
+                ->schema([
+                    Forms\Components\Repeater::make('schedules')
+                        ->label('')
+                        ->relationship()
+                        ->schema([
+                            Forms\Components\Select::make('day')
+                                ->label(__('Day'))
+                                ->options([
+                                    'Monday' => __('Monday'),
+                                    'Tuesday' => __('Tuesday'),
+                                    'Wednesday' => __('Wednesday'),
+                                    'Thursday' => __('Thursday'),
+                                    'Friday' => __('Friday'),
+                                    'Saturday' => __('Saturday'),
+                                    'Sunday' => __('Sunday'),
+                                ])->required(),
+                            Forms\Components\TimePicker::make('start_time')
+                                ->label(__('Start Time'))
+                                ->translateLabel()
+                                ->required(),
+                            Forms\Components\TimePicker::make('end_time')
+                                ->label(__('End Time'))
+                                ->translateLabel()
+                                ->required(),
+                            Forms\Components\Select::make('tutor_id')
+                                ->label(__('Teaching Tutor'))
+                                ->options(Tutor::where('is_active', true)->pluck('name', 'id'))
+                                ->searchable()
+                                ->nullable(),
+                        ])->columns(4)
+                        ->addActionLabel('Tambah Jadwal')
+                        ->defaultItems(1),
+                ]),
 
-            \Filament\Schemas\Components\Section::make(__('Student List'))->schema([
-                Forms\Components\Select::make('students')
-                    ->label(__('Student'))
-                    ->multiple()
-                    ->relationship('students', 'name')
-                    ->preload()
-                    ->searchable(),
-            ]),
+            \Filament\Schemas\Components\Section::make(__('Student List'))
+                ->description('Pilih siswa yang terdaftar di dalam kelas ini.')
+                ->icon('heroicon-o-user-group')
+                ->schema([
+                    Forms\Components\Select::make('students')
+                        ->label(__('Student'))
+                        ->multiple()
+                        ->relationship('students', 'name')
+                        ->preload()
+                        ->searchable(),
+                ]),
         ]);
     }
 
@@ -116,20 +145,59 @@ class ClassRoomResource extends Resource
     {
         return $table->columns([
             \Filament\Tables\Columns\Layout\Split::make([
-            Tables\Columns\TextColumn::make('name')->label(__('Class Name'))->searchable()->sortable(),
-            Tables\Columns\TextColumn::make('academicYear.name')->label(__('Academic Year'))->sortable(),
-            Tables\Columns\TextColumn::make('subject.name')->label(__('Subject'))->translateLabel()->badge()->color('info'),
-            Tables\Columns\TextColumn::make('tutor.name')->label(__('Homeroom Teacher')),
-            Tables\Columns\TextColumn::make('schedules.day')->label(__('Schedule'))
-                ->badge()
-                ->separator(', '),
-            Tables\Columns\TextColumn::make('students_count')->label(__('Student'))->counts('students'),
-            Tables\Columns\TextColumn::make('capacity')->label(__('Capacity')),
-            Tables\Columns\IconColumn::make('is_active')->label(__('Active'))->boolean(),
+                Tables\Columns\TextColumn::make('name')
+                    ->label(__('Class Name'))
+                    ->weight('bold')
+                    ->description(fn (ClassRoom $record): string => $record->academicYear?->name ?? 'Tanpa Tahun Ajaran')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('academicYear.name')
+                    ->label(__('Academic Year'))
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('subject.name')
+                    ->label(__('Subject'))
+                    ->translateLabel()
+                    ->badge()
+                    ->color('info'),
+                Tables\Columns\TextColumn::make('tutor.name')
+                    ->label(__('Homeroom Teacher'))
+                    ->placeholder('-'),
+                Tables\Columns\TextColumn::make('schedules.day')
+                    ->label(__('Schedule'))
+                    ->badge()
+                    ->color('gray')
+                    ->separator(', '),
+                Tables\Columns\TextColumn::make('students_count')
+                    ->label(__('Student'))
+                    ->counts('students')
+                    ->badge()
+                    ->color('success')
+                    ->suffix(' Siswa'),
+                Tables\Columns\TextColumn::make('capacity')
+                    ->label(__('Capacity'))
+                    ->numeric()
+                    ->suffix(' Kursi')
+                    ->alignEnd(),
+                Tables\Columns\IconColumn::make('is_active')
+                    ->label(__('Active'))
+                    ->boolean(),
             ])->from('md'),
         ])
-        ->actions([\Filament\Actions\ViewAction::make(), \Filament\Actions\EditAction::make(), \Filament\Actions\DeleteAction::make()])
-        ->bulkActions([\Filament\Actions\BulkActionGroup::make([\Filament\Actions\DeleteBulkAction::make()])]);
+        ->actions([
+            \Filament\Actions\ActionGroup::make([
+                \Filament\Actions\ViewAction::make(),
+                \Filament\Actions\EditAction::make(),
+                \Filament\Actions\DeleteAction::make(),
+            ])
+                ->icon('heroicon-m-ellipsis-vertical')
+                ->color('gray')
+                ->tooltip('Aksi'),
+        ])
+        ->bulkActions([
+            \Filament\Actions\BulkActionGroup::make([
+                \Filament\Actions\DeleteBulkAction::make(),
+            ]),
+        ]);
     }
 
     public static function getPages(): array
@@ -139,6 +207,3 @@ class ClassRoomResource extends Resource
         ];
     }
 }
-
-
-

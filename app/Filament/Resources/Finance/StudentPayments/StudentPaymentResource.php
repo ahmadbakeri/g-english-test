@@ -5,15 +5,16 @@ namespace App\Filament\Resources\Finance\StudentPayments;
 use App\Filament\Resources\Finance\StudentPayments\Pages\ManageStudentPayments;
 use App\Models\StudentPayment;
 use BackedEnum;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -43,6 +44,7 @@ class StudentPaymentResource extends Resource
     }
 
     protected static ?string $model = StudentPayment::class;
+
     public static function getNavigationGroup(): ?string
     {
         return __('Accounting');
@@ -56,31 +58,40 @@ class StudentPaymentResource extends Resource
     {
         return $schema
             ->components([
-                Select::make('student_id')
-                    ->label(__('Student'))
-                    ->relationship('student', 'name')
-                    ->searchable()
-                    ->required(),
-                DatePicker::make('due_date')->label(__('Due Date')),
-                
-                TextInput::make('amount')
-                    ->label(__('Amount (Rp)'))
-                    ->numeric()
-                    ->default(250000)
-                    ->required(),
-                Select::make('status')
-                    ->label(__('Status'))
-                    ->options([
-                        'unpaid' => 'Belum Lunas',
-                        'paid' => 'Lunas'
-                    ])
-                    ->default('unpaid')
-                    ->required(),
-                DateTimePicker::make('paid_at')
-                    ->label(__('Payment Date')),
-                Textarea::make('notes')
-                    ->label(__('Notes'))
-                    ->columnSpanFull(),
+                \Filament\Schemas\Components\Section::make('Detail Tagihan & Pembayaran SPP')
+                    ->description('Informasi tagihan siswa, batas waktu pembayaran, nominal Rupiah, dan status pelunasan.')
+                    ->icon('heroicon-o-banknotes')
+                    ->schema([
+                        Select::make('student_id')
+                            ->label(__('Student'))
+                            ->relationship('student', 'name')
+                            ->searchable()
+                            ->preload()
+                            ->required(),
+                        DatePicker::make('due_date')
+                            ->label(__('Due Date')),
+                        TextInput::make('amount')
+                            ->label(__('Amount (Rp)'))
+                            ->prefix('Rp')
+                            ->numeric()
+                            ->default(250000)
+                            ->required(),
+                        Select::make('status')
+                            ->label(__('Status'))
+                            ->options([
+                                'unpaid' => 'Belum Lunas',
+                                'paid' => 'Lunas',
+                            ])
+                            ->default('unpaid')
+                            ->required(),
+                        DateTimePicker::make('paid_at')
+                            ->label(__('Payment Date'))
+                            ->columnSpanFull(),
+                        Textarea::make('notes')
+                            ->label(__('Notes'))
+                            ->rows(2)
+                            ->columnSpanFull(),
+                    ])->columns(2),
             ]);
     }
 
@@ -89,34 +100,46 @@ class StudentPaymentResource extends Resource
         return $table
             ->columns([
                 \Filament\Tables\Columns\Layout\Split::make([
-                TextColumn::make('student.name')
-                    ->label(__('Student'))
-                    ->searchable()
-                    ->sortable(),
-                TextColumn::make('notes')->label(__('Description'))->wrap(),
-                TextColumn::make('due_date')->label(__('Due Date'))->date('d M Y')->sortable(),
-                TextColumn::make('amount')
-                    ->label(__('Amount'))->translateLabel()
-                    ->money('IDR', locale: 'id')
-                    ->sortable(),
-                TextColumn::make('status')
-                    ->label(__('Status'))
-                    ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'unpaid' => 'danger',
-                        'paid' => 'success',
-                        default => 'gray',
-                    })
-                    ->formatStateUsing(fn (string $state): string => match ($state) {
-                        'unpaid' => 'Belum Lunas',
-                        'paid' => 'Lunas',
-                        default => $state,
-                    }),
-                TextColumn::make('paid_at')
-                    ->label(__('Payment Date'))
-                    ->dateTime('d M Y, H:i')
-                    ->sortable()
-                    ->toggleable(),
+                    TextColumn::make('student.name')
+                        ->label(__('Student'))
+                        ->weight('bold')
+                        ->description(fn (StudentPayment $record): string => $record->notes ?: 'Tagihan SPP')
+                        ->searchable()
+                        ->sortable(),
+                    TextColumn::make('notes')
+                        ->label(__('Description'))
+                        ->placeholder('-')
+                        ->wrap(),
+                    TextColumn::make('due_date')
+                        ->label(__('Due Date'))
+                        ->date('d M Y')
+                        ->sortable(),
+                    TextColumn::make('amount')
+                        ->label(__('Amount'))
+                        ->translateLabel()
+                        ->money('IDR', locale: 'id')
+                        ->weight('bold')
+                        ->alignEnd()
+                        ->sortable(),
+                    TextColumn::make('status')
+                        ->label(__('Status'))
+                        ->badge()
+                        ->color(fn (string $state): string => match ($state) {
+                            'unpaid' => 'danger',
+                            'paid' => 'success',
+                            default => 'gray',
+                        })
+                        ->formatStateUsing(fn (string $state): string => match ($state) {
+                            'unpaid' => 'Belum Lunas',
+                            'paid' => 'Lunas',
+                            default => $state,
+                        }),
+                    TextColumn::make('paid_at')
+                        ->label(__('Payment Date'))
+                        ->dateTime('d M Y, H:i')
+                        ->placeholder('-')
+                        ->sortable()
+                        ->toggleable(),
                 ])->from('md'),
             ])
             ->filters([
@@ -129,27 +152,32 @@ class StudentPaymentResource extends Resource
                     ->searchable(),
             ])
             ->recordActions([
-                EditAction::make(),
-                DeleteAction::make(),
-                \Filament\Actions\Action::make('pay')
-                    ->label(__('Set as Paid'))
-                    ->icon('heroicon-o-check-circle')
-                    ->color('success')
-                    ->requiresConfirmation()
-                    ->visible(fn (StudentPayment $record) => $record->status === 'unpaid')
-                    ->action(function (StudentPayment $record) {
-                        $record->update([
-                            'status' => 'paid',
-                            'paid_at' => now(),
-                        ]);
-                    }),
-                \Filament\Actions\Action::make('print')
-                    ->label(__('Print Receipt'))
-                    ->icon('heroicon-o-printer')
-                    ->color('info')
-                    ->visible(fn (StudentPayment $record) => $record->status === 'paid')
-                    ->url(fn (StudentPayment $record) => route('report.student-payment', $record->id))
-                    ->openUrlInNewTab(),
+                ActionGroup::make([
+                    EditAction::make(),
+                    \Filament\Actions\Action::make('pay')
+                        ->label(__('Set as Paid'))
+                        ->icon('heroicon-o-check-circle')
+                        ->color('success')
+                        ->requiresConfirmation()
+                        ->visible(fn (StudentPayment $record) => $record->status === 'unpaid')
+                        ->action(function (StudentPayment $record) {
+                            $record->update([
+                                'status' => 'paid',
+                                'paid_at' => now(),
+                            ]);
+                        }),
+                    \Filament\Actions\Action::make('print')
+                        ->label(__('Print Receipt'))
+                        ->icon('heroicon-o-printer')
+                        ->color('info')
+                        ->visible(fn (StudentPayment $record) => $record->status === 'paid')
+                        ->url(fn (StudentPayment $record) => route('report.student-payment', $record->id))
+                        ->openUrlInNewTab(),
+                    DeleteAction::make(),
+                ])
+                    ->icon('heroicon-m-ellipsis-vertical')
+                    ->color('gray')
+                    ->tooltip('Aksi'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
@@ -170,5 +198,3 @@ class StudentPaymentResource extends Resource
         ];
     }
 }
-
-
