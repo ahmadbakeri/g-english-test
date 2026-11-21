@@ -62,8 +62,11 @@ class CbtExamResource extends Resource
         
         $tutorId = auth()->user()->tutor?->id;
         if ($tutorId) {
-            $query->whereHas('classRoom.schedules', function ($q) use ($tutorId) {
-                $q->where('tutor_id', $tutorId);
+            $query->whereHas('classRoom', function ($q) use ($tutorId) {
+                $q->where('tutor_id', $tutorId)
+                    ->orWhereHas('schedules', function ($sq) use ($tutorId) {
+                        $sq->where('tutor_id', $tutorId);
+                    });
             });
         }
         

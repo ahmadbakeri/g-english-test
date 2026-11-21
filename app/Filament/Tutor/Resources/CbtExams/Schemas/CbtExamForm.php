@@ -40,8 +40,11 @@ class CbtExamForm
                         ->relationship('classRoom', 'name', function (\Illuminate\Database\Eloquent\Builder $query) {
                             $tutorId = auth()->user()->tutor?->id;
                             if ($tutorId) {
-                                $query->whereHas('schedules', function ($q) use ($tutorId) {
-                                    $q->where('tutor_id', $tutorId);
+                                $query->where(function ($q) use ($tutorId) {
+                                    $q->where('tutor_id', $tutorId)
+                                        ->orWhereHas('schedules', function ($sq) use ($tutorId) {
+                                            $sq->where('tutor_id', $tutorId);
+                                        });
                                 });
                             }
                         })
