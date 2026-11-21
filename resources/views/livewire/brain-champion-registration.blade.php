@@ -1,140 +1,254 @@
 <div class="min-h-screen flex flex-col">
-    <!-- Top Navbar -->
-    <nav class="sticky top-0 z-40 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-700/80 shadow-sm">
+    <!-- Top Navbar with Dark/Light Mode Toggle -->
+    <nav class="no-print sticky top-0 z-40 glass-card border-b border-slate-200/80 dark:border-slate-700/80">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <a href="{{ route('landing') }}" class="flex items-center gap-2.5 text-genza-blue dark:text-blue-400 font-black text-xl hover:opacity-85 transition-opacity">
                     <img src="{{ asset('images/logo.png') }}" alt="Genza English Logo" class="h-10 w-auto dark:brightness-110">
+                    <span class="hidden sm:inline-block text-sm font-extrabold tracking-tight text-genza-blue dark:text-white">
+                        BRAIN <span class="text-genza-yellow">CHAMPION</span>
+                    </span>
                 </a>
-                <div class="flex items-center gap-3">
-                    <a href="{{ route('landing') }}" class="inline-flex items-center gap-1.5 text-sm font-bold text-slate-600 dark:text-slate-300 hover:text-genza-blue dark:hover:text-genza-yellow transition-colors">
+                <div class="flex items-center gap-2.5 sm:gap-3.5">
+                    <button type="button"
+                            onclick="toggleBrainChampionTheme()"
+                            aria-label="Toggle Dark/Light Mode"
+                            class="p-2.5 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-genza-blue dark:text-genza-yellow border border-slate-200/80 dark:border-slate-700 transition-all">
+                        <!-- Sun (visible in dark mode) -->
+                        <svg class="hidden dark:block w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                        <!-- Moon (visible in light mode) -->
+                        <svg class="block dark:hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                    </button>
+
+                    <a href="{{ route('landing') }}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-300 bg-slate-100/80 dark:bg-slate-800/80 hover:bg-genza-blue hover:text-white dark:hover:bg-genza-yellow dark:hover:text-genza-blue border border-slate-200/70 dark:border-slate-700 transition-all">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                        <span>Kembali ke Beranda</span>
+                        <span>Beranda</span>
                     </a>
                 </div>
             </div>
         </div>
     </nav>
 
-    <!-- Main Container -->
-    <main class="flex-grow py-8 sm:py-12 px-4 sm:px-6">
-        <div class="max-w-4xl mx-auto">
+    <!-- Main Content -->
+    <main class="flex-grow py-8 sm:py-10 px-4 sm:px-6">
+        <div class="max-w-5xl mx-auto">
 
-            <!-- Hero Competition Header -->
-            <div class="bg-gradient-to-br from-[#0a4282] via-[#0d4f9c] to-[#083366] text-white rounded-3xl p-6 sm:p-8 mb-8 shadow-xl border-2 border-genza-yellow/60 relative overflow-hidden">
-                <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <!-- 1. HERO HEADER -->
+            <div class="no-print bg-gradient-to-br from-[#0a4282] via-[#0d4f9c] to-[#083366] text-white rounded-3xl p-6 sm:p-8 mb-8 shadow-2xl border-2 border-genza-yellow/60 relative overflow-hidden">
+                <div class="absolute -top-24 -right-24 w-72 h-72 rounded-full bg-genza-yellow/15 blur-3xl pointer-events-none"></div>
+
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative">
                     <div>
-                        <div class="inline-flex items-center gap-2 bg-genza-yellow text-genza-blue font-black text-xs uppercase tracking-widest px-3.5 py-1.5 rounded-full mb-3 shadow">
-                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                            <span>Official English Competition</span>
+                        <div class="inline-flex flex-wrap items-center gap-2 mb-3">
+                            <span class="inline-flex items-center gap-1.5 bg-genza-yellow text-genza-blue font-black text-xs uppercase tracking-wider px-3.5 py-1.5 rounded-full shadow">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                                <span>Sistem Gugur Whiteboard • SD/MI &amp; SMP/MTs</span>
+                            </span>
                         </div>
-                        <h1 class="text-2xl sm:text-4xl font-black tracking-tight text-white leading-tight">
+
+                        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white leading-tight">
                             G-ENGLISH BRAIN CHAMPION
                         </h1>
-                        <p class="text-genza-yellow font-extrabold text-sm sm:text-lg tracking-wide uppercase mt-1">
+                        <p class="text-genza-yellow font-black text-base sm:text-xl tracking-wide uppercase mt-1">
                             "ONE MIND, ONE CHAMPION"
                         </p>
-                        <p class="text-blue-100 text-xs sm:text-sm mt-2 max-w-2xl leading-relaxed">
-                            Kompetisi Bahasa Inggris tingkat SD/MI (Kelas 4, 5, 6) &amp; SMP/MTs (Kelas 7, 8, 9). Kuota terbatas maksimal <strong>35 peserta per jenjang kelas</strong>.
+                        <p class="text-blue-100 text-xs sm:text-sm mt-2.5 max-w-2xl leading-relaxed">
+                            Ajang kompetisi Bahasa Inggris antar sekolah tingkat SD/MI (Kelas 4, 5, 6) dan SMP/MTs (Kelas 7, 8, 9). Kuota sangat terbatas hanya <strong>35 peserta per jenjang kelas</strong>!
                         </p>
                     </div>
-                    <div class="shrink-0 bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-4 text-xs sm:text-sm space-y-1.5">
-                        <div class="font-extrabold text-genza-yellow uppercase tracking-wider text-xs">Aturan Utusan Sekolah</div>
-                        <div class="text-white font-semibold">&bull; SD / MI: Maks. <strong>2 Siswa / Kelas</strong> (4, 5, 6)</div>
-                        <div class="text-white font-semibold">&bull; SMP / MTs: Maks. <strong>1 Siswa / Kelas</strong> (7, 8, 9)</div>
-                        <div class="text-blue-200 text-xs">&bull; Kuota Global: <strong>35 Siswa / Kelas</strong></div>
+
+                    <div class="shrink-0 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-4 sm:p-5 text-xs sm:text-sm space-y-2">
+                        <div class="font-extrabold text-genza-yellow uppercase tracking-wider text-xs flex items-center gap-1.5">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <span>Kuota Utusan Per Sekolah</span>
+                        </div>
+                        <div class="text-white font-semibold">&bull; SD / MI: Maks. <strong>2 Siswa / Kelas</strong> (Kelas 4, 5, 6)</div>
+                        <div class="text-white font-semibold">&bull; SMP / MTs: Maks. <strong>1 Siswa / Kelas</strong> (Kelas 7, 8, 9)</div>
+                        <div class="text-blue-200 text-xs pt-1 border-t border-white/15">&bull; Kuota Global: <strong>35 Siswa / Kelas</strong></div>
                     </div>
                 </div>
             </div>
 
-            <!-- Live Quota Dashboard Bar (Grades 4 - 9) -->
-            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 sm:p-6 mb-8 shadow-md border border-slate-200/80 dark:border-slate-700">
+            <!-- 2. LIVE QUOTA BOARD (6 CARDS: KELAS 4, 5, 6 & KELAS 7, 8, 9) -->
+            <div class="no-print glass-card rounded-3xl p-5 sm:p-6 mb-8">
                 <div class="flex items-center justify-between flex-wrap gap-2 mb-4">
                     <h2 class="text-sm sm:text-base font-extrabold text-genza-blue dark:text-white uppercase tracking-wider flex items-center gap-2">
                         <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
-                        <span>Status Kuota Real-Time (Maks. 35 Siswa / Kelas)</span>
+                        <span>Live Quota Board (6 Jenjang Kelas)</span>
                     </h2>
-                    <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Otomatis terkunci saat mencapai 35/35</span>
+                    <span class="text-xs font-bold text-slate-500 dark:text-slate-400">
+                        Update otomatis &bull; Maksimal 35 Peserta / Kelas
+                    </span>
                 </div>
 
-                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
                     @foreach($quotaSummary as $grade => $q)
-                        <div class="p-3 rounded-xl border {{ $q['is_full'] ? 'bg-rose-50/80 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800' : 'bg-slate-50 dark:bg-slate-900/70 border-slate-200/80 dark:border-slate-700' }}">
-                            <div class="flex items-center justify-between">
-                                <span class="font-extrabold text-xs sm:text-sm {{ $q['is_full'] ? 'text-rose-700 dark:text-rose-300' : 'text-genza-blue dark:text-white' }}">
-                                    {{ $q['class_label'] }}
-                                </span>
-                                <span class="text-[10px] font-extrabold px-1.5 py-0.5 rounded-full {{ $q['is_full'] ? 'bg-rose-600 text-white' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/60 dark:text-emerald-300' }}">
-                                    {{ $q['is_full'] ? 'PENUH' : 'BUKA' }}
-                                </span>
+                        @php
+                            $used = $q['global_used'];
+                            $max = $q['max_global'];
+                            $remaining = $q['global_remaining'];
+                            $isFull = $q['is_full'];
+                            $isWarning = !$isFull && $used >= 28;
+                            $pct = min(100, round(($used / max(1, $max)) * 100));
+                            $levelTag = $grade <= 6 ? 'SD/MI' : 'SMP/MTs';
+                        @endphp
+                        <div class="p-3.5 rounded-2xl border transition-all {{ $isFull ? 'bg-rose-50/90 dark:bg-rose-950/40 border-rose-300 dark:border-rose-800' : ($isWarning ? 'bg-amber-50/80 dark:bg-amber-950/30 border-amber-300 dark:border-amber-800' : 'bg-slate-50/90 dark:bg-slate-900/70 border-slate-200/80 dark:border-slate-700') }}">
+                            <div class="flex items-center justify-between gap-1 mb-1">
+                                <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">{{ $levelTag }}</span>
+                                @if($isFull)
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-rose-600 text-white">
+                                        PENUH
+                                    </span>
+                                @elseif($isWarning)
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-500 text-slate-950">
+                                        SISA {{ $remaining }}
+                                    </span>
+                                @else
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300">
+                                        SISA {{ $remaining }}
+                                    </span>
+                                @endif
                             </div>
-                            <div class="mt-1.5 flex items-baseline justify-between">
-                                <span class="text-lg font-black {{ $q['is_full'] ? 'text-rose-600 dark:text-rose-400' : 'text-slate-900 dark:text-white' }}">
-                                    {{ $q['global_used'] }}<span class="text-xs font-bold text-slate-400">/{{ $q['max_global'] }}</span>
-                                </span>
-                                <span class="text-[11px] font-bold {{ $q['is_full'] ? 'text-rose-500' : 'text-sky-600 dark:text-sky-400' }}">
-                                    Sisa {{ $q['global_remaining'] }}
-                                </span>
+
+                            <div class="font-black text-base {{ $isFull ? 'text-rose-700 dark:text-rose-300' : 'text-genza-blue dark:text-white' }}">
+                                {{ $q['class_label'] }}
+                            </div>
+
+                            <div class="mt-1 text-xs font-bold {{ $isFull ? 'text-rose-600 dark:text-rose-400' : ($isWarning ? 'text-amber-700 dark:text-amber-300' : 'text-slate-600 dark:text-slate-300') }}">
+                                Terisi {{ $used }} / {{ $max }}
+                            </div>
+
+                            <div class="mt-2 w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+                                <div class="h-full rounded-full transition-all duration-300 {{ $isFull ? 'bg-rose-600' : ($isWarning ? 'bg-amber-500' : 'bg-emerald-500') }}"
+                                     style="width: {{ $pct }}%"></div>
                             </div>
                         </div>
                     @endforeach
                 </div>
             </div>
 
-            <!-- Registration Success Receipt -->
+            <!-- 3. SUCCESS CONFIRMATION SCREEN & PRINTABLE PARTICIPANT CARD -->
             @if(count($registeredResults) > 0)
-                <div class="bg-emerald-50 dark:bg-emerald-950/70 border-2 border-emerald-500 rounded-3xl p-6 sm:p-8 mb-8 shadow-xl">
-                    <div class="flex items-start gap-4 mb-6">
-                        <div class="w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow">
-                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
-                        </div>
-                        <div>
-                            <h3 class="text-xl font-black text-emerald-900 dark:text-emerald-100">Pendaftaran Brain Champion Berhasil!</h3>
-                            <p class="text-sm text-emerald-700 dark:text-emerald-300 mt-0.5">
-                                Simpan Nomor Peserta di bawah ini untuk registrasi ulang dan login CBT.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 mb-6">
-                        @foreach($registeredResults as $res)
-                            <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-emerald-200 dark:border-emerald-800 flex items-center justify-between gap-3">
-                                <div>
-                                    <div class="text-xs font-bold text-slate-500 dark:text-slate-400">{{ $res['school_name'] }} &bull; {{ $res['class_name'] }}</div>
-                                    <div class="font-extrabold text-base text-slate-900 dark:text-white mt-0.5">{{ $res['name'] }}</div>
-                                    @if(!empty($res['username']))
-                                        <div class="text-xs text-slate-500 mt-0.5">ID Portal CBT: <strong class="text-genza-blue dark:text-genza-yellow">{{ $res['username'] }}</strong></div>
-                                    @endif
-                                </div>
-                                <span class="px-3 py-1.5 rounded-xl bg-genza-blue text-genza-yellow font-black text-sm tracking-wider shrink-0">
-                                    {{ $res['registration_number'] }}
-                                </span>
+                <div class="print-card glass-card rounded-3xl p-6 sm:p-8 mb-8 border-2 border-emerald-500 dark:border-emerald-500">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 mb-6 border-b border-slate-200 dark:border-slate-700">
+                        <div class="flex items-start gap-4">
+                            <div class="w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-lg">
+                                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
                             </div>
-                        @endforeach
+                            <div>
+                                <span class="inline-block px-3 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300 mb-1">
+                                    Bukti Registrasi Resmi
+                                </span>
+                                <h3 class="text-xl sm:text-2xl font-black text-genza-blue dark:text-white">
+                                    Kartu Peserta G-English Brain Champion
+                                </h3>
+                                <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-0.5">
+                                    Screenshot atau cetak halaman ini untuk ditunjukkan saat daftar ulang (check-in) di lokasi kompetisi.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="no-print flex items-center gap-2.5 shrink-0">
+                            <button type="button"
+                                    onclick="window.print()"
+                                    class="inline-flex items-center gap-2 bg-genza-yellow hover:bg-yellow-400 text-genza-blue font-black text-xs sm:text-sm px-5 py-2.5 rounded-full shadow-md transition-all">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                                <span>Cetak / Print Kartu</span>
+                            </button>
+                        </div>
                     </div>
 
-                    <button type="button" wire:click="resetRegistrationSuccess" class="inline-flex items-center gap-2 bg-genza-blue hover:bg-[#083568] text-white font-bold text-sm px-6 py-3 rounded-full transition-all">
-                        <span>Daftarkan Peserta / Sekolah Lain</span>
-                    </button>
+                    <!-- School & PIC Metadata Summary -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5 mb-6 text-xs sm:text-sm">
+                        <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-700">
+                            <div class="text-slate-500 dark:text-slate-400 font-semibold">Sekolah Utusan</div>
+                            <div class="font-extrabold text-genza-blue dark:text-white mt-0.5">{{ $lastSubmittedSchool ?: ($registeredResults[0]['school_name'] ?? '-') }}</div>
+                        </div>
+                        <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-700">
+                            <div class="text-slate-500 dark:text-slate-400 font-semibold">Guru Pendamping (PIC)</div>
+                            <div class="font-extrabold text-genza-blue dark:text-white mt-0.5">{{ $lastSubmittedPicName ?: '-' }} ({{ $lastSubmittedPicPhone ?: '-' }})</div>
+                        </div>
+                        <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-700">
+                            <div class="text-slate-500 dark:text-slate-400 font-semibold">Waktu Registrasi</div>
+                            <div class="font-extrabold text-genza-blue dark:text-white mt-0.5">{{ $lastSubmittedAt ?: now()->translatedFormat('d F Y, H:i') }}</div>
+                        </div>
+                    </div>
+
+                    <!-- Summary Table Ready to Screenshot / Print -->
+                    <div class="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-700 mb-6">
+                        <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                            <thead>
+                                <tr class="bg-genza-blue text-white uppercase text-[11px] font-extrabold tracking-wider">
+                                    <th class="py-3 px-4">No. Peserta</th>
+                                    <th class="py-3 px-4">Nama Lengkap Siswa</th>
+                                    <th class="py-3 px-4 text-center">Kategori Kelas</th>
+                                    <th class="py-3 px-4 text-center">L/P</th>
+                                    <th class="py-3 px-4">NISN / No. HP</th>
+                                    <th class="py-3 px-4 text-center">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 dark:divide-slate-700 bg-white dark:bg-slate-900">
+                                @foreach($registeredResults as $res)
+                                    <tr>
+                                        <td class="py-3.5 px-4">
+                                            <span class="inline-block px-3 py-1 rounded-full bg-genza-blue text-genza-yellow font-black text-xs tracking-wider">
+                                                {{ $res['registration_number'] }}
+                                            </span>
+                                        </td>
+                                        <td class="py-3.5 px-4 font-extrabold text-slate-900 dark:text-white">
+                                            {{ $res['name'] }}
+                                        </td>
+                                        <td class="py-3.5 px-4 text-center">
+                                            <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-sky-100 text-sky-800 dark:bg-sky-900/60 dark:text-sky-300">
+                                                {{ $res['class_name'] }}
+                                            </span>
+                                        </td>
+                                        <td class="py-3.5 px-4 text-center font-bold">
+                                            {{ $res['gender'] ?? 'L' }}
+                                        </td>
+                                        <td class="py-3.5 px-4 text-slate-600 dark:text-slate-300 font-medium">
+                                            {{ $res['phone'] ?? '-' }}
+                                        </td>
+                                        <td class="py-3.5 px-4 text-center">
+                                            <span class="px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300">
+                                                TERDAFTAR
+                                            </span>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="no-print flex items-center justify-between flex-wrap gap-3">
+                        <button type="button"
+                                wire:click="resetRegistrationSuccess"
+                                class="inline-flex items-center gap-2 bg-genza-blue hover:bg-[#083568] text-white font-bold text-xs sm:text-sm px-6 py-3 rounded-full transition-all shadow">
+                            <span>+ Daftarkan Peserta / Sekolah Lain</span>
+                        </button>
+                        <span class="text-xs text-slate-500 dark:text-slate-400">
+                            Harap membawa kartu identitas sekolah saat daftar ulang di Genza English Center.
+                        </span>
+                    </div>
                 </div>
             @endif
 
-            <!-- Main Registration Form Card -->
-            <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-200/80 dark:border-slate-700 overflow-hidden">
+            <!-- 4. SCHOOL REGISTRATION FORM -->
+            <div class="no-print glass-card rounded-3xl overflow-hidden">
                 <div class="bg-genza-blue px-6 py-5 sm:px-8 border-b-4 border-genza-yellow flex items-center justify-between flex-wrap gap-3">
                     <div>
-                        <h2 class="text-xl sm:text-2xl font-black text-white">Formulir Delegasi Sekolah</h2>
-                        <p class="text-blue-100 text-xs sm:text-sm">Isi nama sekolah terlebih dahulu untuk mengecek sisa kuota delegasi sekolah Anda.</p>
+                        <h2 class="text-xl sm:text-2xl font-black text-white">Formulir Pendaftaran Delegasi Sekolah</h2>
+                        <p class="text-blue-100 text-xs sm:text-sm">Pilih jenjang kompetisi dan lengkapi data peserta perwakilan sekolah Anda.</p>
                     </div>
-                    <span class="px-3.5 py-1 rounded-full bg-genza-yellow text-genza-blue font-black text-xs uppercase">
-                        {{ $school_level === 'SD' ? 'Tingkat SD / MI (Kelas 4–6)' : 'Tingkat SMP / MTs (Kelas 7–9)' }}
+                    <span class="px-3.5 py-1.5 rounded-full bg-genza-yellow text-genza-blue font-black text-xs uppercase shadow-sm">
+                        {{ $school_level === 'SD' ? 'SD / MI (Kelas 4, 5, 6)' : 'SMP / MTs (Kelas 7, 8, 9)' }}
                     </span>
                 </div>
 
                 <form wire:submit="submit" class="p-6 sm:p-8 space-y-8">
                     @if ($errors->any())
                         <div class="bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 px-5 py-4 rounded-2xl text-sm" role="alert">
-                            <div class="font-extrabold mb-1">Mohon periksa kembali:</div>
+                            <div class="font-extrabold mb-1">Mohon periksa kembali isian formulir:</div>
                             <ul class="list-disc pl-5 space-y-0.5 text-xs sm:text-sm">
                                 @foreach ($errors->all() as $error)
                                     <li>{{ $error }}</li>
@@ -143,68 +257,84 @@
                         </div>
                     @endif
 
-                    <!-- STEP 1: JENJANG & DATA SEKOLAH -->
-                    <section class="p-5 sm:p-6 rounded-2xl bg-slate-50/80 dark:bg-slate-900/50 border border-slate-200/80 dark:border-slate-700 space-y-5">
+                    <!-- SECTION A: SCHOOL INFO CARD -->
+                    <section class="p-5 sm:p-6 rounded-2xl bg-slate-50/80 dark:bg-slate-900/55 border border-slate-200/80 dark:border-slate-700 space-y-5">
                         <div class="flex items-center gap-3 pb-3 border-b border-slate-200 dark:border-slate-700">
-                            <div class="w-9 h-9 rounded-xl bg-genza-blue text-genza-yellow flex items-center justify-center font-black text-sm shrink-0">01</div>
+                            <div class="w-9 h-9 rounded-xl bg-genza-blue text-genza-yellow flex items-center justify-center font-black text-sm shrink-0 shadow-sm">01</div>
                             <div>
-                                <h3 class="text-lg font-extrabold text-genza-blue dark:text-white">Data Sekolah &amp; Pendamping (PIC)</h3>
-                                <p class="text-xs text-slate-500 dark:text-slate-400">Pilih jenjang kompetisi dan masukkan nama resmi sekolah</p>
+                                <h3 class="text-lg font-extrabold text-genza-blue dark:text-white">Informasi Sekolah &amp; Guru Pendamping</h3>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">Pilih jenjang (SD/MI atau SMP/MTs) dan ketik nama sekolah untuk mengecek kuota sekolah Anda</p>
                             </div>
                         </div>
 
-                        <!-- Level Switcher -->
+                        <!-- Reactive Jenjang Toggle (SD/MI vs SMP/MTs) -->
                         <div>
-                            <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Kategori Jenjang Sekolah <span class="text-rose-500">*</span></label>
+                            <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Jenjang Kompetisi <span class="text-rose-500">*</span></label>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                                <label class="relative flex items-start gap-3.5 p-4 rounded-xl border-2 cursor-pointer transition-all bg-white dark:bg-slate-900 {{ $school_level === 'SD' ? 'border-genza-blue dark:border-genza-yellow bg-blue-50/40 dark:bg-slate-800' : 'border-slate-200 dark:border-slate-700' }}">
+                                <label class="relative flex items-start gap-3.5 p-4 rounded-2xl border-2 cursor-pointer transition-all bg-white dark:bg-slate-900 {{ $school_level === 'SD' ? 'border-genza-blue dark:border-genza-yellow ring-2 ring-[#0a4282]/15 dark:ring-[#fbb900]/20' : 'border-slate-200 dark:border-slate-700' }}">
                                     <input type="radio" wire:model.live="school_level" value="SD" class="mt-1 accent-[#0a4282]">
                                     <div>
                                         <div class="flex items-center gap-2">
-                                            <span class="font-extrabold text-sm text-slate-900 dark:text-white">Tingkat SD / MI</span>
-                                            <span class="px-2 py-0.5 text-[10px] font-extrabold uppercase rounded-full bg-sky-100 text-sky-700 dark:bg-sky-900/60 dark:text-sky-300">Kelas 4, 5, 6</span>
+                                            <span class="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white">Tingkat SD / MI</span>
+                                            <span class="px-2.5 py-0.5 text-[10px] font-extrabold uppercase rounded-full bg-sky-100 text-sky-700 dark:bg-sky-900/60 dark:text-sky-300">Kelas 4, 5, 6</span>
                                         </div>
-                                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Maksimal 2 siswa per kelas (Total 6 siswa per sekolah).</p>
+                                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Setiap sekolah dapat mendaftarkan maks. <strong>2 peserta per kelas</strong>.</p>
                                     </div>
                                 </label>
 
-                                <label class="relative flex items-start gap-3.5 p-4 rounded-xl border-2 cursor-pointer transition-all bg-white dark:bg-slate-900 {{ $school_level === 'SMP' ? 'border-genza-blue dark:border-genza-yellow bg-blue-50/40 dark:bg-slate-800' : 'border-slate-200 dark:border-slate-700' }}">
+                                <label class="relative flex items-start gap-3.5 p-4 rounded-2xl border-2 cursor-pointer transition-all bg-white dark:bg-slate-900 {{ $school_level === 'SMP' ? 'border-genza-blue dark:border-genza-yellow ring-2 ring-[#0a4282]/15 dark:ring-[#fbb900]/20' : 'border-slate-200 dark:border-slate-700' }}">
                                     <input type="radio" wire:model.live="school_level" value="SMP" class="mt-1 accent-[#0a4282]">
                                     <div>
                                         <div class="flex items-center gap-2">
-                                            <span class="font-extrabold text-sm text-slate-900 dark:text-white">Tingkat SMP / MTs</span>
-                                            <span class="px-2 py-0.5 text-[10px] font-extrabold uppercase rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-300">Kelas 7, 8, 9</span>
+                                            <span class="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white">Tingkat SMP / MTs</span>
+                                            <span class="px-2.5 py-0.5 text-[10px] font-extrabold uppercase rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-300">Kelas 7, 8, 9</span>
                                         </div>
-                                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Maksimal 1 siswa per kelas (Total 3 siswa per sekolah).</p>
+                                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Setiap sekolah dapat mendaftarkan maks. <strong>1 peserta per kelas</strong>.</p>
                                     </div>
                                 </label>
                             </div>
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                            <div class="sm:col-span-1">
-                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Nama Sekolah Asal <span class="text-rose-500">*</span></label>
-                                <input type="text" wire:model.live.debounce.300ms="school_name" class="bc-input w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm" placeholder="{{ $school_level === 'SD' ? 'Contoh: SDN 1 Tanjung' : 'Contoh: SMPN 1 Tanjung' }}" required>
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Nama Sekolah <span class="text-rose-500">*</span></label>
+                                <input type="text"
+                                       wire:model.live.debounce.300ms="school_name"
+                                       class="bc-input w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm"
+                                       placeholder="{{ $school_level === 'SD' ? 'Contoh: SDN 1 Tanjung' : 'Contoh: SMPN 1 Tanjung' }}"
+                                       required>
                             </div>
                             <div>
-                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Nama Guru / Orang Tua PIC <span class="text-rose-500">*</span></label>
-                                <input type="text" wire:model="pic_name" class="bc-input w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm" placeholder="Nama Pendamping" required>
+                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Nama Guru Pendamping <span class="text-rose-500">*</span></label>
+                                <input type="text"
+                                       wire:model="pic_name"
+                                       class="bc-input w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm"
+                                       placeholder="Nama Lengkap Guru / PIC"
+                                       required>
                             </div>
                             <div>
-                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">No. WhatsApp PIC <span class="text-rose-500">*</span></label>
-                                <input type="text" wire:model="pic_phone" class="bc-input w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm" placeholder="08..." required>
+                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">No. WhatsApp Guru Pendamping <span class="text-rose-500">*</span></label>
+                                <input type="text"
+                                       wire:model="pic_phone"
+                                       class="bc-input w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm"
+                                       placeholder="08..."
+                                       required>
                             </div>
                         </div>
                     </section>
 
-                    <!-- STEP 2: DAFTAR PESERTA PER KELAS -->
+                    <!-- SECTION B: DYNAMIC GRADE PARTICIPANT CARDS -->
                     <section class="space-y-5">
                         <div class="flex items-center justify-between flex-wrap gap-2">
                             <div class="flex items-center gap-3">
-                                <div class="w-9 h-9 rounded-xl bg-genza-blue text-genza-yellow flex items-center justify-center font-black text-sm shrink-0">02</div>
+                                <div class="w-9 h-9 rounded-xl bg-genza-blue text-genza-yellow flex items-center justify-center font-black text-sm shrink-0 shadow-sm">02</div>
                                 <div>
-                                    <h3 class="text-lg font-extrabold text-genza-blue dark:text-white">Daftar Peserta Delegasi ({{ $school_level === 'SD' ? 'Kelas 4, 5, 6' : 'Kelas 7, 8, 9' }})</h3>
-                                    <p class="text-xs text-slate-500 dark:text-slate-400">Kosongkan kolom kelas apabila sekolah tidak mengirimkan wakil pada kelas tersebut.</p>
+                                    <h3 class="text-lg font-extrabold text-genza-blue dark:text-white">
+                                        Data Peserta Per Kelas ({{ $school_level === 'SD' ? 'SD/MI: Kelas 4, 5, 6' : 'SMP/MTs: Kelas 7, 8, 9' }})
+                                    </h3>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400">
+                                        Isi data siswa pada kelas yang diikuti. Kelas yang mencapai 35/35 otomatis terkunci.
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -214,79 +344,106 @@
                                 $q = $quotaSummary[$grade];
                                 $maxSlots = $q['max_per_school'];
                                 $availableSlots = $q['available_slots'];
+                                $isFull = $q['is_full'];
                             @endphp
 
-                            <div class="p-5 sm:p-6 rounded-2xl border-2 transition-all {{ $q['is_full'] ? 'bg-rose-50/50 dark:bg-rose-950/20 border-rose-200 dark:border-rose-800/70' : 'bg-slate-50/80 dark:bg-slate-900/50 border-slate-200/80 dark:border-slate-700' }}">
-                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3.5 mb-4 border-b border-slate-200 dark:border-slate-700">
-                                    <div class="flex items-center gap-2.5">
-                                        <span class="px-3 py-1 rounded-xl bg-genza-blue text-genza-yellow font-black text-sm">
+                            <div class="p-5 sm:p-6 rounded-2xl border-2 transition-all {{ $isFull ? 'bg-rose-50/50 dark:bg-rose-950/25 border-rose-300 dark:border-rose-800/80' : 'bg-slate-50/80 dark:bg-slate-900/55 border-slate-200/80 dark:border-slate-700' }}">
+                                <!-- Card Header -->
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-4 mb-4 border-b border-slate-200 dark:border-slate-700">
+                                    <div class="flex items-center gap-2.5 flex-wrap">
+                                        <span class="px-3.5 py-1 rounded-full bg-genza-blue text-genza-yellow font-black text-sm shadow-sm">
                                             {{ $q['class_label'] }}
                                         </span>
-                                        <span class="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-200">
-                                            Maks. {{ $maxSlots }} Siswa / Sekolah
+                                        <span class="text-xs sm:text-sm font-extrabold text-slate-700 dark:text-slate-200">
+                                            {{ $maxSlots === 2 ? 'Slot Delegasi: Peserta 1 & Peserta 2' : 'Slot Delegasi: 1 Peserta' }}
                                         </span>
                                     </div>
 
                                     <div class="flex items-center gap-2 flex-wrap">
-                                        <span class="px-2.5 py-1 rounded-full text-xs font-extrabold {{ $q['is_full'] ? 'bg-rose-600 text-white' : 'bg-sky-100 text-sky-800 dark:bg-sky-900/50 dark:text-sky-300' }}">
-                                            Kuota Global: {{ $q['global_used'] }}/{{ $q['max_global'] }} (Sisa {{ $q['global_remaining'] }})
-                                        </span>
-                                        @if(trim($school_name) !== '')
-                                            <span class="px-2.5 py-1 rounded-full text-xs font-extrabold {{ $q['school_remaining'] === 0 ? 'bg-amber-500 text-white' : 'bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300' }}">
-                                                Sisa Slot Sekolah Anda: {{ $availableSlots }}
+                                        @if($isFull)
+                                            <span class="px-3 py-1 rounded-full text-xs font-black uppercase bg-rose-600 text-white shadow-sm">
+                                                KUOTA PENUH (35/35)
+                                            </span>
+                                        @else
+                                            <span class="px-3 py-1 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300">
+                                                Terisi {{ $q['global_used'] }} / 35 &bull; Sisa {{ $q['global_remaining'] }} Kursi
+                                            </span>
+                                        @endif
+
+                                        @if(trim($school_name) !== '' && !$isFull)
+                                            <span class="px-3 py-1 rounded-full text-xs font-extrabold {{ $q['school_remaining'] === 0 ? 'bg-rose-600 text-white' : 'bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-300' }}">
+                                                Sisa Slot Sekolah: {{ $availableSlots }} / {{ $maxSlots }}
                                             </span>
                                         @endif
                                     </div>
                                 </div>
 
-                                @if($q['is_full'])
-                                    <div class="p-4 rounded-xl bg-rose-100/80 dark:bg-rose-950/60 text-rose-800 dark:text-rose-200 text-xs sm:text-sm font-bold flex items-center gap-2.5">
+                                @if($isFull)
+                                    <div class="p-4 rounded-xl bg-rose-100/90 dark:bg-rose-950/70 border border-rose-300 dark:border-rose-800 text-rose-800 dark:text-rose-200 text-xs sm:text-sm font-bold flex items-center gap-2.5 mb-3">
                                         <svg class="w-5 h-5 text-rose-600 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>
-                                        <span>Mohon maaf, kuota {{ $q['class_label'] }} sudah penuh (35/35). Anda tetap dapat mendaftarkan peserta pada kelas lain yang masih tersedia.</span>
+                                        <span>KUOTA PENUH (35/35) — Pendaftaran untuk {{ $q['class_label'] }} telah ditutup. Silakan isi peserta pada kelas lain yang masih tersedia.</span>
                                     </div>
                                 @elseif(trim($school_name) !== '' && $q['school_remaining'] === 0)
-                                    <div class="p-4 rounded-xl bg-amber-100/80 dark:bg-amber-950/60 text-amber-900 dark:text-amber-200 text-xs sm:text-sm font-bold">
-                                        Sekolah <strong>{{ trim($school_name) }}</strong> sudah memenuhi batas maksimal {{ $maxSlots }} siswa untuk {{ $q['class_label'] }}.
+                                    <div class="p-4 rounded-xl bg-amber-100/90 dark:bg-amber-950/70 border border-amber-300 dark:border-amber-800 text-amber-900 dark:text-amber-200 text-xs sm:text-sm font-bold mb-3">
+                                        Sekolah <strong>{{ trim($school_name) }}</strong> telah mencapai batas maksimal {{ $maxSlots }} peserta pada {{ $q['class_label'] }}.
                                     </div>
                                 @endif
 
-                                <div class="space-y-3 mt-3">
+                                <!-- Participant Slots -->
+                                <div class="space-y-3.5">
                                     @for($slotIdx = 0; $slotIdx < $maxSlots; $slotIdx++)
                                         @php
                                             $slotLocked = $slotIdx >= $availableSlots;
                                         @endphp
-                                        <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700 {{ $slotLocked ? 'opacity-55' : '' }}">
-                                            <div class="sm:col-span-2">
-                                                <span class="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider {{ $slotLocked ? 'text-rose-500' : 'text-genza-blue dark:text-genza-yellow' }}">
-                                                    @if($slotLocked)
-                                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path></svg>
-                                                        <span>Terkunci</span>
-                                                    @else
-                                                        <span>Peserta #{{ $slotIdx + 1 }}</span>
-                                                    @endif
+                                        <div class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-700 {{ $slotLocked ? 'opacity-60' : '' }}">
+                                            <div class="flex items-center justify-between mb-3">
+                                                <span class="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider {{ $slotLocked ? 'text-rose-600 dark:text-rose-400' : 'text-genza-blue dark:text-genza-yellow' }}">
+                                                    <span>Peserta {{ $slotIdx + 1 }} ({{ $q['class_label'] }})</span>
                                                 </span>
+
+                                                @if($isFull)
+                                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-rose-600 text-white">
+                                                        KUOTA PENUH (35/35)
+                                                    </span>
+                                                @elseif($slotLocked)
+                                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-rose-100 text-rose-700 dark:bg-rose-900/60 dark:text-rose-300">
+                                                        SLOT TERKUNCI (SISA KUOTA {{ $q['global_remaining'] }})
+                                                    </span>
+                                                @else
+                                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300">
+                                                        Slot Tersedia
+                                                    </span>
+                                                @endif
                                             </div>
-                                            <div class="sm:col-span-5">
-                                                <input type="text"
-                                                       wire:model="participants.{{ $grade }}.{{ $slotIdx }}.name"
-                                                       @disabled($slotLocked)
-                                                       class="bc-input w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm disabled:cursor-not-allowed"
-                                                       placeholder="{{ $slotLocked ? 'Slot Kuota Tidak Tersedia' : 'Nama Lengkap Siswa (Kelas ' . $grade . ')' }}">
-                                            </div>
-                                            <div class="sm:col-span-2">
-                                                <select wire:model="participants.{{ $grade }}.{{ $slotIdx }}.gender"
-                                                        @disabled($slotLocked)
-                                                        class="bc-input w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm disabled:cursor-not-allowed">
-                                                    <option value="L">Laki-laki (L)</option>
-                                                    <option value="P">Perempuan (P)</option>
-                                                </select>
-                                            </div>
-                                            <div class="sm:col-span-3">
-                                                <input type="text"
-                                                       wire:model="participants.{{ $grade }}.{{ $slotIdx }}.phone"
-                                                       @disabled($slotLocked)
-                                                       class="bc-input w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm disabled:cursor-not-allowed"
-                                                       placeholder="No. WA Siswa (Opsional)">
+
+                                            <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
+                                                <div class="sm:col-span-5">
+                                                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">Nama Lengkap Peserta {{ $slotIdx + 1 }}</label>
+                                                    <input type="text"
+                                                           wire:model="participants.{{ $grade }}.{{ $slotIdx }}.name"
+                                                           @disabled($slotLocked)
+                                                           class="bc-input w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm disabled:cursor-not-allowed"
+                                                           placeholder="{{ $slotLocked ? 'KUOTA PENUH (35/35)' : 'Masukkan Nama Lengkap Siswa' }}">
+                                                </div>
+
+                                                <div class="sm:col-span-4">
+                                                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">NISN / No. HP Siswa</label>
+                                                    <input type="text"
+                                                           wire:model="participants.{{ $grade }}.{{ $slotIdx }}.phone"
+                                                           @disabled($slotLocked)
+                                                           class="bc-input w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm disabled:cursor-not-allowed"
+                                                           placeholder="{{ $slotLocked ? 'Terkunci' : 'NISN atau No. WhatsApp' }}">
+                                                </div>
+
+                                                <div class="sm:col-span-3">
+                                                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">Jenis Kelamin</label>
+                                                    <select wire:model="participants.{{ $grade }}.{{ $slotIdx }}.gender"
+                                                            @disabled($slotLocked)
+                                                            class="bc-input w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm disabled:cursor-not-allowed">
+                                                        <option value="L">Laki-laki (L)</option>
+                                                        <option value="P">Perempuan (P)</option>
+                                                    </select>
+                                                </div>
                                             </div>
                                         </div>
                                     @endfor
@@ -295,22 +452,23 @@
                         @endforeach
                     </section>
 
-                    <!-- Submit CTA -->
+                    <!-- Submit Button -->
                     <div class="pt-2">
                         <button type="submit"
                                 wire:loading.attr="disabled"
                                 class="w-full inline-flex items-center justify-center gap-2.5 bg-genza-blue hover:bg-[#083568] disabled:opacity-60 text-white text-base sm:text-lg font-extrabold px-8 py-4 rounded-full hover:-translate-y-0.5 transition-all duration-200 shadow-xl shadow-[#0a4282]/25">
-                            <span wire:loading.remove wire:target="submit">Daftarkan Peserta Brain Champion</span>
-                            <span wire:loading wire:target="submit">Memproses &amp; Mengunci Kuota...</span>
+                            <span wire:loading.remove wire:target="submit">Kirim &amp; Kunci Kuota Peserta Brain Champion</span>
+                            <span wire:loading wire:target="submit">Memvalidasi Kuota &amp; Menyimpan Data...</span>
                             <svg class="w-5 h-5 text-genza-yellow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                         </button>
                     </div>
                 </form>
             </div>
+
         </div>
     </main>
 
-    <footer class="py-6 text-center text-slate-500 dark:text-slate-400 text-xs sm:text-sm border-t border-slate-200/60 dark:border-slate-800">
-        &copy; {{ date('Y') }} Genza English Center — G-English Brain Champion "One Mind, One Champion".
+    <footer class="no-print py-6 text-center text-slate-500 dark:text-slate-400 text-xs sm:text-sm border-t border-slate-200/60 dark:border-slate-800">
+        &copy; {{ date('Y') }} Genza English Center — G-English Brain Champion <span class="font-bold text-genza-blue dark:text-genza-yellow">"ONE MIND, ONE CHAMPION"</span>.
     </footer>
 </div>

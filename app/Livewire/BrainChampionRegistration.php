@@ -9,7 +9,7 @@ use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-#[Layout('layouts.brain-champion')]
+#[Layout('brain-champion')]
 class BrainChampionRegistration extends Component
 {
     public const EVENT_TAG = 'G-English Brain Champion';
@@ -19,6 +19,10 @@ class BrainChampionRegistration extends Component
     public string $school_name = '';
     public string $pic_name = '';
     public string $pic_phone = '';
+    public string $lastSubmittedSchool = '';
+    public string $lastSubmittedPicName = '';
+    public string $lastSubmittedPicPhone = '';
+    public string $lastSubmittedAt = '';
 
     /**
      * Participants keyed by grade ('4','5','6','7','8','9') -> slot index (0..1 for SD, 0 for SMP)
@@ -273,6 +277,8 @@ class BrainChampionRegistration extends Component
                     $results[] = [
                         'registration_number' => $regCode,
                         'name' => $student->name,
+                        'gender' => $entry['gender'],
+                        'phone' => $entry['phone'],
                         'grade' => (int) $grade,
                         'class_name' => $classLabel,
                         'school_name' => $cleanSchoolName,
@@ -284,6 +290,10 @@ class BrainChampionRegistration extends Component
             return $results;
         });
 
+        $this->lastSubmittedSchool = $cleanSchoolName;
+        $this->lastSubmittedPicName = trim($this->pic_name);
+        $this->lastSubmittedPicPhone = trim($this->pic_phone);
+        $this->lastSubmittedAt = now()->translatedFormat('d F Y, H:i') . ' WITA';
         $this->registeredResults = $createdRecords;
         $this->initializeParticipantSlots();
     }
