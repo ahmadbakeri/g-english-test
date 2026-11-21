@@ -76,9 +76,20 @@
         border-radius: 1rem !important; /* rounded-2xl */
         transition: all 0.3s ease-in-out !important;
     }
-    .fi-ta-record:hover, .fi-wi-stats-overview-stat:hover {
+    .fi-wi-stats-overview-stat:hover {
         transform: translateY(-2px);
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04) !important;
+    }
+    .fi-ta-record:hover {
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04) !important;
+    }
+    .fi-ta-record:has([aria-expanded="true"]),
+    .fi-ta-record:has(.fi-dropdown-panel:not([style*="display: none"])),
+    .fi-ta-record:focus-within {
+        position: relative !important;
+        z-index: 40 !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
     }
     
     .dark .fi-ta-record:hover, .dark .fi-wi-stats-overview-stat:hover {
@@ -478,6 +489,7 @@
         border-spacing: 0 0.5rem !important;
         background: transparent !important;
         width: 100% !important;
+        max-width: 100% !important;
     }
     
     .fi-ta-header {
@@ -488,7 +500,7 @@
     .fi-ta-table thead th {
         background-color: rgba(10, 66, 130, 0.05) !important;
         border-bottom: 2px solid rgba(10, 66, 130, 0.14) !important;
-        padding: 0.875rem 1rem !important;
+        padding: 0.75rem 0.65rem !important;
         font-weight: 700 !important;
         text-transform: uppercase !important;
         letter-spacing: 0.05em !important;
@@ -503,12 +515,15 @@
         color: #93c5fd !important;
     }
 
-    /* Table Rows (Floating Rows effect) */
+    /* Table Rows (Floating Rows effect without transform stacking-context trap) */
     .fi-ta-row {
         background-color: #ffffff !important;
         border-radius: 1rem !important;
         box-shadow: 0 2px 5px -1px rgba(15, 23, 42, 0.04) !important;
-        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        transition: background-color 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease !important;
+        transform: none !important;
+        position: relative;
+        z-index: 1;
     }
     
     .dark .fi-ta-row {
@@ -517,10 +532,9 @@
     }
 
     .fi-ta-row:hover {
-        transform: translateY(-2px) !important;
+        transform: none !important;
         box-shadow: 0 10px 18px -4px rgba(10, 66, 130, 0.12), 0 4px 6px -2px rgba(10, 66, 130, 0.05) !important;
-        z-index: 10;
-        position: relative;
+        z-index: 5;
     }
     
     .dark .fi-ta-row:hover {
@@ -528,14 +542,41 @@
         box-shadow: 0 10px 18px -4px rgba(0, 0, 0, 0.55) !important;
     }
 
-    /* Table Cells: Vertical Padding, Crisp Subtle Borders & Column Alignment */
+    /* Elevate active row when its ActionGroup dropdown is open so menu never slips behind subsequent rows */
+    .fi-ta-row:has([aria-expanded="true"]),
+    .fi-ta-row:has(.fi-dropdown-panel:not([style*="display: none"])),
+    .fi-ta-row:focus-within {
+        position: relative !important;
+        z-index: 40 !important;
+    }
+
+    /* ActionGroup & Global Dropdown Panels: opaque surface + top z-index */
+    .fi-dropdown-panel {
+        z-index: 9999 !important;
+        background-color: #ffffff !important;
+        border: 1px solid rgba(15, 23, 42, 0.1) !important;
+        border-radius: 0.875rem !important;
+        box-shadow: 0 15px 30px -5px rgba(15, 23, 42, 0.16), 0 8px 10px -6px rgba(15, 23, 42, 0.08) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+    .dark .fi-dropdown-panel {
+        background-color: #0f172a !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.65), 0 8px 10px -6px rgba(0, 0, 0, 0.45) !important;
+    }
+
+    /* Table Cells: Vertical & Compact Horizontal Padding, Crisp Subtle Borders & Column Alignment */
     .fi-ta-cell,
     .fi-ta-row td {
-        padding-top: 0.75rem !important;
-        padding-bottom: 0.75rem !important;
+        padding: 0.65rem 0.65rem !important;
         vertical-align: middle !important;
         border-top: 1px solid rgba(15, 23, 42, 0.05) !important;
         border-bottom: 1px solid rgba(15, 23, 42, 0.05) !important;
+    }
+    .fi-ta-cell .fi-ta-col-wrp {
+        padding-left: 0.25rem !important;
+        padding-right: 0.25rem !important;
     }
     
     .dark .fi-ta-cell,
@@ -638,11 +679,21 @@
         color: #fbb900 !important;
     }
 
-    /* Remove default ugly borders from the table container */
-    .fi-ta-content {
+    /* Remove default ugly borders & prevent horizontal scrollbar / dropdown clipping on desktop tables */
+    .fi-ta-content,
+    .fi-ta-content-ctn,
+    .fi-ta-ctn {
         border: none !important;
         box-shadow: none !important;
         background: transparent !important;
+    }
+    @media (min-width: 1024px) {
+        .fi-ta-content,
+        .fi-ta-content-ctn,
+        .fi-ta-ctn {
+            overflow-x: visible !important;
+            overflow-y: visible !important;
+        }
     }
 
     /* 3. Global Sections, Form Headers & Modals */
