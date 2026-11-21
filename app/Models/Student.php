@@ -22,6 +22,8 @@ class Student extends Model
         'birth_date',
         'address',
         'phone',
+        'parent_name',
+        'parent_phone',
         'mother_name',
         'mother_phone',
         'mother_email',
@@ -86,29 +88,47 @@ class Student extends Model
         });
 
         static::saved(function (Student $student) {
-            // Auto-provision Parent Users
+            // Auto-provision & Sync Parent / Guardian Users
             $parentsToSync = [];
-            
-            $provisionParent = function ($phone, $name) use (&$parentsToSync) {
-                if ($phone) {
+
+            $provisionParent = function ($phone, $name, $email = null) use (&$parentsToSync) {
+                $phone = trim((string) $phone);
+                if ($phone !== '') {
+                    $resolvedName = trim((string) $name) !== '' ? trim((string) $name) : 'Orang Tua';
+                    $resolvedEmail = trim((string) $email) !== '' ? trim((string) $email) : ($phone . '@parent.g-english.com');
+
                     $user = User::firstOrCreate(
                         ['username' => $phone],
                         [
-                            'name' => $name ?? 'Orang Tua',
-                            'email' => $phone . '@parent.g-english.com',
+                            'name' => $resolvedName,
+                            'email' => $resolvedEmail,
                             'password' => \Illuminate\Support\Facades\Hash::make($phone),
-                            'role' => 'parent'
+                            'role' => 'parent',
                         ]
                     );
+
+                    // Sync updated name/email directly to linked parent User account
+                    $updates = [];
+                    if (trim((string) $name) !== '' && $user->name !== $resolvedName) {
+                        $updates['name'] = $resolvedName;
+                    }
+                    if (trim((string) $email) !== '' && $user->email !== $resolvedEmail && !User::where('email', $resolvedEmail)->where('id', '!=', $user->id)->exists()) {
+                        $updates['email'] = $resolvedEmail;
+                    }
+                    if (!empty($updates)) {
+                        $user->update($updates);
+                    }
+
                     $parentsToSync[] = $user->id;
                 }
             };
 
-            $provisionParent($student->father_phone, $student->father_name);
-            $provisionParent($student->mother_phone, $student->mother_name);
+            $provisionParent($student->father_phone, $student->father_name, $student->father_email);
+            $provisionParent($student->mother_phone, $student->mother_name, $student->mother_email);
+            $provisionParent($student->parent_phone, $student->parent_name);
 
             if (count($parentsToSync) > 0) {
-                $student->parents()->syncWithoutDetaching($parentsToSync);
+                $student->parents()->sync(array_unique($parentsToSync));
             }
         });
 

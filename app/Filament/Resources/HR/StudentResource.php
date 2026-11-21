@@ -5,10 +5,12 @@ namespace App\Filament\Resources\HR;
 use App\Filament\Resources\HR\StudentResource\Pages;
 use App\Models\Student;
 use Filament\Forms;
-use Filament\Schemas\Schema;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables;
+use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class StudentResource extends Resource
 {
@@ -34,55 +36,63 @@ class StudentResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema->columns(1)->components([
-                \Filament\Schemas\Components\Section::make(__('Student Data'))
-                    ->schema([
-                        Forms\Components\TextInput::make('nis')
-                            ->label(__('No. Siswa (NIS)'))
-                            ->required()
-                            ->unique(ignoreRecord: true)
-                            ->maxLength(20),
-                        Forms\Components\Select::make('student_type')
-                            ->label(__('Student Type'))
-                            ->options([
-                                'internal' => __('Internal'),
-                                'external' => __('External'),
-                            ])
-                            ->default('internal')
-                            ->required(),
-                        Forms\Components\TextInput::make('name')
-                            ->label(__('Full Name'))
-                            ->required()
-                            ->maxLength(255),
-                        Forms\Components\Select::make('gender')
-                            ->label(__('Gender'))
-                            ->options([
-                                'L' => __('Male'),
-                                'P' => __('Female'),
-                            ]),
-                        Forms\Components\DatePicker::make('birth_date')
-                            ->label(__('Date of Birth')),
-                        Forms\Components\Textarea::make('address')
-                            ->label(__('Address'))
-                            ->rows(3),
-                        Forms\Components\TextInput::make('phone')
-                            ->label(__('Phone No.'))
-                            ->tel(),
-                    ])->columns(2),
+            \Filament\Schemas\Components\Section::make(__('Student Data'))
+                ->schema([
+                    Forms\Components\TextInput::make('nis')
+                        ->label(__('No. Siswa (NIS)'))
+                        ->required()
+                        ->unique(ignoreRecord: true)
+                        ->maxLength(20),
+                    Forms\Components\Select::make('student_type')
+                        ->label(__('Student Type'))
+                        ->options([
+                            'internal' => 'Siswa Internal',
+                            'external' => 'Siswa Eksternal',
+                        ])
+                        ->default('internal')
+                        ->required(),
+                    Forms\Components\TextInput::make('name')
+                        ->label(__('Full Name'))
+                        ->required()
+                        ->maxLength(255),
+                    Forms\Components\Select::make('gender')
+                        ->label(__('Gender'))
+                        ->options([
+                            'L' => __('Male'),
+                            'P' => __('Female'),
+                        ]),
+                    Forms\Components\TextInput::make('birth_place')
+                        ->label(__('Place of Birth')),
+                    Forms\Components\DatePicker::make('birth_date')
+                        ->label(__('Date of Birth')),
+                    Forms\Components\TextInput::make('phone')
+                        ->label(__('Phone No.'))
+                        ->tel(),
+                    Forms\Components\Select::make('education_level')
+                        ->label(__('Education Level'))
+                        ->options([
+                            'SD' => 'SD',
+                            'SMP' => 'SMP',
+                            'SMA' => 'SMA',
+                            'Umum' => 'Umum',
+                        ]),
+                    Forms\Components\TextInput::make('school_name')
+                        ->label('Sekolah Asal (School Name)'),
+                    Forms\Components\TextInput::make('class_name')
+                        ->label('Kelas (Class)'),
+                    Forms\Components\TextInput::make('course_level')
+                        ->label(__('Course Level')),
+                    Forms\Components\Textarea::make('address')
+                        ->label(__('Address'))
+                        ->rows(3)
+                        ->columnSpanFull(),
+                ])->columns(2),
 
-                \Filament\Schemas\Components\Section::make(__('Parent Data'))->schema([
-                    \Filament\Schemas\Components\Fieldset::make(__('Mother\'s Data'))->schema([
-                        Forms\Components\TextInput::make('mother_name')
-                            ->label(__('Mother\'s Name')),
-                        Forms\Components\TextInput::make('mother_phone')
-                            ->label(__('Mother\'s Phone'))
-                            ->tel(),
-                        Forms\Components\TextInput::make('mother_email')
-                            ->label(__('Mother\'s Email'))
-                            ->email(),
-                        Forms\Components\TextInput::make('mother_job')
-                            ->label(__('Mother\'s Occupation')),
-                    ])->columns(2),
-                    \Filament\Schemas\Components\Fieldset::make(__('Father\'s Data'))->schema([
+            \Filament\Schemas\Components\Section::make('Data Orang Tua / Wali')
+                ->description('Data Ayah, Ibu, dan Wali disinkronkan otomatis ke akun Portal Orang Tua (student_parent).')
+                ->icon('heroicon-o-users')
+                ->schema([
+                    \Filament\Schemas\Components\Fieldset::make('Data Ayah (Father)')->schema([
                         Forms\Components\TextInput::make('father_name')
                             ->label(__('Father\'s Name')),
                         Forms\Components\TextInput::make('father_phone')
@@ -94,84 +104,144 @@ class StudentResource extends Resource
                         Forms\Components\TextInput::make('father_job')
                             ->label(__('Father\'s Occupation')),
                     ])->columns(2),
+
+                    \Filament\Schemas\Components\Fieldset::make('Data Ibu (Mother)')->schema([
+                        Forms\Components\TextInput::make('mother_name')
+                            ->label(__('Mother\'s Name')),
+                        Forms\Components\TextInput::make('mother_phone')
+                            ->label(__('Mother\'s Phone'))
+                            ->tel(),
+                        Forms\Components\TextInput::make('mother_email')
+                            ->label(__('Mother\'s Email'))
+                            ->email(),
+                        Forms\Components\TextInput::make('mother_job')
+                            ->label(__('Mother\'s Occupation')),
+                    ])->columns(2),
+
+                    \Filament\Schemas\Components\Fieldset::make('Data Wali (Guardian)')->schema([
+                        Forms\Components\TextInput::make('parent_name')
+                            ->label('Nama Wali (Guardian Name)'),
+                        Forms\Components\TextInput::make('parent_phone')
+                            ->label('No. HP Wali (Guardian Phone)')
+                            ->tel(),
+                    ])->columns(2),
                 ]),
 
-                \Filament\Schemas\Components\Section::make(__('Status'))
-                    ->schema([
-                        Forms\Components\FileUpload::make('photo')
-                            ->label(__('Photo'))
-                            ->avatar()
-                            ->alignCenter()
-                            ->columnSpanFull()
-                            ->extraAttributes(['class' => 'flex justify-center text-center hide-edit-btn'])
-                            ->circleCropper()
-                            ->imageCropAspectRatio('1:1')
-                            ->automaticallyOpenImageEditorForAspectRatio()
-                            ->disk('public')
-                            ->directory('students')
-                            ->maxSize(2048)
-                            ->hintAction(
-                                \Filament\Actions\Action::make('remove_photo')
-                                    ->label(__('Remove (Reset)'))
-                                    ->icon('heroicon-o-trash')
-                                    ->color('danger')
-                                    ->action(function ($record, callable $set) {
-                                        $set('photo', null);
-                                        if ($record) {
-                                            $record->photo = null;
-                                            $record->save();
-                                        }
-                                    })
-                            ),
-                        
-
-                        
-
-                        Forms\Components\Toggle::make('is_active')
-                            ->label(__('Active'))
-                            ->default(true),
-                    ])->columns(2),
-            ]);
+            \Filament\Schemas\Components\Section::make(__('Status'))
+                ->schema([
+                    Forms\Components\FileUpload::make('photo')
+                        ->label(__('Photo'))
+                        ->avatar()
+                        ->alignCenter()
+                        ->columnSpanFull()
+                        ->extraAttributes(['class' => 'flex justify-center text-center hide-edit-btn'])
+                        ->circleCropper()
+                        ->imageCropAspectRatio('1:1')
+                        ->automaticallyOpenImageEditorForAspectRatio()
+                        ->disk('public')
+                        ->directory('students')
+                        ->maxSize(2048)
+                        ->hintAction(
+                            \Filament\Actions\Action::make('remove_photo')
+                                ->label(__('Remove (Reset)'))
+                                ->icon('heroicon-o-trash')
+                                ->color('danger')
+                                ->action(function ($record, callable $set) {
+                                    $set('photo', null);
+                                    if ($record) {
+                                        $record->photo = null;
+                                        $record->save();
+                                    }
+                                })
+                        ),
+                    Forms\Components\Toggle::make('is_active')
+                        ->label(__('Active'))
+                        ->default(true),
+                ])->columns(2),
+        ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
+            ->groups([
+                Group::make('class_name')
+                    ->label('Kelas')
+                    ->collapsible()
+                    ->getTitleFromRecordUsing(function (Student $record): string {
+                        $enrolledClasses = $record->classes->pluck('name')->filter()->join(', ');
+                        if ($enrolledClasses !== '') {
+                            return $enrolledClasses;
+                        }
+                        return filled($record->class_name) ? (string) $record->class_name : 'Tanpa Kelas';
+                    }),
+                Group::make('school_name')
+                    ->label('Sekolah — Kelas')
+                    ->collapsible()
+                    ->getTitleFromRecordUsing(function (Student $record): string {
+                        $school = filled($record->school_name) ? $record->school_name : 'Tanpa Sekolah';
+                        $class = filled($record->class_name)
+                            ? $record->class_name
+                            : ($record->classes->pluck('name')->filter()->join(', ') ?: 'Tanpa Kelas');
+                        return "{$school} — {$class}";
+                    })
+                    ->orderQueryUsing(fn (Builder $query, string $direction) => $query->orderBy('school_name', $direction)->orderBy('class_name', $direction)),
+            ])
+            ->defaultGroup(function ($livewire): ?string {
+                $activeTab = $livewire->activeTab ?? null;
+                return match ($activeTab) {
+                    'internal' => 'class_name',
+                    'external' => 'school_name',
+                    default => null,
+                };
+            })
+            ->groupingSettingsInDropdownOnDesktop()
             ->columns([
                 \Filament\Tables\Columns\Layout\Split::make([
-                Tables\Columns\ImageColumn::make('photo')->label(__('Photo'))->circular()->disk('public')
-                    ->defaultImageUrl(fn ($record) => 'https://ui-avatars.com/api/?name=' . urlencode($record->name) . '&color=2563eb&background=dbeafe'),
-                Tables\Columns\TextColumn::make('user.username')
-                    ->label(__('No. Siswa'))
-                    ->searchable()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('name')
-                    ->label(__('Name'))->translateLabel()
-                    ->searchable()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('student_type')
-                    ->label(__('Type'))
-                    ->badge()
-                    ->color(fn (?string $state): string => $state === 'external' ? 'warning' : 'info')
-                    ->formatStateUsing(fn (?string $state): string => $state === 'external' ? __('External') : __('Internal')),
-                Tables\Columns\TextColumn::make('gender')
-                    ->label(__('Gender'))
-                    ->badge()
-                    ->color(fn (string $state): string => $state === 'L' ? 'info' : 'danger'),
-                Tables\Columns\TextColumn::make('phone')
-                    ->label(__('Phone'))
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('parent_name')
-                    ->label(__('Parent'))
-                    ->toggleable(),
-                Tables\Columns\IconColumn::make('is_active')
-                    ->label(__('Active'))
-                    ->boolean(),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->label(__('Registered'))
-                    ->dateTime('d/m/Y')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    Tables\Columns\ImageColumn::make('photo')->label(__('Photo'))->circular()->disk('public')
+                        ->defaultImageUrl(fn ($record) => 'https://ui-avatars.com/api/?name=' . urlencode($record->name) . '&color=2563eb&background=dbeafe'),
+                    Tables\Columns\TextColumn::make('user.username')
+                        ->label(__('No. Siswa'))
+                        ->searchable()
+                        ->sortable(),
+                    Tables\Columns\TextColumn::make('name')
+                        ->label(__('Name'))->translateLabel()
+                        ->searchable()
+                        ->sortable(),
+                    Tables\Columns\TextColumn::make('student_type')
+                        ->label(__('Type'))
+                        ->badge()
+                        ->color(fn (?string $state): string => $state === 'external' ? 'warning' : 'info')
+                        ->formatStateUsing(fn (?string $state): string => $state === 'external' ? __('External') : __('Internal')),
+                    Tables\Columns\TextColumn::make('school_name')
+                        ->label('Sekolah')
+                        ->placeholder('-')
+                        ->searchable()
+                        ->toggleable(),
+                    Tables\Columns\TextColumn::make('class_name')
+                        ->label('Kelas')
+                        ->getStateUsing(fn (Student $record): string => $record->class_name ?: ($record->classes->pluck('name')->join(', ') ?: '-'))
+                        ->searchable()
+                        ->toggleable(),
+                    Tables\Columns\TextColumn::make('gender')
+                        ->label(__('Gender'))
+                        ->badge()
+                        ->color(fn (?string $state): string => $state === 'L' ? 'info' : 'danger'),
+                    Tables\Columns\TextColumn::make('phone')
+                        ->label(__('Phone'))
+                        ->searchable(),
+                    Tables\Columns\TextColumn::make('parent_summary')
+                        ->label('Orang Tua / Wali')
+                        ->getStateUsing(fn (Student $record): string => $record->father_name ?: ($record->mother_name ?: ($record->parent_name ?: '-')))
+                        ->toggleable(),
+                    Tables\Columns\IconColumn::make('is_active')
+                        ->label(__('Active'))
+                        ->boolean(),
+                    Tables\Columns\TextColumn::make('created_at')
+                        ->label(__('Registered'))
+                        ->dateTime('d/m/Y')
+                        ->sortable()
+                        ->toggleable(isToggledHiddenByDefault: true),
                 ])->from('md'),
             ])
             ->filters([
@@ -213,7 +283,7 @@ class StudentResource extends Resource
         return [];
     }
 
-    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()->with(['user', 'classes', 'parents']);
     }
@@ -225,6 +295,3 @@ class StudentResource extends Resource
         ];
     }
 }
-
-
-
