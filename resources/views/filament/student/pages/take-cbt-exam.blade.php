@@ -361,9 +361,30 @@
          @paste.prevent>
 
         {{-- ========================================================= --}}
+        {{-- LOCKED STATE (3 VIOLATIONS)                               --}}
+        {{-- ========================================================= --}}
+        @if($isLocked)
+            <div class="glass-panel" style="text-align: center; max-width: 620px; margin: 2.5rem auto; border: 2px solid #e11d48;">
+                <div style="width: 5rem; height: 5rem; background: rgba(244, 63, 94, 0.15); color: #e11d48; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.35rem auto;">
+                    <x-heroicon-o-lock-closed style="width: 3rem; height: 3rem;" />
+                </div>
+                <h2 class="cbt-title" style="margin-bottom: 0.4rem; color: #e11d48;">Ujian Terkunci!</h2>
+                <p class="cbt-subtitle" style="margin-bottom: 1rem;">
+                    Anda telah melampaui batas pelanggaran (<strong>{{ $attempt->violation_count ?? 3 }} / {{ $attempt->max_violations ?? 3 }}</strong>) karena keluar dari mode layar penuh atau berpindah tab/aplikasi.
+                </p>
+                <div style="background: rgba(244, 63, 94, 0.08); border: 1px solid rgba(244, 63, 94, 0.25); border-radius: 1rem; padding: 1.15rem; margin-bottom: 1.5rem; font-size: 0.925rem; font-weight: 600; color: #be123c;" class="dark:text-rose-300">
+                    Silakan hubungi <strong>Admin / Pengawas</strong> untuk membuka kunci (Reset) ujian Anda melalui menu <em>Exam Monitoring</em>.
+                </div>
+                <a href="{{ route('filament.student.pages.student-cbt-exams') }}" class="cbt-btn cbt-btn-primary">
+                    <x-heroicon-m-arrow-left style="width: 1.25rem; height: 1.25rem; margin-right: 0.5rem;" />
+                    <span>Kembali ke Daftar Ujian</span>
+                </a>
+            </div>
+
+        {{-- ========================================================= --}}
         {{-- FINISHED STATE                                            --}}
         {{-- ========================================================= --}}
-        @if($isFinished)
+        @elseif($isFinished)
             <div class="glass-panel" style="text-align: center; max-width: 600px; margin: 2.5rem auto;">
                 <div style="width: 5rem; height: 5rem; background: rgba(16, 185, 129, 0.15); color: #10b981; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.35rem auto;">
                     <x-heroicon-o-check-badge style="width: 3rem; height: 3rem;" />
@@ -401,9 +422,55 @@
                     timeLeft: '00:00:00',
                     isTimeUp: false,
                     timerId: null,
+                    inFullscreen: !!document.fullscreenElement,
+                    hasEnteredFullscreen: false,
+                    violationCount: {{ (int) ($attempt->violation_count ?? 0) }},
+                    maxViolations: {{ (int) ($attempt->max_violations ?? 3) }},
+                    lastViolationAt: 0,
+                    violationWarning: '',
                     init() {
                         this.tick();
                         this.timerId = setInterval(() => this.tick(), 1000);
+                        this.bindAntiCheat();
+                    },
+                    enterFullscreen() {
+                        const el = document.documentElement;
+                        if (el.requestFullscreen) {
+                            el.requestFullscreen().then(() => {
+                                this.inFullscreen = true;
+                                this.hasEnteredFullscreen = true;
+                            }).catch(() => {});
+                        }
+                    },
+                    bindAntiCheat() {
+                        document.addEventListener('fullscreenchange', () => {
+                            this.inFullscreen = !!document.fullscreenElement;
+                            if (this.hasEnteredFullscreen && !this.inFullscreen && !this.isTimeUp) {
+                                this.triggerViolation('Keluar dari mode layar penuh');
+                            }
+                        });
+                        document.addEventListener('visibilitychange', () => {
+                            if (document.hidden && this.hasEnteredFullscreen && !this.isTimeUp) {
+                                this.triggerViolation('Pindah tab atau meminimalkan browser');
+                            }
+                        });
+                        window.addEventListener('blur', () => {
+                            if (this.hasEnteredFullscreen && !this.isTimeUp && document.activeElement?.tagName !== 'IFRAME') {
+                                this.triggerViolation('Keluar dari jendela ujian');
+                            }
+                        });
+                    },
+                    triggerViolation(reason) {
+                        const now = Date.now();
+                        if (now - this.lastViolationAt < 1500) return;
+                        this.lastViolationAt = now;
+                        $wire.recordViolation(reason).then((res) => {
+                            if (res) {
+                                this.violationCount = res.violation_count;
+                                this.maxViolations = res.max_violations;
+                                this.violationWarning = `Peringatan (${res.violation_count}/${res.max_violations}): ${reason}. Jika mencapai ${res.max_violations}x, ujian otomatis terkunci!`;
+                            }
+                        });
                     },
                     tick() {
                         const now = Date.now();
@@ -420,6 +487,20 @@
                         }
                     }
                 }">
+                <!-- Fullscreen Gate Overlay -->
+                <div x-show="!inFullscreen" style="position: fixed; inset: 0; z-index: 9999; background: rgba(15, 23, 42, 0.92); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; padding: 1.5rem;">
+                    <div class="glass-panel" style="max-width: 520px; width: 100%; text-align: center; margin: 0;">
+                        <h2 class="cbt-title" style="font-size: 1.5rem;">Mode Layar Penuh Diperlukan</h2>
+                        <p class="cbt-subtitle" style="margin-bottom: 1rem;">
+                            Ujian wajib dikerjakan dalam mode layar penuh (Fullscreen). Dilarang pindah tab atau keluar layar penuh (maksimal <strong x-text="maxViolations"></strong>x pelanggaran).
+                        </p>
+                        <div x-show="violationWarning" x-text="violationWarning" style="margin-bottom: 1rem; padding: 0.75rem 1rem; border-radius: 0.75rem; background: rgba(244, 63, 94, 0.14); color: #e11d48; font-weight: 700; font-size: 0.875rem;"></div>
+                        <button type="button" @click="enterFullscreen()" class="cbt-btn cbt-btn-primary" style="width: 100%;">
+                            Masuk Layar Penuh &amp; Lanjutkan Ujian
+                        </button>
+                    </div>
+                </div>
+
                 <!-- Header Bar -->
                 <div class="glass-panel cbt-flex-between" style="padding: 1.25rem 1.75rem;">
                     <div>
@@ -432,6 +513,9 @@
                         </p>
                     </div>
                     <div style="display: flex; align-items: center; gap: 0.85rem; flex-wrap: wrap;">
+                        <span style="padding: 0.5rem 0.9rem; border-radius: 9999px; background: rgba(244, 63, 94, 0.12); color: #e11d48; font-size: 0.8rem; font-weight: 800;">
+                            Pelanggaran: <span x-text="violationCount"></span>/<span x-text="maxViolations"></span>
+                        </span>
                         <div class="cbt-timer">
                             <x-heroicon-o-clock style="width: 1.4rem; height: 1.4rem; margin-right: 0.45rem;" />
                             <span x-text="timeLeft"></span>
@@ -519,6 +603,12 @@
                     timeLeft: '00:00:00',
                     submitting: false,
                     timerId: null,
+                    inFullscreen: !!document.fullscreenElement,
+                    hasEnteredFullscreen: false,
+                    violationCount: {{ (int) ($attempt->violation_count ?? 0) }},
+                    maxViolations: {{ (int) ($attempt->max_violations ?? 3) }},
+                    lastViolationAt: 0,
+                    violationWarning: '',
 
                     init() {
                         try {
@@ -535,6 +625,49 @@
 
                         this.tick();
                         this.timerId = setInterval(() => this.tick(), 1000);
+                        this.bindAntiCheat();
+                    },
+
+                    enterFullscreen() {
+                        const el = document.documentElement;
+                        if (el.requestFullscreen) {
+                            el.requestFullscreen().then(() => {
+                                this.inFullscreen = true;
+                                this.hasEnteredFullscreen = true;
+                            }).catch(() => {});
+                        }
+                    },
+
+                    bindAntiCheat() {
+                        document.addEventListener('fullscreenchange', () => {
+                            this.inFullscreen = !!document.fullscreenElement;
+                            if (this.hasEnteredFullscreen && !this.inFullscreen && !this.submitting) {
+                                this.triggerViolation('Keluar dari mode layar penuh');
+                            }
+                        });
+                        document.addEventListener('visibilitychange', () => {
+                            if (document.hidden && this.hasEnteredFullscreen && !this.submitting) {
+                                this.triggerViolation('Pindah tab atau meminimalkan browser');
+                            }
+                        });
+                        window.addEventListener('blur', () => {
+                            if (this.hasEnteredFullscreen && !this.submitting) {
+                                this.triggerViolation('Keluar dari jendela ujian');
+                            }
+                        });
+                    },
+
+                    triggerViolation(reason) {
+                        const now = Date.now();
+                        if (now - this.lastViolationAt < 1500) return;
+                        this.lastViolationAt = now;
+                        $wire.recordViolation(reason).then((res) => {
+                            if (res) {
+                                this.violationCount = res.violation_count;
+                                this.maxViolations = res.max_violations;
+                                this.violationWarning = `Peringatan (${res.violation_count}/${res.max_violations}): ${reason}. Jika mencapai ${res.max_violations}x, ujian otomatis terkunci!`;
+                            }
+                        });
                     },
 
                     get currentQuestion() {
@@ -593,6 +726,20 @@
                 }"
                 class="cbt-grid cbt-grid-cols-4">
 
+                <!-- Fullscreen Gate Overlay -->
+                <div x-show="!inFullscreen" style="position: fixed; inset: 0; z-index: 9999; background: rgba(15, 23, 42, 0.92); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; padding: 1.5rem;">
+                    <div class="glass-panel" style="max-width: 520px; width: 100%; text-align: center; margin: 0;">
+                        <h2 class="cbt-title" style="font-size: 1.5rem;">Mode Layar Penuh Diperlukan</h2>
+                        <p class="cbt-subtitle" style="margin-bottom: 1rem;">
+                            Ujian wajib dikerjakan dalam mode layar penuh (Fullscreen). Dilarang pindah tab atau keluar layar penuh (maksimal <strong x-text="maxViolations"></strong>x pelanggaran).
+                        </p>
+                        <div x-show="violationWarning" x-text="violationWarning" style="margin-bottom: 1rem; padding: 0.75rem 1rem; border-radius: 0.75rem; background: rgba(244, 63, 94, 0.14); color: #e11d48; font-weight: 700; font-size: 0.875rem;"></div>
+                        <button type="button" @click="enterFullscreen()" class="cbt-btn cbt-btn-primary" style="width: 100%;">
+                            Masuk Layar Penuh &amp; Lanjutkan Ujian
+                        </button>
+                    </div>
+                </div>
+
                 <!-- Left Panel: Question -->
                 <div class="cbt-col-span-3">
                     <!-- Header / Timer -->
@@ -604,9 +751,14 @@
                                 &bull; Terjawab: <strong style="color: #0a4282;" class="dark:text-amber-400" x-text="answeredCount()"></strong>/<span x-text="questions.length"></span>
                             </p>
                         </div>
-                        <div class="cbt-timer">
-                            <x-heroicon-o-clock style="width: 1.4rem; height: 1.4rem; margin-right: 0.45rem;" />
-                            <span x-text="timeLeft"></span>
+                        <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+                            <span style="padding: 0.45rem 0.85rem; border-radius: 9999px; background: rgba(244, 63, 94, 0.12); color: #e11d48; font-size: 0.78rem; font-weight: 800;">
+                                Pelanggaran: <span x-text="violationCount"></span>/<span x-text="maxViolations"></span>
+                            </span>
+                            <div class="cbt-timer">
+                                <x-heroicon-o-clock style="width: 1.4rem; height: 1.4rem; margin-right: 0.45rem;" />
+                                <span x-text="timeLeft"></span>
+                            </div>
                         </div>
                     </div>
 

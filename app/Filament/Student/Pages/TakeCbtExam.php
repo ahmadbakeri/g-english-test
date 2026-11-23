@@ -21,6 +21,7 @@ class TakeCbtExam extends Page
     public array $questionsData = [];
     public array $answers = [];
     public bool $isFinished = false;
+    public bool $isLocked = false;
     public ?string $prefilledGformUrl = null;
 
     protected string $view = 'filament.student.pages.take-cbt-exam';
@@ -56,11 +57,16 @@ class TakeCbtExam extends Page
                     'start_time' => now(),
                     'status' => 'in_progress',
                     'is_completed' => false,
+                    'violation_count' => 0,
+                    'max_violations' => 3,
                     'sync_status' => 'pending',
                 ]
             );
 
-            if ($this->attempt->is_completed || $this->attempt->status === 'finished') {
+            if ($this->attempt->status === 'locked' || ($this->attempt->violation_count >= ($this->attempt->max_violations ?: 3) && !$this->attempt->is_completed)) {
+                $this->isLocked = true;
+                $this->isFinished = true;
+            } elseif ($this->attempt->is_completed || $this->attempt->status === 'finished') {
                 $this->isFinished = true;
             }
             return;
@@ -77,7 +83,13 @@ class TakeCbtExam extends Page
         if ($latestAttempt) {
             $this->attempt = $latestAttempt;
 
-            if ($latestAttempt->is_completed || in_array($latestAttempt->status, ['finished', 'locked'], true)) {
+            if ($latestAttempt->status === 'locked' || ($latestAttempt->violation_count >= ($latestAttempt->max_violations ?: 3) && !$latestAttempt->is_completed)) {
+                $this->isLocked = true;
+                $this->isFinished = true;
+                return;
+            }
+
+            if ($latestAttempt->is_completed || $latestAttempt->status === 'finished') {
                 $this->isFinished = true;
                 return;
             }
@@ -203,8 +215,46 @@ class TakeCbtExam extends Page
             'start_time' => now(),
             'status' => 'in_progress',
             'is_completed' => false,
+            'violation_count' => 0,
+            'max_violations' => 3,
             'sync_status' => 'internal',
         ]);
+    }
+
+    public function recordViolation(string $reason = 'tab_switch'): array
+    {
+        if (!$this->attempt || $this->attempt->is_completed || $this->attempt->status === 'locked') {
+            return [
+                'violation_count' => (int) ($this->attempt?->violation_count ?? 0),
+                'max_violations' => (int) ($this->attempt?->max_violations ?? 3),
+                'locked' => $this->isLocked,
+            ];
+        }
+
+        $this->attempt->refresh();
+        $max = (int) ($this->attempt->max_violations ?: 3);
+        $newCount = (int) $this->attempt->violation_count + 1;
+
+        if ($newCount >= $max) {
+            $this->attempt->update([
+                'violation_count' => $newCount,
+                'status' => 'locked',
+                'is_force_submitted' => true,
+                'end_time' => now(),
+            ]);
+            $this->isLocked = true;
+            $this->isFinished = true;
+        } else {
+            $this->attempt->update([
+                'violation_count' => $newCount,
+            ]);
+        }
+
+        return [
+            'violation_count' => $newCount,
+            'max_violations' => $max,
+            'locked' => $this->isLocked,
+        ];
     }
 
     public function cancelExam(): void
