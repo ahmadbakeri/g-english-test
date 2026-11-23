@@ -26,11 +26,11 @@ class StudentResource extends Resource
     public static function getPluralModelLabel(): string { return __('Internal Students'); }
     public static function getNavigationGroup(): ?string
     {
-        return __('Academic');
+        return __('Student Management');
     }
     public static function getNavigationSort(): ?int
     {
-        return 2;
+        return 1;
     }
 
     public static function resolveClassLabel(Student $record): string

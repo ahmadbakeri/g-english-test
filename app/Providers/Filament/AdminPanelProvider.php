@@ -53,6 +53,8 @@ class AdminPanelProvider extends PanelProvider
             ->navigationGroups([
                 NavigationGroup::make('Administration')
                     ->label(fn (): string => __('Administration')),
+                NavigationGroup::make('Student Management')
+                    ->label(fn (): string => __('Student Management')),
                 NavigationGroup::make('Academic')
                     ->label(fn (): string => __('Academic')),
                 NavigationGroup::make('Evaluation')

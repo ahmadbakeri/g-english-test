@@ -35,12 +35,12 @@ class ExternalStudentResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('Master Data');
+        return __('Student Management');
     }
 
     public static function getNavigationSort(): ?int
     {
-        return 3;
+        return 2;
     }
 
     public static function form(Schema $schema): Schema
