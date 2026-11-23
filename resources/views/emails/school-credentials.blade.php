@@ -55,7 +55,7 @@
                                                 </td>
                                             </tr>
                                             <tr>
-                                                <td style="padding: 6px 0; font-size: 13px; color: #64748b; font-weight: 600;">Username (No. WA)</td>
+                                                <td style="padding: 6px 0; font-size: 13px; color: #64748b; font-weight: 600;">Username Sekolah</td>
                                                 <td style="padding: 6px 0; font-size: 15px; color: #0a4282; font-family: monospace; font-weight: 900;">: {{ $username }}</td>
                                             </tr>
                                             <tr>

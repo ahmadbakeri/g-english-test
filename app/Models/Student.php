@@ -66,25 +66,53 @@ class Student extends Model
         static::created(function (Student $student) {
             // Create user account automatically
             if (!$student->user_id) {
-                $maxNum = User::where('role', 'siswa')
-                    ->whereNotNull('username')
-                    ->pluck('username')
-                    ->filter(fn ($u) => ctype_digit((string) $u))
-                    ->map(fn ($u) => (int) $u)
-                    ->max();
+                if ($student->student_type === 'external' && $student->school_user_id) {
+                    $schoolUser = User::find($student->school_user_id);
+                    $schoolSeq = preg_match('/^48(\d{3})$/', (string) ($schoolUser?->username ?? ''), $m)
+                        ? $m[1]
+                        : str_pad((string) ($student->school_user_id % 1000), 3, '0', STR_PAD_LEFT);
+                    $gradeDigit = preg_match('/(\d+)/', (string) $student->class_name, $gm)
+                        ? $gm[1]
+                        : '0';
 
-                $nextNum = $maxNum && $maxNum >= 481000 ? $maxNum + 1 : 481001;
-                while (User::where('username', (string) $nextNum)->exists()) {
-                    $nextNum++;
+                    $prefix = "48{$schoolSeq}{$gradeDigit}";
+                    $maxOrder = User::where('role', 'siswa')
+                        ->where('username', 'like', $prefix . '%')
+                        ->pluck('username')
+                        ->map(function ($u) use ($prefix): int {
+                            return preg_match('/^' . preg_quote($prefix, '/') . '(\d{2})$/', (string) $u, $om)
+                                ? (int) $om[1]
+                                : 0;
+                        })
+                        ->max() ?? 0;
+
+                    $order = $maxOrder + 1;
+                    do {
+                        $generatedUsername = $prefix . str_pad((string) $order, 2, '0', STR_PAD_LEFT);
+                        $order++;
+                    } while (User::where('username', $generatedUsername)->exists());
+                } else {
+                    $maxNum = User::where('role', 'siswa')
+                        ->whereNotNull('username')
+                        ->pluck('username')
+                        ->filter(fn ($u) => ctype_digit((string) $u))
+                        ->map(fn ($u) => (int) $u)
+                        ->max();
+
+                    $nextNum = $maxNum && $maxNum >= 481000 ? $maxNum + 1 : 481001;
+                    while (User::where('username', (string) $nextNum)->exists()) {
+                        $nextNum++;
+                    }
+                    $generatedUsername = (string) $nextNum;
                 }
 
                 $baseEmail = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $student->nis ?: 'student')) . '@g-english.com';
                 if (User::where('email', $baseEmail)->exists()) {
-                    $baseEmail = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $student->nis ?: 'student')) . '_' . $nextNum . '@g-english.com';
+                    $baseEmail = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $student->nis ?: 'student')) . '_' . $generatedUsername . '@g-english.com';
                 }
 
                 $user = User::create([
-                    'username' => (string) $nextNum,
+                    'username' => $generatedUsername,
                     'name' => $student->name,
                     'email' => $baseEmail,
                     'password' => \Illuminate\Support\Facades\Hash::make('password'),

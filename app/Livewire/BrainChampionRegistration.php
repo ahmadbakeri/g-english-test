@@ -484,16 +484,33 @@ class BrainChampionRegistration extends Component
                 ->lockForUpdate()
                 ->get();
 
-            $schoolUser = User::where('username', $coordinatorPhone)->first();
             $resolvedEmail = $cleanSchoolEmail;
+
+            $schoolUser = User::where('role', 'school')
+                ->get()
+                ->first(fn (User $u): bool => self::normalizeSchoolName((string) $u->name) === $normalizedSchool);
 
             if (!$schoolUser && User::where('email', $resolvedEmail)->exists()) {
                 $schoolUser = User::where('email', $resolvedEmail)->first();
             }
 
             if (!$schoolUser) {
+                $maxSeq = User::where('role', 'school')
+                    ->whereNotNull('username')
+                    ->pluck('username')
+                    ->map(function ($u): int {
+                        return preg_match('/^48(\d{3})$/', (string) $u, $m) ? (int) $m[1] : 0;
+                    })
+                    ->max() ?? 0;
+
+                $nextSeq = $maxSeq + 1;
+                do {
+                    $schoolUsername = '48' . str_pad((string) $nextSeq, 3, '0', STR_PAD_LEFT);
+                    $nextSeq++;
+                } while (User::where('username', $schoolUsername)->exists());
+
                 $schoolUser = User::create([
-                    'username' => $coordinatorPhone,
+                    'username' => $schoolUsername,
                     'name' => $cleanSchoolName,
                     'email' => $resolvedEmail,
                     'password' => Hash::make($plainPassword),

@@ -178,7 +178,7 @@
                                         </a>
                                     </div>
                                     <div class="bg-white/10 backdrop-blur-sm rounded-xl px-3.5 py-2.5 border border-white/20">
-                                        <div class="text-blue-200 font-semibold">Username (No. WA)</div>
+                                        <div class="text-blue-200 font-semibold">Username Sekolah</div>
                                         <div class="font-mono font-black text-white text-sm mt-0.5">{{ $schoolCredentials['username'] }}</div>
                                     </div>
                                     <div class="bg-white/10 backdrop-blur-sm rounded-xl px-3.5 py-2.5 border border-white/20">
@@ -278,7 +278,7 @@
                             <div class="w-9 h-9 rounded-xl bg-genza-blue text-genza-yellow flex items-center justify-center font-black text-sm shrink-0 shadow-sm">01</div>
                             <div>
                                 <h3 class="text-lg font-extrabold text-genza-blue dark:text-white">Data Sekolah &amp; Akun Login Pendamping</h3>
-                                <p class="text-xs text-slate-500 dark:text-slate-400">No. WhatsApp Pendamping otomatis menjadi Username login sekolah di <code class="font-bold">/login</code></p>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">Username sekolah (format <code class="font-bold">48001</code>) dibuat otomatis setelah pendaftaran untuk login di <code class="font-bold">/login</code></p>
                             </div>
                         </div>
 
@@ -335,7 +335,7 @@
                         <!-- Row 2: No. WA Pendamping, Email Sekolah, & Password/PIN (3 Columns, aligned top edges) -->
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
                             <div>
-                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 truncate mb-1.5">No. WA Pendamping (Username) <span class="text-rose-500">*</span></label>
+                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 truncate mb-1.5">No. WA Pendamping <span class="text-rose-500">*</span></label>
                                 <input type="text"
                                        wire:model="pic_phone"
                                        class="bc-input w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm"
