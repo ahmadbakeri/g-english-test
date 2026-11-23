@@ -13,7 +13,7 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     
     <!-- Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -22,7 +22,7 @@
 
     @stack('styles')
 </head>
-<body class="bg-gray-50 text-slate-800 antialiased overflow-hidden selection:bg-indigo-500 selection:text-white">
+<body class="bg-gray-50 text-slate-800 antialiased overflow-hidden selection:bg-[#0a4282] selection:text-white">
     
     <!-- Exam Container -->
     <div class="h-screen w-screen flex flex-col overflow-hidden bg-slate-50 relative">

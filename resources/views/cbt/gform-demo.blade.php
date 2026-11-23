@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Test Google Form CBT</title>
     <style>
-        body { margin: 0; padding: 24px 16px; background: #f0ebf8; font-family: 'Segoe UI', Roboto, Arial, sans-serif; color: #202124; }
+        body { margin: 0; padding: 24px 16px; background: #f0ebf8; font-family: 'Outfit', ui-sans-serif, system-ui, sans-serif; color: #202124; }
         .wrap { max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
         .card { background: #fff; border: 1px solid #dadce0; border-radius: 10px; padding: 22px 24px; }
         .header-card { border-top: 10px solid #0a4282; }

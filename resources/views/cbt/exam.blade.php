@@ -30,7 +30,7 @@
                 
                 <!-- Loading State (Initial) -->
                 <div id="loading-overlay" class="absolute inset-0 bg-slate-50 z-10 flex flex-col items-center justify-center rounded-2xl">
-                    <i class="ph ph-spinner-gap text-indigo-500 text-4xl animate-spin mb-4"></i>
+                    <i class="ph ph-spinner-gap text-[#0a4282] text-4xl animate-spin mb-4"></i>
                     <p class="text-slate-500 font-medium">Mempersiapkan Ujian...</p>
                 </div>
 

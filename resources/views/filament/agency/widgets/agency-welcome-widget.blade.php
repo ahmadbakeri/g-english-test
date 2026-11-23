@@ -5,7 +5,7 @@
                 <span class="g-welcome-greeting" style="font-size: 0.825rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">
                     &#x1F3C6; G-ENGLISH BRAIN CHAMPION &bull; "ONE MIND, ONE CHAMPION"
                 </span>
-                <h2 class="g-welcome-title" style="font-size: 1.875rem; font-weight: 800; background: linear-gradient(to right, #0a4282, #2563eb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0;">
+                <h2 class="g-welcome-title dark:text-white" style="font-size: 1.875rem; font-weight: 800; color: #0a4282; margin: 0; letter-spacing: -0.025em;">
                     {{ $agencyLabel }}
                 </h2>
                 <div style="margin-top: 0.15rem; display: flex; flex-wrap: wrap; gap: 0.5rem;">

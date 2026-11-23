@@ -966,7 +966,7 @@
                     </div>
                 </div>
 
-                <div style="margin-bottom: 2rem; padding: 1.35rem 1.5rem; border-left: 4px solid #0a4282; background: rgba(10, 66, 130, 0.05); border-radius: 0.85rem;">
+                <div style="margin-bottom: 2rem; padding: 1.35rem 1.5rem; border: 1px solid rgba(10, 66, 130, 0.2); background: rgba(10, 66, 130, 0.05); border-radius: 0.85rem;">
                     <h3 style="font-weight: 800; font-size: 1.025rem; margin-bottom: 0.4rem;">Petunjuk Pengerjaan:</h3>
                     <p style="white-space: pre-line; line-height: 1.65; margin: 0; font-size: 0.95rem;">{{ $exam->description ?? 'Pilihlah jawaban yang paling tepat. Jawaban Anda tersimpan otomatis di perangkat dan dikirim sekaligus saat menekan tombol Selesai & Submit Ujian.' }}</p>
                 </div>

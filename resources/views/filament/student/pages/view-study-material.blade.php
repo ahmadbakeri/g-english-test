@@ -87,14 +87,14 @@
             line-height: 1.75;
             padding: 1.25rem 1.5rem;
             background: rgba(248, 250, 252, 0.8);
-            border-left: 4px solid #0a4282;
+            border: 1px solid rgba(10, 66, 130, 0.2);
             border-radius: 0.85rem;
             margin-bottom: 2rem;
         }
         .dark .material-desc {
             color: #cbd5e1;
             background: rgba(15, 23, 42, 0.55);
-            border-left-color: #fbb900;
+            border-color: rgba(251, 185, 0, 0.25);
         }
 
         .section-title {

@@ -50,7 +50,7 @@
                 <span class="g-welcome-greeting" style="font-size: 0.825rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">
                     &#x1F44B; WELCOME TO PARENT PORTAL!
                 </span>
-                <h2 class="g-welcome-title" style="font-size: 1.85rem; font-weight: 800; background: linear-gradient(to right, #0a4282, #2563eb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0;">
+                <h2 class="g-welcome-title dark:text-white" style="font-size: 1.85rem; font-weight: 800; color: #0a4282; margin: 0; letter-spacing: -0.025em;">
                     {{ auth()->user()->name }}
                 </h2>
                 <p class="g-welcome-subtitle" style="font-size: 0.925rem; color: #475569; margin: 0;" class="dark:text-slate-300">
