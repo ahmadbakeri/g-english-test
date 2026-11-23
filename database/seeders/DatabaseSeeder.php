@@ -50,6 +50,7 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Mr Bakeri', 'username' => 'GE48101', 'email' => 'bakeri@g-english.com'],
             ['name' => 'Mr Ichsan', 'username' => 'GE48102', 'email' => 'ichsan@g-english.com'],
             ['name' => 'Mr Rizhan', 'username' => 'GE48103', 'email' => 'rizhan@g-english.com'],
+            ['name' => 'Ms Hana', 'username' => 'GE48104', 'email' => 'hana@g-english.com'],
         ];
 
         $tutors = [];
@@ -204,13 +205,7 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        // -- Settings --
-        if (Setting::count() == 0) {
-            Setting::create(['key' => 'app_name', 'value' => 'G-English', 'group' => 'general']);
-            Setting::create(['key' => 'app_description', 'value' => 'Sistem Administrasi G-English', 'group' => 'general']);
-            Setting::create(['key' => 'institution_name', 'value' => 'G-ENGLISH', 'group' => 'general']);
-            Setting::create(['key' => 'institution_address', 'value' => 'Jl. Pendidikan No. 1', 'group' => 'general']);
-            Setting::create(['key' => 'institution_phone', 'value' => '021-1234567', 'group' => 'general']);
-        }
+        // -- Settings & Complete Module Demo Seed --
+        $this->call(FullDemoSeeder::class);
     }
 }

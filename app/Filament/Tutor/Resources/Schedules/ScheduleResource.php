@@ -97,11 +97,12 @@ class ScheduleResource extends Resource
                     ->weight('bold')
                     ->placeholder('-')
                     ->sortable(),
-                TextColumn::make('day')
-                    ->label(__('Day'))
+                TextColumn::make('date')
+                    ->label(__('Date'))
+                    ->date('d M Y')
                     ->badge()
                     ->color('info')
-                    ->searchable(),
+                    ->sortable(),
                 TextColumn::make('start_time')
                     ->label(__('Time'))
                     ->formatStateUsing(fn ($record): string => substr((string) $record->start_time, 0, 5) . ' - ' . substr((string) $record->end_time, 0, 5))
