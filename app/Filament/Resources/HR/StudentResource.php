@@ -267,39 +267,42 @@ class StudentResource extends Resource
                     ->color('primary')
                     ->description(function (Student $record): string {
                         $code = $record->user?->username ?: ($record->nis ?: '-');
+                        $gender = $record->gender ?: '-';
                         $school = trim((string) $record->school_name);
-                        return $school !== '' ? "{$code} • {$school}" : $code;
+                        return $school !== '' ? "{$code} • {$gender} • {$school}" : "{$code} • {$gender}";
                     })
                     ->searchable(['name', 'nis', 'nisn', 'school_name'])
                     ->sortable(),
-                Tables\Columns\TextColumn::make('student_type')
-                    ->label(__('Type'))
-                    ->badge()
-                    ->color(fn (?string $state): string => $state === 'external' ? 'warning' : 'info')
-                    ->formatStateUsing(fn (?string $state): string => $state === 'external' ? __('External') : __('Internal')),
                 Tables\Columns\TextColumn::make('class_name')
                     ->label(__('Class'))
                     ->badge()
                     ->color('info')
                     ->getStateUsing(fn (Student $record): string => self::resolveClassLabel($record))
+                    ->description(fn (Student $record): string => $record->student_type === 'external' ? __('External') : __('Internal'))
                     ->searchable(),
-                Tables\Columns\TextColumn::make('gender')
-                    ->label('L/P')
-                    ->badge()
-                    ->color(fn (?string $state): string => $state === 'L' ? 'info' : 'danger'),
                 Tables\Columns\TextColumn::make('phone')
                     ->label(__('Phone'))
                     ->placeholder('-')
-                    ->searchable()
-                    ->toggleable(),
-                Tables\Columns\TextColumn::make('parent_summary')
-                    ->label('Orang Tua / Wali')
-                    ->getStateUsing(fn (Student $record): string => $record->father_name ?: ($record->mother_name ?: ($record->parent_name ?: '-')))
-                    ->limit(24)
-                    ->toggleable(),
+                    ->description(function (Student $record): ?string {
+                        $parent = $record->father_name ?: ($record->mother_name ?: $record->parent_name);
+                        return $parent ? 'Wali: ' . \Illuminate\Support\Str::limit($parent, 22) : null;
+                    })
+                    ->searchable(),
                 Tables\Columns\IconColumn::make('is_active')
                     ->label(__('Active'))
-                    ->boolean(),
+                    ->boolean()
+                    ->alignCenter(),
+                Tables\Columns\TextColumn::make('student_type')
+                    ->label(__('Type'))
+                    ->badge()
+                    ->color(fn (?string $state): string => $state === 'external' ? 'warning' : 'info')
+                    ->formatStateUsing(fn (?string $state): string => $state === 'external' ? __('External') : __('Internal'))
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('gender')
+                    ->label('L/P')
+                    ->badge()
+                    ->color(fn (?string $state): string => $state === 'L' ? 'info' : 'danger')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label(__('Registered'))
                     ->dateTime('d/m/Y')
