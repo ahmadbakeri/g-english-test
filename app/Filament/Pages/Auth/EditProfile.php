@@ -32,11 +32,17 @@ class EditProfile extends BaseEditProfile
                 \Filament\Forms\Components\FileUpload::make('new_avatar')
                     ->label(__('Unggah Foto Baru'))
                     ->image()
-                    ->disk('r2')
+                    ->avatar()
+                    ->alignCenter()
+                    ->imageEditor()
+                    ->circleCropper()
+                    ->imageCropAspectRatio('1:1')
+                    ->automaticallyOpenImageEditorForAspectRatio()
+                    ->disk(fn (): string => \App\Models\User::avatarDisk())
                     ->directory('avatars')
-                    ->maxSize(2048)
-                    ->columnSpanFull()
-                    ->dehydrated(false),
+                    ->visibility('public')
+                    ->maxSize(4096)
+                    ->columnSpanFull(),
                 
                 \Filament\Forms\Components\Hidden::make('delete_avatar')
                     ->default(false),
@@ -70,19 +76,20 @@ class EditProfile extends BaseEditProfile
     {
         $user = auth()->user();
         $oldAvatar = $user->avatar_url;
-        
-        $formState = $this->form->getState();
+        $disk = \App\Models\User::avatarDisk();
+
         $deleteAvatar = filter_var($data['delete_avatar'] ?? false, FILTER_VALIDATE_BOOLEAN);
-        $newAvatar = $formState['new_avatar'] ?? null;
+        $newAvatar = $data['new_avatar'] ?? null;
+
+        unset($data['new_avatar'], $data['delete_avatar'], $data['old_password']);
 
         // Jika user mengunggah foto baru ATAU mengeklik hapus foto
         if ($newAvatar || $deleteAvatar) {
-            // Hapus foto lama di R2
             if ($oldAvatar) {
-                \Illuminate\Support\Facades\Storage::disk('r2')->delete($oldAvatar);
+                \Illuminate\Support\Facades\Storage::disk($disk)->delete($oldAvatar);
             }
-            
-            $data['avatar_url'] = $newAvatar ? $newAvatar : null;
+
+            $data['avatar_url'] = $newAvatar ?: null;
         }
 
         return parent::mutateFormDataBeforeSave($data);

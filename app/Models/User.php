@@ -102,10 +102,17 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         return $this->role === 'tutor';
     }
 
+    public static function avatarDisk(): string
+    {
+        return filled(config('filesystems.disks.r2.bucket')) && filled(config('filesystems.disks.r2.key'))
+            ? 'r2'
+            : 'public';
+    }
+
     public function getFilamentAvatarUrl(): ?string
     {
         if ($this->avatar_url) {
-            return \Illuminate\Support\Facades\Storage::disk('r2')->url($this->avatar_url);
+            return \Illuminate\Support\Facades\Storage::disk(self::avatarDisk())->url($this->avatar_url);
         }
 
         // Fast local SVG generation (no external API calls to ui-avatars.com which is slow)
