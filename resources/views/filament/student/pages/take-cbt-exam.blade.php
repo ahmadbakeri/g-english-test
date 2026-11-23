@@ -81,6 +81,23 @@
                 align-items: start;
             }
         }
+        @media (max-width: 639px) {
+            .cbt-fullscreen-shell:fullscreen,
+            .cbt-fullscreen-shell:-webkit-full-screen {
+                padding: 0.75rem 0.75rem 1.5rem 0.75rem !important;
+            }
+            .cbt-topbar {
+                padding: 0.85rem 1rem;
+            }
+            .glass-panel {
+                padding: 1.15rem;
+            }
+            .cbt-btn {
+                min-height: 44px;
+                padding: 0.7rem 1.1rem;
+                font-size: 0.85rem;
+            }
+        }
         .cbt-flex-between {
             display: flex;
             justify-content: space-between;

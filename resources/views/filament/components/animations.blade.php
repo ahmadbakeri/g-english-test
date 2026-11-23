@@ -820,6 +820,54 @@
     }
     .fi-ta-ctn {
         overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* 8. Cross-Device Responsive Adaptation (Mobile <= 767px & Laptop/Desktop) */
+    @media (max-width: 767px) {
+        html, body, .fi-main {
+            max-width: 100vw !important;
+            overflow-x: hidden !important;
+        }
+        .fi-main {
+            padding-left: 0.75rem !important;
+            padding-right: 0.75rem !important;
+        }
+        .fi-header-heading {
+            font-size: 1.35rem !important;
+            line-height: 1.25 !important;
+        }
+        .g-welcome-title {
+            font-size: 1.35rem !important;
+        }
+        .fi-btn {
+            min-height: 44px !important;
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
+        }
+        .fi-icon-btn {
+            min-width: 40px !important;
+            min-height: 40px !important;
+        }
+        input, select, textarea, .fi-input {
+            font-size: 16px !important; /* Prevent iOS auto-zoom on focus */
+        }
+        .fi-tabs, .fi-fo-tabs-tab-list {
+            overflow-x: auto !important;
+            flex-wrap: nowrap !important;
+            scrollbar-width: none;
+        }
+        .fi-tabs::-webkit-scrollbar,
+        .fi-fo-tabs-tab-list::-webkit-scrollbar {
+            display: none;
+        }
+        .fi-modal-window {
+            max-width: calc(100vw - 1rem) !important;
+            border-radius: 1rem !important;
+        }
+        .fi-section-content {
+            padding: 1rem !important;
+        }
     }
 
 </style>
