@@ -849,19 +849,42 @@
         .g-welcome-title {
             font-size: 1.35rem !important;
         }
+        .fi-header {
+            gap: 0.75rem !important;
+        }
+        .fi-header-actions {
+            flex-wrap: wrap !important;
+            gap: 0.45rem !important;
+        }
         .fi-btn {
-            min-height: 40px !important;
-            padding-left: 0.9rem !important;
-            padding-right: 0.9rem !important;
+            min-height: 38px !important;
+            padding-left: 0.85rem !important;
+            padding-right: 0.85rem !important;
+        }
+        .fi-ta-actions .fi-btn {
+            min-height: 32px !important;
+            padding-left: 0.7rem !important;
+            padding-right: 0.7rem !important;
+            font-size: 0.78rem !important;
         }
         .fi-icon-btn {
-            min-width: 38px !important;
-            min-height: 38px !important;
+            min-width: 36px !important;
+            min-height: 36px !important;
         }
         input, select, textarea, .fi-input {
             font-size: 16px !important; /* Prevent iOS auto-zoom on focus */
         }
-        /* Responsive Stacked Card Tables on Mobile (No horizontal scrolling) */
+        /* Mobile Table Toolbar & Search */
+        .fi-ta-header-toolbar {
+            flex-wrap: wrap !important;
+            gap: 0.5rem !important;
+            padding: 0.65rem 0.75rem !important;
+        }
+        .fi-ta-search-field {
+            width: 100% !important;
+            flex: 1 0 100% !important;
+        }
+        /* Responsive Compact Card Tables on Mobile (No horizontal scrolling, no bloated tall cards) */
         .fi-ta-ctn,
         .fi-ta-content {
             overflow-x: visible !important;
@@ -877,12 +900,14 @@
         }
         .fi-ta-table tr.fi-ta-row {
             display: flex !important;
-            flex-direction: column !important;
-            gap: 0.25rem !important;
+            flex-direction: row !important;
+            flex-wrap: wrap !important;
+            align-items: center !important;
+            gap: 0.35rem 0.6rem !important;
             width: 100% !important;
-            padding: 0.8rem 0.9rem !important;
-            margin-bottom: 0.7rem !important;
-            border-radius: 1rem !important;
+            padding: 0.75rem 0.85rem !important;
+            margin-bottom: 0.6rem !important;
+            border-radius: 0.95rem !important;
             border: 1px solid rgba(15, 23, 42, 0.08) !important;
             background-color: #ffffff !important;
             box-shadow: 0 2px 6px -1px rgba(15, 23, 42, 0.05) !important;
@@ -894,24 +919,44 @@
         .fi-ta-table tr.fi-ta-row td,
         .fi-ta-table tr.fi-ta-row td.fi-ta-cell {
             display: block !important;
-            width: 100% !important;
-            padding: 0.15rem 0 !important;
+            flex: 1 1 44% !important;
+            min-width: 0 !important;
+            width: auto !important;
+            padding: 0.1rem 0 !important;
             border: none !important;
             border-radius: 0 !important;
             text-align: left !important;
             white-space: normal !important;
         }
+        .fi-ta-table tr.fi-ta-row td .fi-ta-col-wrp {
+            padding: 0 !important;
+        }
         .fi-ta-table tr.fi-ta-row td.fi-ta-selection-cell {
+            flex: 0 0 auto !important;
             width: auto !important;
-            padding-bottom: 0.25rem !important;
+            padding: 0 !important;
+        }
+        .fi-ta-table tr.fi-ta-row td:has(.fi-ta-image),
+        .fi-ta-table tr.fi-ta-row td:has(img.rounded-full) {
+            flex: 0 0 auto !important;
+            width: auto !important;
+        }
+        .fi-ta-table tr.fi-ta-row td:has(.fi-ta-icon) {
+            flex: 0 0 auto !important;
+            width: auto !important;
+        }
+        .fi-ta-table tr.fi-ta-row td:has(.fi-ta-icon) .fi-ta-icon {
+            justify-content: flex-start !important;
         }
         .fi-ta-table tr.fi-ta-row td.fi-ta-actions-cell,
         .fi-ta-table tr.fi-ta-row td:last-child:has(.fi-ta-actions) {
             display: flex !important;
             justify-content: flex-end !important;
+            align-items: center !important;
+            flex: 1 0 100% !important;
             width: 100% !important;
-            padding-top: 0.55rem !important;
-            margin-top: 0.35rem !important;
+            padding-top: 0.45rem !important;
+            margin-top: 0.25rem !important;
             border-top: 1px solid rgba(15, 23, 42, 0.07) !important;
         }
         .dark .fi-ta-table tr.fi-ta-row td.fi-ta-actions-cell,
@@ -921,12 +966,13 @@
         .fi-ta-table tr.fi-ta-group-header-row {
             display: block !important;
             width: 100% !important;
-            margin-bottom: 0.5rem !important;
+            margin-bottom: 0.45rem !important;
         }
         .fi-ta-table tr.fi-ta-group-header-row td {
             display: block !important;
             width: 100% !important;
             border-radius: 0.85rem !important;
+            padding: 0.55rem 0.75rem !important;
         }
         .fi-tabs, .fi-fo-tabs-tab-list {
             overflow-x: auto !important;
