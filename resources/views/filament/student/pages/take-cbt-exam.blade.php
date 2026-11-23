@@ -473,6 +473,7 @@
         {{-- ========================================================= --}}
         @elseif($mode === 'google_form')
             <div x-ref="examShell"
+                 wire:ignore
                  class="cbt-fullscreen-shell"
                  x-data="{
                     endTime: new Date('{{ $endTimeIso }}').getTime(),
@@ -536,6 +537,9 @@
                                 this.violationCount = res.violation_count;
                                 this.maxViolations = res.max_violations;
                                 this.violationWarning = `Peringatan (${res.violation_count}/${res.max_violations}): ${reason}. Jika mencapai ${res.max_violations}x, ujian otomatis terkunci!`;
+                                if (res.locked && document.fullscreenElement) {
+                                    document.exitFullscreen().catch(() => {});
+                                }
                             }
                         });
                     },
@@ -674,6 +678,7 @@
         {{-- ========================================================= --}}
         @else
             <div x-ref="examShell"
+                 wire:ignore
                  class="cbt-fullscreen-shell"
                  x-data="{
                     storageKey: 'g_english_cbt_attempt_{{ $attempt->id }}',
@@ -759,6 +764,9 @@
                                 this.violationCount = res.violation_count;
                                 this.maxViolations = res.max_violations;
                                 this.violationWarning = `Peringatan (${res.violation_count}/${res.max_violations}): ${reason}. Jika mencapai ${res.max_violations}x, ujian otomatis terkunci!`;
+                                if (res.locked && document.fullscreenElement) {
+                                    document.exitFullscreen().catch(() => {});
+                                }
                             }
                         });
                     },

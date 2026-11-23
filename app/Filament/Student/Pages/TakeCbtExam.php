@@ -248,6 +248,7 @@ class TakeCbtExam extends Page
             $this->attempt->update([
                 'violation_count' => $newCount,
             ]);
+            $this->skipRender();
         }
 
         return [
