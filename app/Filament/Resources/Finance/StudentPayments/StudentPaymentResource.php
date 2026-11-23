@@ -98,49 +98,45 @@ class StudentPaymentResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->recordAction('edit')
             ->columns([
-                \Filament\Tables\Columns\Layout\Split::make([
-                    TextColumn::make('student.name')
-                        ->label(__('Student'))
-                        ->weight('bold')
-                        ->description(fn (StudentPayment $record): string => $record->notes ?: 'Tagihan SPP')
-                        ->searchable()
-                        ->sortable(),
-                    TextColumn::make('notes')
-                        ->label(__('Description'))
-                        ->placeholder('-')
-                        ->wrap(),
-                    TextColumn::make('due_date')
-                        ->label(__('Due Date'))
-                        ->date('d M Y')
-                        ->sortable(),
-                    TextColumn::make('amount')
-                        ->label(__('Amount'))
-                        ->translateLabel()
-                        ->money('IDR', locale: 'id')
-                        ->weight('bold')
-                        ->alignEnd()
-                        ->sortable(),
-                    TextColumn::make('status')
-                        ->label(__('Status'))
-                        ->badge()
-                        ->color(fn (string $state): string => match ($state) {
-                            'unpaid' => 'danger',
-                            'paid' => 'success',
-                            default => 'gray',
-                        })
-                        ->formatStateUsing(fn (string $state): string => match ($state) {
-                            'unpaid' => 'Belum Lunas',
-                            'paid' => 'Lunas',
-                            default => $state,
-                        }),
-                    TextColumn::make('paid_at')
-                        ->label(__('Payment Date'))
-                        ->dateTime('d M Y, H:i')
-                        ->placeholder('-')
-                        ->sortable()
-                        ->toggleable(),
-                ])->from('md'),
+                TextColumn::make('student.name')
+                    ->label(__('Student'))
+                    ->weight('bold')
+                    ->color('primary')
+                    ->description(fn (StudentPayment $record): string => \Illuminate\Support\Str::limit($record->notes ?: 'Tagihan SPP', 55))
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('due_date')
+                    ->label(__('Due Date'))
+                    ->date('d M Y')
+                    ->sortable(),
+                TextColumn::make('amount')
+                    ->label(__('Amount'))
+                    ->translateLabel()
+                    ->money('IDR', locale: 'id')
+                    ->weight('bold')
+                    ->alignEnd()
+                    ->sortable(),
+                TextColumn::make('status')
+                    ->label(__('Status'))
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'unpaid' => 'danger',
+                        'paid' => 'success',
+                        default => 'gray',
+                    })
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'unpaid' => 'Belum Lunas',
+                        'paid' => 'Lunas',
+                        default => $state,
+                    }),
+                TextColumn::make('paid_at')
+                    ->label(__('Payment Date'))
+                    ->dateTime('d M Y, H:i')
+                    ->placeholder('-')
+                    ->sortable()
+                    ->toggleable(),
             ])
             ->filters([
                 \Filament\Tables\Filters\SelectFilter::make('status')

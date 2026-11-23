@@ -27,7 +27,7 @@ class TutorTodayScheduleWidget extends TableWidget
         $tutorId = $tutor?->id;
 
         return $table
-            ->heading('Ã°Å¸â€œâ€¦ ' . __('Today\'s Teaching Schedule'))
+            ->heading('📅 ' . __('Today\'s Teaching Schedule'))
             ->query(
                 fn (): Builder => ClassSchedule::query()
                     ->whereJsonContains('schedule_items', ['day' => $today])

@@ -341,7 +341,7 @@
                                        class="bc-input w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm"
                                        placeholder="Contoh: 081234567890"
                                        required>
-                                <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Digunakan sebagai Username login portal sekolah.</p>
+                                <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Nomor WhatsApp aktif koordinator/guru pendamping.</p>
                             </div>
                             <div>
                                 <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 truncate mb-1.5">Email Sekolah / Pendamping <span class="text-rose-500">*</span></label>
