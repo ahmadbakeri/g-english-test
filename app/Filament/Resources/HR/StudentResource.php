@@ -62,141 +62,143 @@ class StudentResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema->columns(1)->components([
-            \Filament\Schemas\Components\Section::make(__('Student Data'))
-                ->description('Identitas utama siswa, kategori program (Internal/Eksternal), serta informasi sekolah dan kelas.')
-                ->icon('heroicon-o-identification')
-                ->schema([
-                    Forms\Components\TextInput::make('nis')
-                        ->label(__('No. Siswa (NIS)'))
-                        ->prefixIcon('heroicon-o-hashtag')
-                        ->required()
-                        ->unique(ignoreRecord: true)
-                        ->maxLength(20),
-                    Forms\Components\TextInput::make('nisn')
-                        ->label('NISN (10 Digit)')
-                        ->maxLength(20),
-                    Forms\Components\Select::make('student_type')
-                        ->label(__('Student Type'))
-                        ->options([
-                            'internal' => 'Siswa Internal',
-                            'external' => 'Siswa Eksternal',
-                        ])
-                        ->default('internal')
-                        ->required(),
-                    Forms\Components\TextInput::make('name')
-                        ->label(__('Full Name'))
-                        ->required()
-                        ->maxLength(255),
-                    Forms\Components\Select::make('gender')
-                        ->label(__('Gender'))
-                        ->options([
-                            'L' => __('Male'),
-                            'P' => __('Female'),
+            \Filament\Schemas\Components\Tabs::make('StudentTabs')
+                ->tabs([
+                    \Filament\Schemas\Components\Tabs\Tab::make('Identitas & Akademik')
+                        ->icon('heroicon-o-identification')
+                        ->schema([
+                            Forms\Components\TextInput::make('nis')
+                                ->label(__('No. Siswa (NIS)'))
+                                ->prefixIcon('heroicon-o-hashtag')
+                                ->required()
+                                ->unique(ignoreRecord: true)
+                                ->maxLength(20),
+                            Forms\Components\TextInput::make('nisn')
+                                ->label('NISN (10 Digit)')
+                                ->maxLength(20),
+                            Forms\Components\Select::make('student_type')
+                                ->label(__('Student Type'))
+                                ->options([
+                                    'internal' => 'Siswa Internal',
+                                    'external' => 'Siswa Eksternal',
+                                ])
+                                ->default('internal')
+                                ->required(),
+                            Forms\Components\TextInput::make('name')
+                                ->label(__('Full Name'))
+                                ->required()
+                                ->maxLength(255),
+                            Forms\Components\Select::make('gender')
+                                ->label(__('Gender'))
+                                ->options([
+                                    'L' => __('Male'),
+                                    'P' => __('Female'),
+                                ]),
+                            Forms\Components\TextInput::make('religion')
+                                ->label('Agama (Religion)')
+                                ->maxLength(100),
+                            Forms\Components\TextInput::make('birth_place')
+                                ->label(__('Place of Birth')),
+                            Forms\Components\DatePicker::make('birth_date')
+                                ->label(__('Date of Birth')),
+                            Forms\Components\TextInput::make('phone')
+                                ->label(__('Phone No.'))
+                                ->prefixIcon('heroicon-o-phone')
+                                ->tel(),
+                            Forms\Components\Select::make('education_level')
+                                ->label(__('Education Level'))
+                                ->options([
+                                    'SD' => 'SD',
+                                    'MI' => 'MI',
+                                    'SMP' => 'SMP',
+                                    'MTs' => 'MTs',
+                                    'SMA' => 'SMA',
+                                    'Umum' => 'Umum',
+                                ]),
+                            Forms\Components\TextInput::make('course_level')
+                                ->label(__('Course Level')),
+                            Forms\Components\TextInput::make('school_name')
+                                ->label('Sekolah Asal (School Name)'),
+                            Forms\Components\TextInput::make('class_name')
+                                ->label('Kelas (Class)'),
+                            Forms\Components\Textarea::make('address')
+                                ->label(__('Address'))
+                                ->rows(2)
+                                ->columnSpanFull(),
+                        ])->columns(2),
+
+                    \Filament\Schemas\Components\Tabs\Tab::make('Data Orang Tua / Wali')
+                        ->icon('heroicon-o-users')
+                        ->schema([
+                            \Filament\Schemas\Components\Fieldset::make('Data Ayah (Father)')->schema([
+                                Forms\Components\TextInput::make('father_name')
+                                    ->label(__('Father\'s Name')),
+                                Forms\Components\TextInput::make('father_phone')
+                                    ->label(__('Father\'s Phone'))
+                                    ->tel(),
+                                Forms\Components\TextInput::make('father_email')
+                                    ->label(__('Father\'s Email'))
+                                    ->email(),
+                                Forms\Components\TextInput::make('father_job')
+                                    ->label(__('Father\'s Occupation')),
+                            ])->columns(2),
+
+                            \Filament\Schemas\Components\Fieldset::make('Data Ibu (Mother)')->schema([
+                                Forms\Components\TextInput::make('mother_name')
+                                    ->label(__('Mother\'s Name')),
+                                Forms\Components\TextInput::make('mother_phone')
+                                    ->label(__('Mother\'s Phone'))
+                                    ->tel(),
+                                Forms\Components\TextInput::make('mother_email')
+                                    ->label(__('Mother\'s Email'))
+                                    ->email(),
+                                Forms\Components\TextInput::make('mother_job')
+                                    ->label(__('Mother\'s Occupation')),
+                            ])->columns(2),
+
+                            \Filament\Schemas\Components\Fieldset::make('Data Wali (Guardian)')->schema([
+                                Forms\Components\TextInput::make('parent_name')
+                                    ->label('Nama Wali (Guardian Name)'),
+                                Forms\Components\TextInput::make('parent_phone')
+                                    ->label('No. HP Wali (Guardian Phone)')
+                                    ->tel(),
+                            ])->columns(2),
                         ]),
-                    Forms\Components\TextInput::make('religion')
-                        ->label('Agama (Religion)')
-                        ->maxLength(100),
-                    Forms\Components\TextInput::make('birth_place')
-                        ->label(__('Place of Birth')),
-                    Forms\Components\DatePicker::make('birth_date')
-                        ->label(__('Date of Birth')),
-                    Forms\Components\TextInput::make('phone')
-                        ->label(__('Phone No.'))
-                        ->prefixIcon('heroicon-o-phone')
-                        ->tel(),
-                    Forms\Components\Select::make('education_level')
-                        ->label(__('Education Level'))
-                        ->options([
-                            'SD' => 'SD',
-                            'SMP' => 'SMP',
-                            'SMA' => 'SMA',
-                            'Umum' => 'Umum',
-                        ]),
-                    Forms\Components\TextInput::make('course_level')
-                        ->label(__('Course Level')),
-                    Forms\Components\TextInput::make('school_name')
-                        ->label('Sekolah Asal (School Name)'),
-                    Forms\Components\TextInput::make('class_name')
-                        ->label('Kelas (Class)'),
-                    Forms\Components\Textarea::make('address')
-                        ->label(__('Address'))
-                        ->rows(2)
-                        ->columnSpanFull(),
-                ])->columns(3),
 
-            \Filament\Schemas\Components\Section::make('Data Orang Tua / Wali')
-                ->description('Data Ayah, Ibu, dan Wali disinkronkan otomatis ke akun Portal Orang Tua (student_parent).')
-                ->icon('heroicon-o-users')
-                ->schema([
-                    \Filament\Schemas\Components\Fieldset::make('Data Ayah (Father)')->schema([
-                        Forms\Components\TextInput::make('father_name')
-                            ->label(__('Father\'s Name')),
-                        Forms\Components\TextInput::make('father_phone')
-                            ->label(__('Father\'s Phone'))
-                            ->tel(),
-                        Forms\Components\TextInput::make('father_email')
-                            ->label(__('Father\'s Email'))
-                            ->email(),
-                        Forms\Components\TextInput::make('father_job')
-                            ->label(__('Father\'s Occupation')),
-                    ])->columns(2),
-
-                    \Filament\Schemas\Components\Fieldset::make('Data Ibu (Mother)')->schema([
-                        Forms\Components\TextInput::make('mother_name')
-                            ->label(__('Mother\'s Name')),
-                        Forms\Components\TextInput::make('mother_phone')
-                            ->label(__('Mother\'s Phone'))
-                            ->tel(),
-                        Forms\Components\TextInput::make('mother_email')
-                            ->label(__('Mother\'s Email'))
-                            ->email(),
-                        Forms\Components\TextInput::make('mother_job')
-                            ->label(__('Mother\'s Occupation')),
-                    ])->columns(2),
-
-                    \Filament\Schemas\Components\Fieldset::make('Data Wali (Guardian)')->schema([
-                        Forms\Components\TextInput::make('parent_name')
-                            ->label('Nama Wali (Guardian Name)'),
-                        Forms\Components\TextInput::make('parent_phone')
-                            ->label('No. HP Wali (Guardian Phone)')
-                            ->tel(),
-                    ])->columns(2),
+                    \Filament\Schemas\Components\Tabs\Tab::make('Foto & Status')
+                        ->icon('heroicon-o-shield-check')
+                        ->schema([
+                            Forms\Components\FileUpload::make('photo')
+                                ->label(__('Photo'))
+                                ->avatar()
+                                ->alignCenter()
+                                ->columnSpanFull()
+                                ->extraAttributes(['class' => 'flex justify-center text-center'])
+                                ->imageEditor()
+                                ->circleCropper()
+                                ->imageCropAspectRatio('1:1')
+                                ->automaticallyOpenImageEditorForAspectRatio()
+                                ->disk('public')
+                                ->directory('students')
+                                ->maxSize(2048)
+                                ->hintAction(
+                                    \Filament\Actions\Action::make('remove_photo')
+                                        ->label(__('Remove (Reset)'))
+                                        ->icon('heroicon-o-trash')
+                                        ->color('danger')
+                                        ->action(function ($record, callable $set) {
+                                            $set('photo', null);
+                                            if ($record) {
+                                                $record->photo = null;
+                                                $record->save();
+                                            }
+                                        })
+                                ),
+                            Forms\Components\Toggle::make('is_active')
+                                ->label(__('Active'))
+                                ->default(true),
+                        ])->columns(2),
                 ]),
-
-            \Filament\Schemas\Components\Section::make(__('Status'))
-                ->description('Foto profil siswa dan status keaktifan akademik.')
-                ->icon('heroicon-o-shield-check')
-                ->schema([
-                    Forms\Components\FileUpload::make('photo')
-                        ->label(__('Photo'))
-                        ->avatar()
-                        ->alignCenter()
-                        ->columnSpanFull()
-                        ->extraAttributes(['class' => 'flex justify-center text-center'])
-                        ->imageEditor()
-                        ->circleCropper()
-                        ->imageCropAspectRatio('1:1')
-                        ->automaticallyOpenImageEditorForAspectRatio()
-                        ->disk('public')
-                        ->directory('students')
-                        ->maxSize(2048)
-                        ->hintAction(
-                            \Filament\Actions\Action::make('remove_photo')
-                                ->label(__('Remove (Reset)'))
-                                ->icon('heroicon-o-trash')
-                                ->color('danger')
-                                ->action(function ($record, callable $set) {
-                                    $set('photo', null);
-                                    if ($record) {
-                                        $record->photo = null;
-                                        $record->save();
-                                    }
-                                })
-                        ),
-                    Forms\Components\Toggle::make('is_active')
-                        ->label(__('Active'))
-                        ->default(true),
-                ])->columns(2),
         ]);
     }
 
@@ -251,72 +253,58 @@ class StudentResource extends Resource
             })
             ->collapsedGroupsByDefault()
             ->groupingSettingsInDropdownOnDesktop()
+            ->recordAction('edit')
             ->columns([
-                \Filament\Tables\Columns\Layout\Split::make([
-                    Tables\Columns\ImageColumn::make('photo')
-                        ->label(__('Photo'))
-                        ->circular()
-                        ->disk('public')
-                        ->grow(false)
-                        ->defaultImageUrl(fn ($record) => 'https://ui-avatars.com/api/?name=' . urlencode($record->name) . '&color=0a4282&background=dbeafe'),
-                    Tables\Columns\TextColumn::make('user.username')
-                        ->label(__('No. Siswa'))
-                        ->badge()
-                        ->color('gray')
-                        ->grow(false)
-                        ->searchable()
-                        ->sortable(),
-                    Tables\Columns\TextColumn::make('name')
-                        ->label(__('Name'))
-                        ->translateLabel()
-                        ->weight('bold')
-                        ->description(fn (Student $record): string => 'NIS: ' . ($record->nis ?: '-'))
-                        ->searchable()
-                        ->sortable(),
-                    Tables\Columns\TextColumn::make('student_type')
-                        ->label(__('Type'))
-                        ->badge()
-                        ->grow(false)
-                        ->color(fn (?string $state): string => $state === 'external' ? 'warning' : 'info')
-                        ->formatStateUsing(fn (?string $state): string => $state === 'external' ? __('External') : __('Internal')),
-                    Tables\Columns\TextColumn::make('school_name')
-                        ->label('Sekolah')
-                        ->placeholder('-')
-                        ->searchable()
-                        ->toggleable(),
-                    Tables\Columns\TextColumn::make('class_name')
-                        ->label('Kelas')
-                        ->badge()
-                        ->color('info')
-                        ->grow(false)
-                        ->getStateUsing(fn (Student $record): string => self::resolveClassLabel($record))
-                        ->searchable()
-                        ->toggleable(),
-                    Tables\Columns\TextColumn::make('gender')
-                        ->label(__('Gender'))
-                        ->badge()
-                        ->grow(false)
-                        ->color(fn (?string $state): string => $state === 'L' ? 'info' : 'danger'),
-                    Tables\Columns\TextColumn::make('phone')
-                        ->label(__('Phone'))
-                        ->placeholder('-')
-                        ->grow(false)
-                        ->searchable(),
-                    Tables\Columns\TextColumn::make('parent_summary')
-                        ->label('Orang Tua / Wali')
-                        ->getStateUsing(fn (Student $record): string => $record->father_name ?: ($record->mother_name ?: ($record->parent_name ?: '-')))
-                        ->toggleable(),
-                    Tables\Columns\IconColumn::make('is_active')
-                        ->label(__('Active'))
-                        ->grow(false)
-                        ->boolean(),
-                    Tables\Columns\TextColumn::make('created_at')
-                        ->label(__('Registered'))
-                        ->dateTime('d/m/Y')
-                        ->grow(false)
-                        ->sortable()
-                        ->toggleable(isToggledHiddenByDefault: true),
-                ])->from('md'),
+                Tables\Columns\ImageColumn::make('photo')
+                    ->label('')
+                    ->circular()
+                    ->imageSize(36)
+                    ->disk('public')
+                    ->defaultImageUrl(fn ($record) => 'https://ui-avatars.com/api/?name=' . urlencode($record->name) . '&color=0a4282&background=dbeafe'),
+                Tables\Columns\TextColumn::make('name')
+                    ->label(__('Name'))
+                    ->weight('bold')
+                    ->color('primary')
+                    ->description(function (Student $record): string {
+                        $code = $record->user?->username ?: ($record->nis ?: '-');
+                        $school = trim((string) $record->school_name);
+                        return $school !== '' ? "{$code} • {$school}" : $code;
+                    })
+                    ->searchable(['name', 'nis', 'nisn', 'school_name'])
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('student_type')
+                    ->label(__('Type'))
+                    ->badge()
+                    ->color(fn (?string $state): string => $state === 'external' ? 'warning' : 'info')
+                    ->formatStateUsing(fn (?string $state): string => $state === 'external' ? __('External') : __('Internal')),
+                Tables\Columns\TextColumn::make('class_name')
+                    ->label(__('Class'))
+                    ->badge()
+                    ->color('info')
+                    ->getStateUsing(fn (Student $record): string => self::resolveClassLabel($record))
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('gender')
+                    ->label('L/P')
+                    ->badge()
+                    ->color(fn (?string $state): string => $state === 'L' ? 'info' : 'danger'),
+                Tables\Columns\TextColumn::make('phone')
+                    ->label(__('Phone'))
+                    ->placeholder('-')
+                    ->searchable()
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('parent_summary')
+                    ->label('Orang Tua / Wali')
+                    ->getStateUsing(fn (Student $record): string => $record->father_name ?: ($record->mother_name ?: ($record->parent_name ?: '-')))
+                    ->limit(24)
+                    ->toggleable(),
+                Tables\Columns\IconColumn::make('is_active')
+                    ->label(__('Active'))
+                    ->boolean(),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->label(__('Registered'))
+                    ->dateTime('d/m/Y')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('student_type')
@@ -336,8 +324,8 @@ class StudentResource extends Resource
             ])
             ->actions([
                 \Filament\Actions\ActionGroup::make([
-                    \Filament\Actions\ViewAction::make(),
-                    \Filament\Actions\EditAction::make(),
+                    \Filament\Actions\ViewAction::make()->slideOver()->modalWidth('4xl'),
+                    \Filament\Actions\EditAction::make()->slideOver()->modalWidth('4xl'),
                     \Filament\Actions\Action::make('brain_champion_card')
                         ->label('Cetak Kartu Peserta')
                         ->icon('heroicon-o-identification')

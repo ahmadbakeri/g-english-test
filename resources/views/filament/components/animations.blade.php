@@ -614,19 +614,18 @@
     /* Grouped Table Headers (Collapse/Expand Chevrons & Item Count Pills) */
     .fi-ta-group-header-row td,
     .fi-ta-group-header {
-        background: linear-gradient(90deg, rgba(10, 66, 130, 0.07), rgba(248, 250, 252, 0.9)) !important;
-        border: 1px solid rgba(10, 66, 130, 0.14) !important;
-        border-left: 4px solid #0a4282 !important;
-        border-radius: 0.875rem !important;
-        padding: 0.75rem 1.25rem !important;
+        background: rgba(10, 66, 130, 0.05) !important;
+        border-top: 1px solid rgba(10, 66, 130, 0.12) !important;
+        border-bottom: 1px solid rgba(10, 66, 130, 0.12) !important;
+        padding: 0.7rem 1.15rem !important;
         cursor: pointer !important;
-        transition: all 0.25s ease !important;
+        transition: background-color 0.2s ease, border-color 0.2s ease !important;
     }
     .dark .fi-ta-group-header-row td,
     .dark .fi-ta-group-header {
-        background: linear-gradient(90deg, rgba(15, 23, 42, 0.85), rgba(30, 41, 59, 0.75)) !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
-        border-left: 4px solid #fbb900 !important;
+        background: rgba(15, 23, 42, 0.72) !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
     }
     .fi-ta-group-header-row:hover td,
     .fi-ta-group-header:hover {
