@@ -396,5 +396,15 @@
     "Absent": "غائب",
     "Income Chart This Year": "مخطط الدخل لهذا العام",
     "Total Tutors & Staff": "إجمالي المعلمين والموظفين",
-    "Manage Employees": "إدارة الموظفين"
+    "Manage Employees": "إدارة الموظفين",
+    "Participating Schools": "المدارس المشاركة",
+    "Registered Participants": "المشاركون المسجلون",
+    "Official monitoring portal for participating schools and students in your jurisdiction.": "بوابة المراقبة الرسمية للمدارس والطلاب المشاركين ضمن نطاق إشرافكم.",
+    "participants": "مشاركين",
+    "Global quota": "الحصة الإجمالية",
+    "Coordinator": "المشرف / المنسق",
+    "Coordinator Phone": "هاتف المنسق",
+    "No participating schools yet.": "لا توجد مدارس مشاركة بعد.",
+    "Total": "الإجمالي",
+    "Search": "بحث"
 }

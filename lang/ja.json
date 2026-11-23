@@ -396,5 +396,15 @@
     "Absent": "欠席",
     "Income Chart This Year": "今年の収入グラフ",
     "Total Tutors & Staff": "講師・スタッフ総数",
-    "Manage Employees": "従業員管理"
+    "Manage Employees": "従業員管理",
+    "Participating Schools": "参加校",
+    "Registered Participants": "登録済み参加者",
+    "Official monitoring portal for participating schools and students in your jurisdiction.": "管轄内の参加校および参加生徒のための公式モニタリングポータル。",
+    "participants": "名",
+    "Global quota": "全体定員",
+    "Coordinator": "引率教員",
+    "Coordinator Phone": "引率教員連絡先",
+    "No participating schools yet.": "参加校はまだありません。",
+    "Total": "合計",
+    "Search": "検索"
 }

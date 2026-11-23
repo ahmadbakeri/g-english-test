@@ -56,6 +56,11 @@ class Student extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function schoolUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'school_user_id');
+    }
+
     protected static function booted(): void
     {
         static::created(function (Student $student) {

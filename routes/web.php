@@ -32,6 +32,8 @@ Route::post('/login-action', function (\Illuminate\Http\Request $request) {
             return redirect()->to('/tutor');
         } elseif ($role === 'school') {
             return redirect()->to('/school');
+        } elseif (in_array($role, ['kemenag', 'kemendikdasmen'], true)) {
+            return redirect()->to('/agency');
         } elseif ($role === 'parent') {
             return redirect()->to('/parent');
         } else {

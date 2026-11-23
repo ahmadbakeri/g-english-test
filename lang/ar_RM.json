@@ -396,5 +396,15 @@
     "Absent": "Gha'ib",
     "Income Chart This Year": "Mukhattat al-dakhl lihadha al-'am",
     "Total Tutors & Staff": "Ijmali al-mu'allimin wa al-muwazzafin",
-    "Manage Employees": "Idarat al-muwazzafin"
+    "Manage Employees": "Idarat al-muwazzafin",
+    "Participating Schools": "Al-madaris al-musharikah",
+    "Registered Participants": "Al-musharikun al-musajjalun",
+    "Official monitoring portal for participating schools and students in your jurisdiction.": "Bawwabat al-muraqabah al-rasmiyyah lil-madaris wa al-tullab al-musharikin dimna nitaq ishrafikum.",
+    "participants": "musharikin",
+    "Global quota": "Al-hissah al-ijmaliyyah",
+    "Coordinator": "Al-mushrif / al-munassiq",
+    "Coordinator Phone": "Hatif al-munassiq",
+    "No participating schools yet.": "La tujad madaris musharikah ba'd.",
+    "Total": "Al-ijmali",
+    "Search": "Bahth"
 }

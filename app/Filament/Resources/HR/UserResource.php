@@ -50,7 +50,7 @@ class UserResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-            ->whereIn('role', ['admin', 'tutor'])
+            ->whereIn('role', ['admin', 'tutor', 'kemenag', 'kemendikdasmen'])
             ->whereDoesntHave('roles', fn (Builder $q) => $q->whereIn('name', ['siswa', 'student', 'parent']));
     }
 
@@ -79,6 +79,8 @@ class UserResource extends Resource
                     ->options([
                         'admin' => 'Admin',
                         'tutor' => 'Tutor',
+                        'kemenag' => 'Kemenag (MI & MTs)',
+                        'kemendikdasmen' => 'Kemendikdasmen (SD & SMP)',
                     ])
                     ->default('tutor')
                     ->required(),
@@ -103,11 +105,15 @@ class UserResource extends Resource
                         ->color(fn (string $state): string => match ($state) {
                             'admin' => 'danger',
                             'tutor' => 'success',
+                            'kemenag' => 'warning',
+                            'kemendikdasmen' => 'info',
                             default => 'gray',
                         })
                         ->formatStateUsing(fn (string $state): string => match ($state) {
                             'admin' => 'Admin',
                             'tutor' => 'Tutor',
+                            'kemenag' => 'Kemenag',
+                            'kemendikdasmen' => 'Kemendikdasmen',
                             default => ucfirst($state),
                         }),
                     Tables\Columns\TextColumn::make('created_at')
@@ -123,6 +129,8 @@ class UserResource extends Resource
                     ->options([
                         'admin' => 'Admin',
                         'tutor' => 'Tutor',
+                        'kemenag' => 'Kemenag (MI & MTs)',
+                        'kemendikdasmen' => 'Kemendikdasmen (SD & SMP)',
                     ]),
             ])
             ->actions([
