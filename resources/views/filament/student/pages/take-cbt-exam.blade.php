@@ -479,6 +479,7 @@
                     endTime: new Date('{{ $endTimeIso }}').getTime(),
                     timeLeft: '00:00:00',
                     isTimeUp: false,
+                    submitting: false,
                     timerId: null,
                     inFullscreen: false,
                     hasEnteredFullscreen: false,
@@ -513,22 +514,23 @@
                     bindAntiCheat() {
                         document.addEventListener('fullscreenchange', () => {
                             this.inFullscreen = (document.fullscreenElement === this.$refs.examShell);
-                            if (this.hasEnteredFullscreen && !this.inFullscreen && !this.isTimeUp) {
+                            if (this.hasEnteredFullscreen && !this.inFullscreen && !this.isTimeUp && !this.submitting) {
                                 this.triggerViolation('Keluar dari mode layar penuh');
                             }
                         });
                         document.addEventListener('visibilitychange', () => {
-                            if (document.hidden && this.hasEnteredFullscreen && !this.isTimeUp) {
+                            if (document.hidden && this.hasEnteredFullscreen && !this.isTimeUp && !this.submitting) {
                                 this.triggerViolation('Pindah tab atau meminimalkan browser');
                             }
                         });
                         window.addEventListener('blur', () => {
-                            if (this.hasEnteredFullscreen && !this.isTimeUp && document.activeElement?.tagName !== 'IFRAME') {
+                            if (this.hasEnteredFullscreen && !this.isTimeUp && !this.submitting && document.activeElement?.tagName !== 'IFRAME') {
                                 this.triggerViolation('Keluar dari jendela ujian');
                             }
                         });
                     },
                     triggerViolation(reason) {
+                        if (this.submitting || this.isTimeUp) return;
                         const now = Date.now();
                         if (now - this.lastViolationAt < 1500) return;
                         this.lastViolationAt = now;
@@ -544,6 +546,8 @@
                         });
                     },
                     finishExam() {
+                        if (this.submitting) return;
+                        this.submitting = true;
                         if (document.fullscreenElement) {
                             document.exitFullscreen().catch(() => {});
                         }
@@ -565,7 +569,7 @@
                     }
                 }">
                 <!-- Fullscreen Gate Overlay -->
-                <div x-show="!inFullscreen" class="cbt-modal-backdrop">
+                <div x-show="!inFullscreen && !submitting" class="cbt-modal-backdrop">
                     <div class="cbt-modal-card" style="border-color: rgba(251, 185, 0, 0.55);">
                         <div style="width: 4.25rem; height: 4.25rem; border-radius: 1.15rem; background: linear-gradient(135deg, #0a4282, #1a368b); color: #fbb900; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.1rem auto; box-shadow: 0 10px 20px -5px rgba(10, 66, 130, 0.45);">
                             <x-heroicon-o-arrows-pointing-out style="width: 2.25rem; height: 2.25rem;" />
@@ -756,6 +760,7 @@
                     },
 
                     triggerViolation(reason) {
+                        if (this.submitting) return;
                         const now = Date.now();
                         if (now - this.lastViolationAt < 1500) return;
                         this.lastViolationAt = now;
@@ -841,7 +846,7 @@
                 }">
 
                 <!-- Fullscreen Gate Overlay -->
-                <div x-show="!inFullscreen" class="cbt-modal-backdrop">
+                <div x-show="!inFullscreen && !submitting" class="cbt-modal-backdrop">
                     <div class="cbt-modal-card" style="border-color: rgba(251, 185, 0, 0.55);">
                         <div style="width: 4.25rem; height: 4.25rem; border-radius: 1.15rem; background: linear-gradient(135deg, #0a4282, #1a368b); color: #fbb900; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.1rem auto; box-shadow: 0 10px 20px -5px rgba(10, 66, 130, 0.45);">
                             <x-heroicon-o-arrows-pointing-out style="width: 2.25rem; height: 2.25rem;" />
