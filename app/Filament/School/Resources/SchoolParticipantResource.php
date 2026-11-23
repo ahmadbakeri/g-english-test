@@ -207,125 +207,117 @@ class SchoolParticipantResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->recordAction('edit')
             ->columns([
-                Split::make([
-                    TextColumn::make('competition_code')
-                        ->label('Kode Peserta')
-                        ->getStateUsing(fn (Student $record): string => $record->competition_code ?: ($record->nis ?: '-'))
-                        ->badge()
-                        ->color('primary')
-                        ->searchable()
-                        ->sortable(),
-                    TextColumn::make('nisn')
-                        ->label('NISN')
-                        ->badge()
-                        ->color('gray')
-                        ->placeholder('-')
-                        ->searchable(),
-                    TextColumn::make('name')
-                        ->label('Nama Siswa')
-                        ->weight('bold')
-                        ->description(fn (Student $record): string => $record->school_name ?: (auth()->user()->name ?? '-'))
-                        ->searchable()
-                        ->sortable(),
-                    TextColumn::make('class_name')
-                        ->label('Kelas')
-                        ->badge()
-                        ->color('info')
-                        ->sortable(),
-                    TextColumn::make('gender')
-                        ->label('L/P')
-                        ->badge()
-                        ->color(fn (?string $state): string => $state === 'P' ? 'danger' : 'info'),
-                    TextColumn::make('parent_name')
-                        ->label('Nama Orang Tua')
-                        ->description(fn (Student $record): string => 'WA Ortu: ' . ($record->parent_phone ?: '-'))
-                        ->searchable(),
-                    TextColumn::make('parent_phone')
-                        ->label('No. HP Ortu')
-                        ->toggleable(isToggledHiddenByDefault: true),
-                    TextColumn::make('phone')
-                        ->label('No. HP Siswa')
-                        ->placeholder('-')
-                        ->toggleable(),
-                ])->from('md'),
+                TextColumn::make('competition_code')
+                    ->label('Kode / NISN')
+                    ->getStateUsing(fn (Student $record): string => $record->competition_code ?: ($record->nis ?: '-'))
+                    ->description(fn (Student $record): string => 'NISN: ' . ($record->nisn ?: '-'))
+                    ->badge()
+                    ->color('primary')
+                    ->searchable(['competition_code', 'nis', 'nisn'])
+                    ->sortable(),
+                TextColumn::make('name')
+                    ->label('Nama Siswa')
+                    ->weight('bold')
+                    ->description(fn (Student $record): string => ($record->gender ?: '-') . ' • ' . ($record->school_name ?: (auth()->user()->name ?? '-')))
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('class_name')
+                    ->label('Kelas')
+                    ->badge()
+                    ->color('info')
+                    ->sortable(),
+                TextColumn::make('parent_name')
+                    ->label('Orang Tua / WA')
+                    ->description(fn (Student $record): string => 'WA: ' . ($record->parent_phone ?: '-'))
+                    ->searchable(),
+                TextColumn::make('nisn')
+                    ->label('NISN')
+                    ->placeholder('-')
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('phone')
+                    ->label('No. HP Siswa')
+                    ->placeholder('-')
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->recordActions([
-                \Filament\Actions\Action::make('print_card')
-                    ->label('Cetak Kartu Peserta')
-                    ->icon('heroicon-o-identification')
-                    ->color('success')
-                    ->url(fn (Student $record): string => route('report.brain-champion-card', $record->id))
-                    ->openUrlInNewTab(),
-                ActionGroup::make([
-                    EditAction::make()
-                        ->label('Edit Biodata')
-                        ->using(function (Student $record, array $data): Student {
-                            return DB::transaction(function () use ($record, $data) {
-                                $newClass = trim((string) ($data['class_name'] ?? $record->class_name));
-                                if ($newClass !== trim((string) $record->class_name)) {
-                                    if (self::isClassOptionDisabled($newClass, $record)) {
-                                        throw ValidationException::withMessages([
-                                            'class_name' => "Kuota {$newClass} sudah penuh (35/35) atau batas delegasi sekolah Anda pada kelas tersebut sudah terpenuhi.",
-                                        ]);
-                                    }
-                                }
-
-                                $record->update([
-                                    'class_name' => $newClass,
-                                    'nisn' => trim((string) $data['nisn']),
-                                    'name' => trim((string) $data['name']),
-                                    'birth_place' => $data['birth_place'] ?? null,
-                                    'birth_date' => $data['birth_date'] ?? null,
-                                    'gender' => $data['gender'] ?? 'L',
-                                    'religion' => $data['religion'] ?? null,
-                                    'address' => $data['address'] ?? null,
-                                    'father_name' => $data['father_name'] ?? null,
-                                    'father_phone' => $data['father_phone'] ?? null,
-                                    'father_job' => $data['father_job'] ?? null,
-                                    'mother_name' => ($data['mother_name'] ?? null) ?: trim((string) $data['parent_name']),
-                                    'mother_phone' => ($data['mother_phone'] ?? null) ?: trim((string) $data['parent_phone']),
-                                    'mother_job' => $data['mother_job'] ?? null,
-                                    'parent_name' => trim((string) $data['parent_name']),
-                                    'parent_phone' => trim((string) $data['parent_phone']),
-                                    'phone' => trim((string) ($data['phone'] ?? '')) ?: trim((string) $data['parent_phone']),
-                                ]);
-
-                                $code = $record->competition_code ?: $record->nis;
-                                if ($code) {
-                                    Admission::where('registration_number', $code)->update([
-                                        'class_name' => $newClass,
-                                        'nisn' => $record->nisn,
-                                        'name' => $record->name,
-                                        'birth_place' => $record->birth_place,
-                                        'birth_date' => $record->birth_date,
-                                        'gender' => $record->gender,
-                                        'religion' => $record->religion,
-                                        'address' => $record->address,
-                                        'father_name' => $record->father_name,
-                                        'father_phone' => $record->father_phone,
-                                        'father_job' => $record->father_job,
-                                        'mother_name' => $record->mother_name,
-                                        'mother_phone' => $record->mother_phone,
-                                        'mother_job' => $record->mother_job,
-                                        'parent_name' => $record->parent_name,
-                                        'parent_phone' => $record->parent_phone,
-                                        'phone' => $record->phone,
+                EditAction::make()
+                    ->label('Edit')
+                    ->button()
+                    ->size('sm')
+                    ->slideOver()
+                    ->modalWidth('4xl')
+                    ->using(function (Student $record, array $data): Student {
+                        return DB::transaction(function () use ($record, $data) {
+                            $newClass = trim((string) ($data['class_name'] ?? $record->class_name));
+                            if ($newClass !== trim((string) $record->class_name)) {
+                                if (self::isClassOptionDisabled($newClass, $record)) {
+                                    throw ValidationException::withMessages([
+                                        'class_name' => "Kuota {$newClass} sudah penuh (35/35) atau batas delegasi sekolah Anda pada kelas tersebut sudah terpenuhi.",
                                     ]);
                                 }
+                            }
 
-                                Notification::make()
-                                    ->title('Biodata peserta berhasil diperbarui.')
-                                    ->success()
-                                    ->send();
+                            $record->update([
+                                'class_name' => $newClass,
+                                'nisn' => trim((string) $data['nisn']),
+                                'name' => trim((string) $data['name']),
+                                'birth_place' => $data['birth_place'] ?? null,
+                                'birth_date' => $data['birth_date'] ?? null,
+                                'gender' => $data['gender'] ?? 'L',
+                                'religion' => $data['religion'] ?? null,
+                                'address' => $data['address'] ?? null,
+                                'father_name' => $data['father_name'] ?? null,
+                                'father_phone' => $data['father_phone'] ?? null,
+                                'father_job' => $data['father_job'] ?? null,
+                                'mother_name' => ($data['mother_name'] ?? null) ?: trim((string) $data['parent_name']),
+                                'mother_phone' => ($data['mother_phone'] ?? null) ?: trim((string) $data['parent_phone']),
+                                'mother_job' => $data['mother_job'] ?? null,
+                                'parent_name' => trim((string) $data['parent_name']),
+                                'parent_phone' => trim((string) $data['parent_phone']),
+                                'phone' => trim((string) ($data['phone'] ?? '')) ?: trim((string) $data['parent_phone']),
+                            ]);
 
-                                return $record;
-                            });
-                        }),
-                ])
-                    ->icon('heroicon-m-ellipsis-vertical')
-                    ->color('gray')
-                    ->tooltip('Aksi'),
+                            $code = $record->competition_code ?: $record->nis;
+                            if ($code) {
+                                Admission::where('registration_number', $code)->update([
+                                    'class_name' => $newClass,
+                                    'nisn' => $record->nisn,
+                                    'name' => $record->name,
+                                    'birth_place' => $record->birth_place,
+                                    'birth_date' => $record->birth_date,
+                                    'gender' => $record->gender,
+                                    'religion' => $record->religion,
+                                    'address' => $record->address,
+                                    'father_name' => $record->father_name,
+                                    'father_phone' => $record->father_phone,
+                                    'father_job' => $record->father_job,
+                                    'mother_name' => $record->mother_name,
+                                    'mother_phone' => $record->mother_phone,
+                                    'mother_job' => $record->mother_job,
+                                    'parent_name' => $record->parent_name,
+                                    'parent_phone' => $record->parent_phone,
+                                    'phone' => $record->phone,
+                                ]);
+                            }
+
+                            Notification::make()
+                                ->title('Biodata peserta berhasil diperbarui.')
+                                ->success()
+                                ->send();
+
+                            return $record;
+                        });
+                    }),
+                \Filament\Actions\Action::make('print_card')
+                    ->label('Kartu')
+                    ->icon('heroicon-o-identification')
+                    ->color('success')
+                    ->button()
+                    ->size('sm')
+                    ->url(fn (Student $record): string => route('report.brain-champion-card', $record->id))
+                    ->openUrlInNewTab(),
             ]);
     }
 

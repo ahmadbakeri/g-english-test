@@ -125,45 +125,45 @@ class AttendanceResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('date', 'desc')
             ->columns([
-                \Filament\Tables\Columns\Layout\Split::make([
-                TextColumn::make('class_id')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('student.name')
-                    ->searchable(),
                 TextColumn::make('date')
-                    ->date()
+                    ->label(__('Date'))
+                    ->date('d M Y')
+                    ->description(fn (Attendance $record): string => ($record->time_in ? substr((string) $record->time_in, 0, 5) : '--:--') . ' - ' . ($record->time_out ? substr((string) $record->time_out, 0, 5) : '--:--'))
                     ->sortable(),
-                TextColumn::make('time_in')
-                    ->time()
-                    ->sortable(),
-                TextColumn::make('time_out')
-                    ->time()
-                    ->sortable(),
-                TextColumn::make('status')
-                    ->searchable(),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('role_type')
+                TextColumn::make('classRoom.name')
+                    ->label(__('Class Room'))
+                    ->weight('bold')
+                    ->placeholder('-')
                     ->searchable(),
                 TextColumn::make('tutor.name')
+                    ->label(__('Tutor'))
+                    ->placeholder('-')
                     ->searchable(),
-                TextColumn::make('user.name')
-                    ->searchable(),
-                ])->from('md'),
+                TextColumn::make('status')
+                    ->label(__('Status'))
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'present' => 'success',
+                        'absent' => 'danger',
+                        'late' => 'warning',
+                        'excused' => 'info',
+                        default => 'gray',
+                    })
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'present' => 'Hadir',
+                        'absent' => 'Tidak Hadir',
+                        'late' => 'Terlambat',
+                        'excused' => 'Izin',
+                        default => $state,
+                    }),
             ])
             ->filters([
                 //
             ])
             ->recordActions([
-                ViewAction::make(),
+                ViewAction::make()->button()->size('sm'),
             ])
             ->toolbarActions([]);
     }

@@ -68,36 +68,39 @@ class AgencyParticipantResource extends Resource
                     ->label(__('Code'))
                     ->badge()
                     ->color('primary')
-                    ->searchable()
+                    ->description(fn (Student $record): string => 'NISN: ' . ($record->nisn ?: '-'))
+                    ->searchable(['competition_code', 'nisn'])
                     ->sortable(),
-                TextColumn::make('school_name')
-                    ->label(__('School Name'))
-                    ->searchable()
-                    ->sortable()
-                    ->weight('bold'),
+                TextColumn::make('name')
+                    ->label(__('Name'))
+                    ->weight('bold')
+                    ->description(fn (Student $record): string => ($record->school_name ?: '-') . ' • ' . ($record->gender === 'P' ? 'P' : 'L'))
+                    ->searchable(['name', 'school_name'])
+                    ->sortable(),
                 TextColumn::make('class_name')
                     ->label(__('Class (Kelas)'))
                     ->badge()
                     ->color('warning')
                     ->sortable(),
+                TextColumn::make('schoolUser.name')
+                    ->label(__('Coordinator'))
+                    ->description(fn (Student $record): ?string => $record->schoolUser?->username)
+                    ->placeholder('-'),
+                TextColumn::make('school_name')
+                    ->label(__('School Name'))
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('nisn')
                     ->label('NISN')
-                    ->searchable(),
-                TextColumn::make('name')
-                    ->label(__('Name'))
                     ->searchable()
-                    ->sortable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('gender')
                     ->label(__('Gender'))
                     ->badge()
                     ->formatStateUsing(fn (?string $state): string => $state === 'P' ? 'P' : 'L')
-                    ->color(fn (?string $state): string => $state === 'P' ? 'danger' : 'info'),
-                TextColumn::make('schoolUser.name')
-                    ->label(__('Coordinator'))
-                    ->placeholder('-'),
-                TextColumn::make('schoolUser.username')
-                    ->label(__('Coordinator Phone'))
-                    ->placeholder('-'),
+                    ->color(fn (?string $state): string => $state === 'P' ? 'danger' : 'info')
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 SelectFilter::make('class_name')

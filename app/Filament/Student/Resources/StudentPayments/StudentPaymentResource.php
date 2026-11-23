@@ -115,35 +115,47 @@ class StudentPaymentResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('due_date', 'desc')
             ->columns([
-                \Filament\Tables\Columns\Layout\Split::make([
-                TextColumn::make('student.name')
+                TextColumn::make('notes')
+                    ->label('Keterangan')
+                    ->weight('bold')
+                    ->placeholder('Pembayaran Kursus')
+                    ->description(fn (StudentPayment $record): string => $record->student?->name ?? '-')
                     ->searchable(),
-                TextColumn::make('notes')->label('Keterangan')->wrap(),
-                TextColumn::make('due_date')->label('Jatuh Tempo')->date('d M Y')->sortable(),
+                TextColumn::make('due_date')
+                    ->label('Jatuh Tempo')
+                    ->date('d M Y')
+                    ->placeholder('-')
+                    ->sortable(),
                 TextColumn::make('amount')
-                    ->numeric()
+                    ->label('Nominal')
+                    ->money('IDR', locale: 'id')
+                    ->weight('bold')
+                    ->alignEnd()
                     ->sortable(),
                 TextColumn::make('status')
-                    ->searchable(),
-                TextColumn::make('paid_at')
-                    ->dateTime()
-                    ->sortable(),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                ])->from('md'),
+                    ->label('Status')
+                    ->badge()
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'paid' => 'Lunas',
+                        'unpaid' => 'Belum Lunas',
+                        'pending' => 'Menunggu',
+                        default => $state,
+                    })
+                    ->description(fn (StudentPayment $record): ?string => $record->paid_at ? 'Bayar ' . $record->paid_at->format('d M Y') : null)
+                    ->color(fn (string $state): string => match ($state) {
+                        'paid' => 'success',
+                        'unpaid' => 'danger',
+                        'pending' => 'warning',
+                        default => 'gray',
+                    }),
             ])
             ->filters([
                 //
             ])
             ->recordActions([
-                ViewAction::make(),
+                ViewAction::make()->button()->size('sm'),
             ])
             ->toolbarActions([]);
     }

@@ -618,46 +618,44 @@
         font-variant-numeric: tabular-nums !important;
     }
 
-    /* Grouped Table Headers (Collapse/Expand Chevrons & Item Count Pills) */
+    /* Grouped Table Headers (Unified Genza Blue Collapsible Accordion Bars) */
     .fi-ta-group-header-row td,
     .fi-ta-group-header {
-        background: rgba(10, 66, 130, 0.05) !important;
-        border-top: 1px solid rgba(10, 66, 130, 0.12) !important;
-        border-bottom: 1px solid rgba(10, 66, 130, 0.12) !important;
-        padding: 0.7rem 1.15rem !important;
+        background: #0a4282 !important;
+        color: #ffffff !important;
+        border: 1px solid rgba(10, 66, 130, 0.2) !important;
+        border-radius: 0.85rem !important;
+        padding: 0.72rem 1.05rem !important;
         cursor: pointer !important;
-        transition: background-color 0.2s ease, border-color 0.2s ease !important;
+        transition: background-color 0.2s ease, box-shadow 0.2s ease !important;
     }
     .dark .fi-ta-group-header-row td,
     .dark .fi-ta-group-header {
-        background: rgba(15, 23, 42, 0.72) !important;
-        border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+        background: #0f294d !important;
+        border-color: rgba(255, 255, 255, 0.1) !important;
     }
     .fi-ta-group-header-row:hover td,
     .fi-ta-group-header:hover {
-        border-color: rgba(251, 185, 0, 0.6) !important;
-        box-shadow: 0 4px 12px -2px rgba(10, 66, 130, 0.12) !important;
+        background: #0d52a0 !important;
+        box-shadow: 0 6px 14px -4px rgba(10, 66, 130, 0.22) !important;
+    }
+    .dark .fi-ta-group-header-row:hover td,
+    .dark .fi-ta-group-header:hover {
+        background: #163a6b !important;
     }
     .fi-ta-group-header h4,
-    .fi-ta-group-heading {
+    .fi-ta-group-heading,
+    .fi-ta-group-header-row td span {
         font-weight: 700 !important;
-        color: #0a4282 !important;
-        font-size: 0.925rem !important;
+        color: #ffffff !important;
+        font-size: 0.9rem !important;
         letter-spacing: 0.01em !important;
     }
-    .dark .fi-ta-group-header h4,
-    .dark .fi-ta-group-heading {
-        color: #f8fafc !important;
-    }
     .fi-ta-group-header .fi-icon-btn,
-    .fi-ta-group-header svg {
-        color: #0a4282 !important;
-        transition: transform 0.25s ease !important;
-    }
-    .dark .fi-ta-group-header .fi-icon-btn,
-    .dark .fi-ta-group-header svg {
+    .fi-ta-group-header svg,
+    .fi-ta-group-header-row td svg {
         color: #fbb900 !important;
+        transition: transform 0.25s ease !important;
     }
 
     /* Remove default borders from table container */
@@ -1028,6 +1026,13 @@
                     }
                 });
             });
+            if (!table.dataset.gxObserved) {
+                table.dataset.gxObserved = '1';
+                const tbody = table.querySelector('tbody');
+                if (tbody) {
+                    new MutationObserver(() => hydrateFilamentTableLabels()).observe(tbody, { childList: true });
+                }
+            }
         });
     }
 

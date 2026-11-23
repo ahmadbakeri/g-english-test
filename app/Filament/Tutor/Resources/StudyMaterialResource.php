@@ -81,28 +81,36 @@ class StudyMaterialResource extends Resource
 
     public static function table(Table $table): Table
     {
-        return $table->columns([
-            Tables\Columns\TextColumn::make('subject.name')->label(__('Subject'))->searchable()->sortable(),
-            Tables\Columns\TextColumn::make('title')->label(__('Title'))->searchable()->sortable(),
-            Tables\Columns\IconColumn::make('youtube_url')
-                ->label(__('Video'))
-                ->boolean()
-                ->getStateUsing(fn ($record) => !empty($record->youtube_url)),
-            Tables\Columns\IconColumn::make('attachment_file')
-                ->label(__('Attachment'))
-                ->boolean()
-                ->getStateUsing(fn ($record) => !empty($record->attachment_file)),
-            Tables\Columns\IconColumn::make('is_published')->label(__('Published'))->boolean(),
-        ])
-        ->actions([
-            \Filament\Actions\EditAction::make(),
-            \Filament\Actions\DeleteAction::make(),
-        ])
-        ->bulkActions([
-            \Filament\Actions\BulkActionGroup::make([
-                \Filament\Actions\DeleteBulkAction::make(),
-            ]),
-        ]);
+        return $table
+            ->recordAction('edit')
+            ->columns([
+                Tables\Columns\TextColumn::make('title')
+                    ->label(__('Title'))
+                    ->weight('bold')
+                    ->description(fn (StudyMaterial $record): string => $record->subject?->name ?? '-')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\IconColumn::make('youtube_url')
+                    ->label(__('Video'))
+                    ->boolean()
+                    ->getStateUsing(fn ($record) => !empty($record->youtube_url)),
+                Tables\Columns\IconColumn::make('attachment_file')
+                    ->label(__('Attachment'))
+                    ->boolean()
+                    ->getStateUsing(fn ($record) => !empty($record->attachment_file)),
+                Tables\Columns\IconColumn::make('is_published')->label(__('Published'))->boolean(),
+            ])
+            ->actions([
+                \Filament\Actions\EditAction::make()->button()->size('sm'),
+                \Filament\Actions\ActionGroup::make([
+                    \Filament\Actions\DeleteAction::make(),
+                ]),
+            ])
+            ->bulkActions([
+                \Filament\Actions\BulkActionGroup::make([
+                    \Filament\Actions\DeleteBulkAction::make(),
+                ]),
+            ]);
     }
 
     public static function getPages(): array

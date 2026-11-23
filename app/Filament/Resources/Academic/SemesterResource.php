@@ -50,18 +50,30 @@ class SemesterResource extends Resource
 
     public static function table(Table $table): Table
     {
-        return $table->columns([
-            \Filament\Tables\Columns\Layout\Split::make([
-            Tables\Columns\TextColumn::make('academicYear.name')->label(__('Academic Year'))->sortable(),
-            Tables\Columns\TextColumn::make('name')->label(__('Semester'))->searchable()->sortable(),
-            Tables\Columns\TextColumn::make('start_date')->label(__('Start'))->date('d/m/Y')->sortable(),
-            Tables\Columns\TextColumn::make('end_date')->label(__('End'))->date('d/m/Y')->sortable(),
-            Tables\Columns\IconColumn::make('is_active')->label(__('Active'))->boolean(),
-            ])->from('md'),
-        ])
-        ->defaultSort('start_date', 'desc')
-        ->actions([\Filament\Actions\EditAction::make(), \Filament\Actions\DeleteAction::make()])
-        ->bulkActions([\Filament\Actions\BulkActionGroup::make([\Filament\Actions\DeleteBulkAction::make()])]);
+        return $table
+            ->recordAction('edit')
+            ->columns([
+                Tables\Columns\TextColumn::make('name')
+                    ->label(__('Semester'))
+                    ->weight('bold')
+                    ->description(fn (Semester $record): string => $record->academicYear?->name ?? '-')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('start_date')
+                    ->label(__('Period'))
+                    ->formatStateUsing(fn (Semester $record): string => ($record->start_date?->format('d/m/Y') ?? '-') . ' - ' . ($record->end_date?->format('d/m/Y') ?? '-'))
+                    ->sortable(),
+                Tables\Columns\IconColumn::make('is_active')->label(__('Active'))->boolean(),
+                Tables\Columns\TextColumn::make('academicYear.name')->label(__('Academic Year'))->sortable()->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->defaultSort('start_date', 'desc')
+            ->actions([
+                \Filament\Actions\EditAction::make()->button()->size('sm')->slideOver(),
+                \Filament\Actions\ActionGroup::make([
+                    \Filament\Actions\DeleteAction::make(),
+                ]),
+            ])
+            ->bulkActions([\Filament\Actions\BulkActionGroup::make([\Filament\Actions\DeleteBulkAction::make()])]);
     }
 
     public static function getPages(): array

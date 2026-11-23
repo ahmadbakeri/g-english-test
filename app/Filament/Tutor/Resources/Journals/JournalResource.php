@@ -173,77 +173,70 @@ class JournalResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('date', 'desc')
+            ->recordAction('edit')
             ->columns([
-                \Filament\Tables\Columns\Layout\Split::make([
-                    TextColumn::make('date')
-                        ->label(__('Date'))
-                        ->date('d M Y')
-                        ->sortable(),
-                    TextColumn::make('topic')
-                        ->label(__('Topic'))
-                        ->weight('bold')
-                        ->description(fn (Journal $record): string => $record->classRoom?->name ?? '-')
-                        ->searchable(),
-                    TextColumn::make('classRoom.name')
-                        ->label(__('Class Room'))
-                        ->badge()
-                        ->color('info')
-                        ->sortable()
-                        ->searchable(),
-                    TextColumn::make('jp_count')
-                        ->label('JP')
-                        ->numeric()
-                        ->badge()
-                        ->color('gray')
-                        ->suffix(' JP')
-                        ->sortable(),
-                    ImageColumn::make('photo')
-                        ->label(__('Photo'))
-                        ->circular(),
-                    IconColumn::make('link')
-                        ->label(__('Link'))
-                        ->icon(fn ($state) => $state ? 'heroicon-o-link' : null)
-                        ->url(fn ($state) => $state)
-                        ->openUrlInNewTab(),
-                    TextColumn::make('status')
-                        ->label(__('Status'))
-                        ->badge()
-                        ->color(fn (string $state): string => match ($state) {
-                            'draft' => 'gray',
-                            'submitted' => 'warning',
-                            'validated' => 'success',
-                            'rejected' => 'danger',
-                            default => 'gray',
-                        })
-                        ->formatStateUsing(fn (string $state): string => match ($state) {
-                            'draft' => 'Draft',
-                            'submitted' => 'Diajukan',
-                            'validated' => 'Divalidasi',
-                            'rejected' => 'Ditolak',
-                            default => $state,
-                        })
-                        ->searchable(),
-                    TextColumn::make('created_at')
-                        ->dateTime()
-                        ->sortable()
-                        ->toggleable(isToggledHiddenByDefault: true),
-                    TextColumn::make('updated_at')
-                        ->dateTime()
-                        ->sortable()
-                        ->toggleable(isToggledHiddenByDefault: true),
-                    TextColumn::make('deleted_at')
-                        ->dateTime()
-                        ->sortable()
-                        ->toggleable(isToggledHiddenByDefault: true),
-                ])->from('md'),
+                TextColumn::make('date')
+                    ->label(__('Date'))
+                    ->date('d M Y')
+                    ->description(fn (Journal $record): string => ($record->jp_count ?? 0) . ' JP')
+                    ->sortable(),
+                TextColumn::make('topic')
+                    ->label(__('Topic'))
+                    ->weight('bold')
+                    ->description(fn (Journal $record): string => $record->classRoom?->name ?? '-')
+                    ->searchable(),
+                TextColumn::make('status')
+                    ->label(__('Status'))
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'draft' => 'gray',
+                        'submitted' => 'warning',
+                        'validated' => 'success',
+                        'rejected' => 'danger',
+                        default => 'gray',
+                    })
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'draft' => 'Draft',
+                        'submitted' => 'Diajukan',
+                        'validated' => 'Divalidasi',
+                        'rejected' => 'Ditolak',
+                        default => $state,
+                    })
+                    ->searchable(),
+                TextColumn::make('classRoom.name')
+                    ->label(__('Class Room'))
+                    ->badge()
+                    ->color('info')
+                    ->sortable()
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('jp_count')
+                    ->label('JP')
+                    ->numeric()
+                    ->badge()
+                    ->color('gray')
+                    ->suffix(' JP')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                ImageColumn::make('photo')
+                    ->label(__('Photo'))
+                    ->circular()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                IconColumn::make('link')
+                    ->label(__('Link'))
+                    ->icon(fn ($state) => $state ? 'heroicon-o-link' : null)
+                    ->url(fn ($state) => $state)
+                    ->openUrlInNewTab()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 TrashedFilter::make(),
             ])
             ->recordActions([
+                EditAction::make()->button()->size('sm')->slideOver(),
                 ActionGroup::make([
                     ViewAction::make(),
-                    EditAction::make(),
                     DeleteAction::make(),
                     ForceDeleteAction::make(),
                     RestoreAction::make(),

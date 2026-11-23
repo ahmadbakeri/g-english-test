@@ -46,45 +46,45 @@ class StudentPaymentResource extends Resource
                     ->latest('month');
             })
             ->columns([
-                Split::make([
-                    TextColumn::make('student.name')
-                        ->label('Nama Anak')
-                        ->weight('bold')
-                        ->description(fn (StudentPayment $record): string => $record->notes ?: 'Tagihan SPP')
-                        ->searchable()
-                        ->sortable(),
-                    TextColumn::make('due_date')
-                        ->label('Jatuh Tempo')
-                        ->date('d M Y')
-                        ->placeholder('-')
-                        ->sortable(),
-                    TextColumn::make('amount')
-                        ->label('Nominal')
-                        ->money('IDR', locale: 'id')
-                        ->weight('bold')
-                        ->alignEnd()
-                        ->sortable(),
-                    TextColumn::make('status')
-                        ->label('Status')
-                        ->badge()
-                        ->formatStateUsing(fn (string $state): string => match ($state) {
-                            'paid' => 'Lunas',
-                            'unpaid' => 'Belum Lunas',
-                            'pending' => 'Menunggu',
-                            default => $state,
-                        })
-                        ->color(fn (string $state): string => match ($state) {
-                            'paid' => 'success',
-                            'unpaid' => 'danger',
-                            'pending' => 'warning',
-                            default => 'gray',
-                        }),
-                    TextColumn::make('paid_at')
-                        ->label('Tanggal Bayar')
-                        ->date('d M Y')
-                        ->placeholder('-')
-                        ->sortable(),
-                ])->from('md'),
+                TextColumn::make('student.name')
+                    ->label('Nama Anak')
+                    ->weight('bold')
+                    ->description(fn (StudentPayment $record): string => $record->notes ?: 'Tagihan SPP')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('due_date')
+                    ->label('Jatuh Tempo')
+                    ->date('d M Y')
+                    ->placeholder('-')
+                    ->sortable(),
+                TextColumn::make('amount')
+                    ->label('Nominal')
+                    ->money('IDR', locale: 'id')
+                    ->weight('bold')
+                    ->alignEnd()
+                    ->sortable(),
+                TextColumn::make('status')
+                    ->label('Status')
+                    ->badge()
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'paid' => 'Lunas',
+                        'unpaid' => 'Belum Lunas',
+                        'pending' => 'Menunggu',
+                        default => $state,
+                    })
+                    ->description(fn (StudentPayment $record): ?string => $record->paid_at ? 'Bayar ' . $record->paid_at->format('d M Y') : null)
+                    ->color(fn (string $state): string => match ($state) {
+                        'paid' => 'success',
+                        'unpaid' => 'danger',
+                        'pending' => 'warning',
+                        default => 'gray',
+                    }),
+                TextColumn::make('paid_at')
+                    ->label('Tanggal Bayar')
+                    ->date('d M Y')
+                    ->placeholder('-')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 SelectFilter::make('student_id')
@@ -99,9 +99,11 @@ class StudentPaymentResource extends Resource
             ])
             ->actions([
                 \Filament\Actions\Action::make('print')
-                    ->label('Download Kwitansi PDF')
+                    ->label('Kwitansi PDF')
                     ->icon('heroicon-o-printer')
                     ->color('info')
+                    ->button()
+                    ->size('sm')
                     ->visible(fn (StudentPayment $record) => $record->status === 'paid')
                     ->url(fn (StudentPayment $record) => route('report.student-payment', $record->id))
                     ->openUrlInNewTab(),

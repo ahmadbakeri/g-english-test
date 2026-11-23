@@ -51,17 +51,26 @@ class SubjectResource extends Resource
 
     public static function table(Table $table): Table
     {
-        return $table->columns([
-            \Filament\Tables\Columns\Layout\Split::make([
-            Tables\Columns\TextColumn::make('code')->label(__('Code'))->searchable()->sortable(),
-            Tables\Columns\TextColumn::make('name')->label(__('Name'))->translateLabel()->searchable()->sortable(),
-            Tables\Columns\TextColumn::make('level')->label(__('Level'))->badge()->color('info'),
-            Tables\Columns\TextColumn::make('description')->label(__('Description'))->limit(40)->toggleable(),
-            Tables\Columns\IconColumn::make('is_active')->label(__('Active'))->boolean(),
-            ])->from('md'),
-        ])
-        ->actions([\Filament\Actions\EditAction::make(), \Filament\Actions\DeleteAction::make()])
-        ->bulkActions([\Filament\Actions\BulkActionGroup::make([\Filament\Actions\DeleteBulkAction::make()])]);
+        return $table
+            ->recordAction('edit')
+            ->columns([
+                Tables\Columns\TextColumn::make('code')->label(__('Code'))->badge()->color('gray')->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('name')
+                    ->label(__('Name'))->translateLabel()
+                    ->weight('bold')
+                    ->description(fn (Subject $record): ?string => $record->description ? \Illuminate\Support\Str::limit($record->description, 45) : null)
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('level')->label(__('Level'))->badge()->color('info'),
+                Tables\Columns\IconColumn::make('is_active')->label(__('Active'))->boolean(),
+            ])
+            ->actions([
+                \Filament\Actions\EditAction::make()->button()->size('sm')->slideOver(),
+                \Filament\Actions\ActionGroup::make([
+                    \Filament\Actions\DeleteAction::make(),
+                ]),
+            ])
+            ->bulkActions([\Filament\Actions\BulkActionGroup::make([\Filament\Actions\DeleteBulkAction::make()])]);
     }
 
     public static function getPages(): array

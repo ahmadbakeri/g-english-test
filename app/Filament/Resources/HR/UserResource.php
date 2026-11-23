@@ -91,37 +91,39 @@ class UserResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->recordAction('edit')
             ->columns([
-                \Filament\Tables\Columns\Layout\Split::make([
-                    Tables\Columns\TextColumn::make('name')
-                        ->label(__('Name'))->translateLabel()
-                        ->searchable(),
-                    Tables\Columns\TextColumn::make('email')
-                        ->label(__('Email'))->translateLabel()
-                        ->searchable(),
-                    Tables\Columns\TextColumn::make('role')
-                        ->label(__('Role'))
-                        ->badge()
-                        ->color(fn (string $state): string => match ($state) {
-                            'admin' => 'danger',
-                            'tutor' => 'success',
-                            'kemenag' => 'warning',
-                            'kemendikdasmen' => 'info',
-                            default => 'gray',
-                        })
-                        ->formatStateUsing(fn (string $state): string => match ($state) {
-                            'admin' => 'Admin',
-                            'tutor' => 'Tutor',
-                            'kemenag' => 'Kemenag',
-                            'kemendikdasmen' => 'Kemendikdasmen',
-                            default => ucfirst($state),
-                        }),
-                    Tables\Columns\TextColumn::make('created_at')
-                        ->label(__('Created At'))->translateLabel()
-                        ->dateTime('d/m/Y')
-                        ->sortable()
-                        ->toggleable(isToggledHiddenByDefault: true),
-                ])->from('md'),
+                Tables\Columns\TextColumn::make('name')
+                    ->label(__('Name'))->translateLabel()
+                    ->weight('bold')
+                    ->description(fn (User $record): string => (string) ($record->email ?? '-'))
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('role')
+                    ->label(__('Role'))
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'admin' => 'danger',
+                        'tutor' => 'success',
+                        'kemenag' => 'warning',
+                        'kemendikdasmen' => 'info',
+                        default => 'gray',
+                    })
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'admin' => 'Admin',
+                        'tutor' => 'Tutor',
+                        'kemenag' => 'Kemenag',
+                        'kemendikdasmen' => 'Kemendikdasmen',
+                        default => ucfirst($state),
+                    }),
+                Tables\Columns\TextColumn::make('email')
+                    ->label(__('Email'))->translateLabel()
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->label(__('Created At'))->translateLabel()
+                    ->dateTime('d/m/Y')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('role')
@@ -134,8 +136,10 @@ class UserResource extends Resource
                     ]),
             ])
             ->actions([
-                \Filament\Actions\EditAction::make(),
-                \Filament\Actions\DeleteAction::make(),
+                \Filament\Actions\EditAction::make()->button()->size('sm')->slideOver(),
+                \Filament\Actions\ActionGroup::make([
+                    \Filament\Actions\DeleteAction::make(),
+                ]),
             ])
             ->bulkActions([
                 \Filament\Actions\BulkActionGroup::make([

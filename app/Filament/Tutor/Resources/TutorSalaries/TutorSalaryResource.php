@@ -116,74 +116,55 @@ class TutorSalaryResource extends Resource
 
         return $table
             ->columns([
-                \Filament\Tables\Columns\Layout\Split::make([
-                    TextColumn::make('tutor.name')
-                        ->label(__('Tutor'))
-                        ->weight('bold')
-                        ->description(fn (TutorSalary $record): string => 'Periode: ' . ($months[$record->month] ?? $record->month) . ' ' . $record->year)
-                        ->searchable(),
-                    TextColumn::make('month')
-                        ->label(__('Month'))
-                        ->formatStateUsing(fn (int $state): string => $months[$state] ?? (string) $state)
-                        ->sortable(),
-                    TextColumn::make('year')
-                        ->label(__('Year'))
-                        ->numeric()
-                        ->sortable(),
-                    TextColumn::make('total_jp')
-                        ->label(__('Total JP'))
-                        ->numeric()
-                        ->badge()
-                        ->color('info')
-                        ->suffix(' JP')
-                        ->sortable(),
-                    TextColumn::make('total_amount')
-                        ->label(__('Total Salary'))
-                        ->money('IDR', locale: 'id')
-                        ->weight('bold')
-                        ->alignEnd()
-                        ->sortable(),
-                    TextColumn::make('status')
-                        ->label(__('Status'))
-                        ->badge()
-                        ->formatStateUsing(fn (string $state): string => $state === 'paid' ? 'Dibayar' : 'Pending')
-                        ->color(fn (string $state): string => match ($state) {
-                            'pending' => 'warning',
-                            'paid' => 'success',
-                            default => 'gray',
-                        })
-                        ->searchable(),
-                    TextColumn::make('paid_at')
-                        ->label(__('Paid Date'))
-                        ->date('d M Y')
-                        ->placeholder('-')
-                        ->sortable(),
-                    TextColumn::make('created_at')
-                        ->dateTime()
-                        ->sortable()
-                        ->toggleable(isToggledHiddenByDefault: true),
-                    TextColumn::make('updated_at')
-                        ->dateTime()
-                        ->sortable()
-                        ->toggleable(isToggledHiddenByDefault: true),
-                ])->from('md'),
+                TextColumn::make('tutor.name')
+                    ->label(__('Tutor'))
+                    ->weight('bold')
+                    ->description(fn (TutorSalary $record): string => 'Periode: ' . ($months[$record->month] ?? $record->month) . ' ' . $record->year)
+                    ->searchable(),
+                TextColumn::make('total_jp')
+                    ->label(__('Total JP'))
+                    ->numeric()
+                    ->badge()
+                    ->color('info')
+                    ->suffix(' JP')
+                    ->sortable(),
+                TextColumn::make('total_amount')
+                    ->label(__('Total Salary'))
+                    ->money('IDR', locale: 'id')
+                    ->weight('bold')
+                    ->alignEnd()
+                    ->sortable(),
+                TextColumn::make('status')
+                    ->label(__('Status'))
+                    ->badge()
+                    ->formatStateUsing(fn (string $state): string => $state === 'paid' ? 'Dibayar' : 'Pending')
+                    ->description(fn (TutorSalary $record): ?string => $record->paid_at ? 'Dibayar ' . $record->paid_at->format('d M Y') : null)
+                    ->color(fn (string $state): string => match ($state) {
+                        'pending' => 'warning',
+                        'paid' => 'success',
+                        default => 'gray',
+                    })
+                    ->searchable(),
+                TextColumn::make('paid_at')
+                    ->label(__('Paid Date'))
+                    ->date('d M Y')
+                    ->placeholder('-')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //
             ])
             ->recordActions([
-                ActionGroup::make([
-                    ViewAction::make(),
-                    \Filament\Actions\Action::make('print')
-                        ->label(__('Print Payslip'))
-                        ->icon('heroicon-o-printer')
-                        ->color('success')
-                        ->url(fn (TutorSalary $record) => route('report.tutor-salary', $record->id))
-                        ->openUrlInNewTab(),
-                ])
-                    ->icon('heroicon-m-ellipsis-vertical')
-                    ->color('gray')
-                    ->tooltip('Aksi'),
+                \Filament\Actions\Action::make('print')
+                    ->label(__('Print Payslip'))
+                    ->icon('heroicon-o-printer')
+                    ->color('success')
+                    ->button()
+                    ->size('sm')
+                    ->url(fn (TutorSalary $record) => route('report.tutor-salary', $record->id))
+                    ->openUrlInNewTab(),
+                ViewAction::make()->button()->size('sm'),
             ])
             ->toolbarActions([]);
     }

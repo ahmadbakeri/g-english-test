@@ -13,10 +13,11 @@ class ClassSchedulesTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->recordAction('edit')
             ->columns([
-                \Filament\Tables\Columns\Layout\Split::make([
                 TextColumn::make('classRoom.name')
                     ->label(__('Class Room'))->translateLabel()
+                    ->weight('bold')
                     ->sortable(),
                 TextColumn::make('tutor.name')
                     ->label(__('Tutor'))->translateLabel()
@@ -41,13 +42,12 @@ class ClassSchedulesTable
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                ])->from('md'),
             ])
             ->filters([
                 //
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()->button()->size('sm'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

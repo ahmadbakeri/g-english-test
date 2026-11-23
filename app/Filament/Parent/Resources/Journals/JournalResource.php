@@ -43,54 +43,34 @@ class JournalResource extends Resource
                 return $query->with(['classRoom', 'tutor'])->whereIn('class_id', $classIds)->latest('date');
             })
             ->columns([
-                Split::make([
-                    Stack::make([
-                        TextColumn::make('topic')
-                            ->label('Topik Pembelajaran')
-                            ->weight('bold')
-                            ->searchable()
-                            ->wrap(),
-                        TextColumn::make('date')
-                            ->label('Tanggal')
-                            ->date('d M Y')
-                            ->icon('heroicon-m-calendar-days')
-                            ->color('gray')
-                            ->sortable(),
-                    ])->space(1),
-
-                    Stack::make([
-                        TextColumn::make('classRoom.name')
-                            ->label('Kelas')
-                            ->badge()
-                            ->color('info')
-                            ->icon('heroicon-m-academic-cap')
-                            ->searchable(),
-                        TextColumn::make('tutor.name')
-                            ->label('Tutor')
-                            ->icon('heroicon-m-user')
-                            ->color('gray')
-                            ->searchable(),
-                    ])->space(1),
-
-                    Stack::make([
-                        TextColumn::make('status')
-                            ->label('Status')
-                            ->getStateUsing(fn (Journal $record): string => $record->status ?? 'draft')
-                            ->badge()
-                            ->formatStateUsing(fn (string $state): string => match (strtolower($state)) {
-                                'validated', 'published' => 'Tervalidasi',
-                                'submitted' => 'Diajukan',
-                                'rejected' => 'Ditolak',
-                                default => 'Draft',
-                            })
-                            ->color(fn (string $state): string => match (strtolower($state)) {
-                                'validated', 'published' => 'success',
-                                'submitted' => 'warning',
-                                'rejected' => 'danger',
-                                default => 'gray',
-                            }),
-                    ])->alignment('end'),
-                ])->from('md'),
+                TextColumn::make('date')
+                    ->label('Tanggal')
+                    ->date('d M Y')
+                    ->sortable(),
+                TextColumn::make('topic')
+                    ->label('Topik Pembelajaran')
+                    ->weight('bold')
+                    ->description(fn (Journal $record): string => $record->classRoom?->name ?? '-')
+                    ->searchable(),
+                TextColumn::make('tutor.name')
+                    ->label('Tutor')
+                    ->searchable(),
+                TextColumn::make('status')
+                    ->label('Status')
+                    ->getStateUsing(fn (Journal $record): string => $record->status ?? 'draft')
+                    ->badge()
+                    ->formatStateUsing(fn (string $state): string => match (strtolower($state)) {
+                        'validated', 'published' => 'Tervalidasi',
+                        'submitted' => 'Diajukan',
+                        'rejected' => 'Ditolak',
+                        default => 'Draft',
+                    })
+                    ->color(fn (string $state): string => match (strtolower($state)) {
+                        'validated', 'published' => 'success',
+                        'submitted' => 'warning',
+                        'rejected' => 'danger',
+                        default => 'gray',
+                    }),
             ])
             ->filters([])
             ->actions([])

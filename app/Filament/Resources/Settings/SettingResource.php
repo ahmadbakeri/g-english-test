@@ -44,16 +44,21 @@ class SettingResource extends Resource
 
     public static function table(Table $table): Table
     {
-        return $table->columns([
-            \Filament\Tables\Columns\Layout\Split::make([
-            Tables\Columns\TextColumn::make('key')->label(__('Key'))->searchable()->sortable(),
-            Tables\Columns\TextColumn::make('value')->label(__('Score'))->searchable()->limit(50),
-            Tables\Columns\TextColumn::make('group')->label(__('Group'))->searchable()->sortable(),
-            ])->from('md'),
-        ])
-        ->defaultGroup('group')
-        ->actions([\Filament\Actions\EditAction::make(), \Filament\Actions\DeleteAction::make()])
-        ->bulkActions([\Filament\Actions\BulkActionGroup::make([\Filament\Actions\DeleteBulkAction::make()])]);
+        return $table
+            ->recordAction('edit')
+            ->columns([
+                Tables\Columns\TextColumn::make('key')->label(__('Key'))->weight('bold')->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('value')->label(__('Value'))->searchable()->limit(50),
+                Tables\Columns\TextColumn::make('group')->label(__('Group'))->badge()->color('info')->searchable()->sortable(),
+            ])
+            ->defaultGroup('group')
+            ->actions([
+                \Filament\Actions\EditAction::make()->button()->size('sm')->slideOver(),
+                \Filament\Actions\ActionGroup::make([
+                    \Filament\Actions\DeleteAction::make(),
+                ]),
+            ])
+            ->bulkActions([\Filament\Actions\BulkActionGroup::make([\Filament\Actions\DeleteBulkAction::make()])]);
     }
 
     public static function getPages(): array

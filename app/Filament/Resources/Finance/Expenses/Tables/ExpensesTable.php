@@ -13,15 +13,23 @@ class ExpensesTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->recordAction('edit')
             ->columns([
-                \Filament\Tables\Columns\Layout\Split::make([
                 TextColumn::make('date')
-                    ->date()
+                    ->label(__('Date'))
+                    ->date('d M Y')
                     ->sortable(),
                 TextColumn::make('category')
+                    ->label(__('Category'))
+                    ->weight('bold')
+                    ->badge()
+                    ->color('info')
                     ->searchable(),
                 TextColumn::make('amount')
-                    ->numeric()
+                    ->label(__('Amount'))
+                    ->money('IDR', locale: 'id')
+                    ->weight('bold')
+                    ->alignEnd()
                     ->sortable(),
                 TextColumn::make('created_at')
                     ->dateTime()
@@ -31,13 +39,12 @@ class ExpensesTable
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                ])->from('md'),
             ])
             ->filters([
                 //
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()->button()->size('sm'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

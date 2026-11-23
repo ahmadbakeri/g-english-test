@@ -38,11 +38,16 @@ class JournalValidationResource extends Resource
     public static function table(Table $table): Table
     {
         return $table->columns([
-            \Filament\Tables\Columns\Layout\Split::make([
-            Tables\Columns\TextColumn::make('date')->label(__('Date'))->translateLabel()->date('d/m/Y')->sortable(),
-            Tables\Columns\TextColumn::make('tutor.name')->label(__('Tutor'))->translateLabel()->searchable(),
-            Tables\Columns\TextColumn::make('topic')->label(__('Topic / Material'))->searchable(),
-            Tables\Columns\TextColumn::make('jp_count')->label(__('JP'))->numeric(),
+            Tables\Columns\TextColumn::make('date')
+                ->label(__('Date'))->translateLabel()
+                ->date('d/m/Y')
+                ->description(fn (Journal $record): string => ($record->jp_count ?? 0) . ' JP')
+                ->sortable(),
+            Tables\Columns\TextColumn::make('topic')
+                ->label(__('Topic / Material'))
+                ->weight('bold')
+                ->description(fn (Journal $record): string => $record->tutor?->name ?? '-')
+                ->searchable(),
             Tables\Columns\TextColumn::make('status')->label(__('Status'))
                 ->badge()
                 ->color(fn (string $state): string => match ($state) {
@@ -59,7 +64,6 @@ class JournalValidationResource extends Resource
                     'rejected' => 'Ditolak',
                     default => $state,
                 }),
-            ])->from('md'),
         ])
         ->defaultSort('date', 'desc')
         ->filters([
@@ -76,6 +80,8 @@ class JournalValidationResource extends Resource
                 ->label(__('Approve'))
                 ->icon('heroicon-o-check-circle')
                 ->color('success')
+                ->button()
+                ->size('sm')
                 ->visible(fn (Journal $record) => $record->status === 'submitted')
                 ->requiresConfirmation()
                 ->action(function (Journal $record) {
@@ -93,6 +99,8 @@ class JournalValidationResource extends Resource
                 ->label(__('Reject'))
                 ->icon('heroicon-o-x-circle')
                 ->color('danger')
+                ->button()
+                ->size('sm')
                 ->visible(fn (Journal $record) => $record->status === 'submitted')
                 ->form([
                     Forms\Components\Textarea::make('notes')->label(__('Rejection Reason'))->required(),

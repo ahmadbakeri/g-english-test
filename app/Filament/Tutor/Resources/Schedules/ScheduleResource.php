@@ -92,36 +92,26 @@ class ScheduleResource extends Resource
     {
         return $table
             ->columns([
-                \Filament\Tables\Columns\Layout\Split::make([
-                TextColumn::make('class_room_id')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('user_id')
-                    ->numeric()
+                TextColumn::make('classRoom.name')
+                    ->label(__('Class Room'))
+                    ->weight('bold')
+                    ->placeholder('-')
                     ->sortable(),
                 TextColumn::make('day')
+                    ->label(__('Day'))
+                    ->badge()
+                    ->color('info')
                     ->searchable(),
                 TextColumn::make('start_time')
-                    ->time()
+                    ->label(__('Time'))
+                    ->formatStateUsing(fn ($record): string => substr((string) $record->start_time, 0, 5) . ' - ' . substr((string) $record->end_time, 0, 5))
                     ->sortable(),
-                TextColumn::make('end_time')
-                    ->time()
-                    ->sortable(),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                ])->from('md'),
             ])
             ->filters([
                 //
             ])
             ->recordActions([
-                ViewAction::make(),
+                ViewAction::make()->button()->size('sm'),
             ])
             ->toolbarActions([]);
     }
