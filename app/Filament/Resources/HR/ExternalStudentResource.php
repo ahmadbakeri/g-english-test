@@ -52,16 +52,22 @@ class ExternalStudentResource extends Resource
     {
         return $table
             ->defaultGroup('school_name')
+            ->defaultSort('class_name')
             ->groups([
                 Tables\Grouping\Group::make('school_name')
                     ->label('Sekolah')
-                    ->getTitleFromRecordUsing(fn (Student $record): string => trim((string) $record->school_name) ?: 'Tanpa Sekolah')
+                    ->getTitleFromRecordUsing(function (Student $record): string {
+                        $school = trim((string) $record->school_name) ?: 'Tanpa Sekolah';
+                        $level = \App\Support\SchoolAgencyClassifier::classifyLevel($record->school_name, $record->education_level, $record->class_name);
+                        return "[{$level}] {$school}";
+                    })
                     ->collapsible(),
                 Tables\Grouping\Group::make('class_name')
                     ->label('Kelas')
                     ->getTitleFromRecordUsing(fn (Student $record): string => StudentResource::resolveClassLabel($record))
                     ->collapsible(),
             ])
+            ->defaultGroup('school_name')
             ->collapsedGroupsByDefault()
             ->groupingSettingsInDropdownOnDesktop()
             ->recordAction('edit')
@@ -94,6 +100,17 @@ class ExternalStudentResource extends Resource
                     ->limit(22),
             ])
             ->filters([
+                Tables\Filters\SelectFilter::make('school_name')
+                    ->label('Sekolah')
+                    ->options(fn (): array => Student::query()
+                        ->where('student_type', 'external')
+                        ->whereNotNull('school_name')
+                        ->where('school_name', '!=', '')
+                        ->distinct()
+                        ->orderBy('school_name')
+                        ->pluck('school_name', 'school_name')
+                        ->all())
+                    ->searchable(),
                 Tables\Filters\SelectFilter::make('class_name')
                     ->label(__('Class'))
                     ->options([

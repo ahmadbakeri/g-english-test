@@ -4,12 +4,43 @@ namespace App\Filament\Resources\HR\ExternalStudentResource\Pages;
 
 use App\Filament\Resources\HR\ExternalStudentResource;
 use App\Models\Student;
+use App\Support\SchoolAgencyClassifier;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Schemas\Components\Tabs\Tab;
+use Illuminate\Database\Eloquent\Builder;
 
 class ListExternalStudents extends ListRecords
 {
     protected static string $resource = ExternalStudentResource::class;
+
+    public function getTabs(): array
+    {
+        $levels = ['SD', 'MI', 'SMP', 'MTs'];
+        $students = Student::query()
+            ->select(['id', 'school_name', 'education_level', 'class_name'])
+            ->where('student_type', 'external')
+            ->get();
+
+        $counts = ['SD' => 0, 'MI' => 0, 'SMP' => 0, 'MTs' => 0];
+        foreach ($students as $student) {
+            $lvl = SchoolAgencyClassifier::classifyLevel($student->school_name, $student->education_level, $student->class_name);
+            $counts[$lvl] = ($counts[$lvl] ?? 0) + 1;
+        }
+
+        $tabs = [
+            'all' => Tab::make('Semua')
+                ->badge($students->count()),
+        ];
+
+        foreach ($levels as $lvl) {
+            $tabs[$lvl] = Tab::make($lvl)
+                ->badge($counts[$lvl] ?? 0)
+                ->modifyQueryUsing(fn (Builder $query): Builder => $query->whereIn('id', SchoolAgencyClassifier::externalStudentIdsForLevel($lvl) ?: [0]));
+        }
+
+        return $tabs;
+    }
 
     protected function getHeaderActions(): array
     {
@@ -70,28 +101,6 @@ class ListExternalStudents extends ListRecords
                         ->body($summary)
                         ->success()
                         ->send();
-                }),
-            Actions\Action::make('print_brain_champion_roster')
-                ->label('Cetak Daftar Hadir')
-                ->icon('heroicon-o-printer')
-                ->color('warning')
-                ->form([
-                    \Filament\Forms\Components\Select::make('grade')
-                        ->label('Pilih Jenjang Kelas Brain Champion')
-                        ->options([
-                            'all' => 'Semua Kelas (Kelas 4 s/d Kelas 9)',
-                            '4' => 'Kelas 4 (SD / MI)',
-                            '5' => 'Kelas 5 (SD / MI)',
-                            '6' => 'Kelas 6 (SD / MI)',
-                            '7' => 'Kelas 7 (SMP / MTs)',
-                            '8' => 'Kelas 8 (SMP / MTs)',
-                            '9' => 'Kelas 9 (SMP / MTs)',
-                        ])
-                        ->default('all')
-                        ->required(),
-                ])
-                ->action(function (array $data) {
-                    return redirect()->to(route('report.brain-champion-roster', ['grade' => $data['grade'] ?? 'all']));
                 }),
             Actions\CreateAction::make()
                 ->label('Tambah Siswa Eksternal')
