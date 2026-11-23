@@ -102,12 +102,12 @@ class TutorResource extends Resource
     public static function table(Table $table): Table
     {
         return $table->columns([
-            \Filament\Tables\Columns\Layout\Split::make([
                 Tables\Columns\ImageColumn::make('photo')
                     ->label(__('Photo'))
                     ->circular()
                     ->disk('public')
-                    ->defaultImageUrl(fn ($record) => 'https://ui-avatars.com/api/?name=' . urlencode($record->name) . '&color=0a4282&background=dbeafe'),
+                    ->defaultImageUrl(fn ($record) => 'https://ui-avatars.com/api/?name=' . urlencode($record->name) . '&color=0a4282&background=dbeafe')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('nip')
                     ->label(__('NIP'))
                     ->badge()
@@ -136,18 +136,21 @@ class TutorResource extends Resource
                         'C' => 'danger',
                         default => 'gray',
                     }),
-                Tables\Columns\TextColumn::make('phone')
-                    ->label(__('Phone'))
-                    ->placeholder('-'),
                 Tables\Columns\IconColumn::make('is_active')
                     ->label(__('Active'))
                     ->boolean(),
-            ])->from('md'),
+                Tables\Columns\TextColumn::make('phone')
+                    ->label(__('Phone'))
+                    ->placeholder('-')
+                    ->toggleable(isToggledHiddenByDefault: true),
         ])
+        ->recordAction('edit')
         ->actions([
+            \Filament\Actions\EditAction::make()
+                ->button()
+                ->size('sm'),
             \Filament\Actions\ActionGroup::make([
                 \Filament\Actions\ViewAction::make(),
-                \Filament\Actions\EditAction::make(),
                 \Filament\Actions\DeleteAction::make(),
             ])
                 ->icon('heroicon-m-ellipsis-vertical')

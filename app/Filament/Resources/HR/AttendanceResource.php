@@ -103,11 +103,23 @@ class AttendanceResource extends Resource
 
     public static function table(Table $table): Table
     {
-        return $table->columns([
-            \Filament\Tables\Columns\Layout\Split::make([
-            Tables\Columns\TextColumn::make('date')->label(__('Date'))->translateLabel()->date('d/m/Y')->sortable(),
-            Tables\Columns\TextColumn::make('time_in')->label(__('Time In'))->time('H:i')->sortable(),
-            Tables\Columns\TextColumn::make('time_out')->label(__('Time Out'))->time('H:i')->sortable(),
+        return $table
+        ->recordAction('edit')
+        ->columns([
+            Tables\Columns\TextColumn::make('date')
+                ->label(__('Date'))->translateLabel()
+                ->date('d/m/Y')
+                ->description(fn (Attendance $record): string => ($record->time_in ? substr((string) $record->time_in, 0, 5) : '--:--') . ' - ' . ($record->time_out ? substr((string) $record->time_out, 0, 5) : '--:--'))
+                ->sortable(),
+            Tables\Columns\TextColumn::make('name')->label(__('Name'))->translateLabel()
+                ->weight('bold')
+                ->description(fn (Attendance $record): string => $record->classRoom?->name ?? '-')
+                ->getStateUsing(function (Attendance $record) {
+                    if ($record->role_type === 'student') return $record->student?->name;
+                    if ($record->role_type === 'tutor') return $record->tutor?->name;
+                    if ($record->role_type === 'employee') return $record->user?->name;
+                    return '-';
+                })->searchable(['student.name', 'tutor.name', 'user.name']),
             Tables\Columns\TextColumn::make('role_type')->label(__('Type'))->translateLabel()
                 ->badge()
                 ->color(fn (string $state): string => match ($state) {
@@ -122,14 +134,6 @@ class AttendanceResource extends Resource
                     'employee' => 'Karyawan',
                     default => $state,
                 }),
-            Tables\Columns\TextColumn::make('name')->label(__('Name'))->translateLabel()
-                ->getStateUsing(function (Attendance $record) {
-                    if ($record->role_type === 'student') return $record->student?->name;
-                    if ($record->role_type === 'tutor') return $record->tutor?->name;
-                    if ($record->role_type === 'employee') return $record->user?->name;
-                    return '-';
-                })->searchable(['student.name', 'tutor.name', 'user.name']),
-            Tables\Columns\TextColumn::make('classRoom.name')->label(__('Class Room'))->translateLabel()->searchable()->sortable(),
             Tables\Columns\TextColumn::make('status')->label(__('Status'))
                 ->badge()
                 ->color(fn (string $state): string => match ($state) {
@@ -144,8 +148,8 @@ class AttendanceResource extends Resource
                     'late' => 'Terlambat',
                     'excused' => 'Izin',
                 }),
-            Tables\Columns\TextColumn::make('notes')->label(__('Notes'))->limit(30)->toggleable(),
-            ])->from('md'),
+            Tables\Columns\TextColumn::make('classRoom.name')->label(__('Class Room'))->translateLabel()->searchable()->sortable()->toggleable(isToggledHiddenByDefault: true),
+            Tables\Columns\TextColumn::make('notes')->label(__('Notes'))->limit(30)->toggleable(isToggledHiddenByDefault: true),
         ])
         ->defaultSort('date', 'desc')
         ->filters([
@@ -166,7 +170,12 @@ class AttendanceResource extends Resource
                 ->form([Forms\Components\DatePicker::make('date')->label(__('Date'))->translateLabel()])
                 ->query(fn ($query, array $data) => $query->when($data['date'], fn ($q, $date) => $q->whereDate('date', $date))),
         ])
-        ->actions([\Filament\Actions\EditAction::make(), \Filament\Actions\DeleteAction::make()])
+        ->actions([
+            \Filament\Actions\EditAction::make()->button()->size('sm'),
+            \Filament\Actions\ActionGroup::make([
+                \Filament\Actions\DeleteAction::make(),
+            ]),
+        ])
         ->bulkActions([\Filament\Actions\BulkActionGroup::make([\Filament\Actions\DeleteBulkAction::make()])]);
     }
 

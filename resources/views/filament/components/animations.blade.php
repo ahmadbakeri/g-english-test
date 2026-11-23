@@ -484,6 +484,7 @@
         background: transparent !important;
         width: 100% !important;
         max-width: 100% !important;
+        table-layout: auto !important;
     }
     
     .fi-ta-header {
@@ -548,14 +549,20 @@
     /* Table Cells: Vertical & Compact Horizontal Padding, Crisp Subtle Borders & Column Alignment */
     .fi-ta-cell,
     .fi-ta-row td {
-        padding: 0.6rem 0.5rem !important;
+        padding: 0.55rem 0.5rem !important;
         vertical-align: middle !important;
         border-top: 1px solid rgba(15, 23, 42, 0.05) !important;
         border-bottom: 1px solid rgba(15, 23, 42, 0.05) !important;
+        white-space: normal !important;
+        overflow-wrap: anywhere !important;
     }
     .fi-ta-cell .fi-ta-col-wrp {
         padding-left: 0.25rem !important;
         padding-right: 0.25rem !important;
+        min-width: 0 !important;
+    }
+    .fi-ta-table thead th {
+        white-space: normal !important;
     }
     
     .dark .fi-ta-cell,
@@ -818,7 +825,9 @@
     .dark * {
         scrollbar-color: rgba(251, 185, 0, 0.3) transparent;
     }
-    .fi-ta-ctn {
+    .fi-ta-ctn,
+    .fi-ta-content {
+        max-width: 100% !important;
         overflow-x: auto !important;
         -webkit-overflow-scrolling: touch;
     }
@@ -841,16 +850,83 @@
             font-size: 1.35rem !important;
         }
         .fi-btn {
-            min-height: 44px !important;
-            padding-left: 1rem !important;
-            padding-right: 1rem !important;
+            min-height: 40px !important;
+            padding-left: 0.9rem !important;
+            padding-right: 0.9rem !important;
         }
         .fi-icon-btn {
-            min-width: 40px !important;
-            min-height: 40px !important;
+            min-width: 38px !important;
+            min-height: 38px !important;
         }
         input, select, textarea, .fi-input {
             font-size: 16px !important; /* Prevent iOS auto-zoom on focus */
+        }
+        /* Responsive Stacked Card Tables on Mobile (No horizontal scrolling) */
+        .fi-ta-ctn,
+        .fi-ta-content {
+            overflow-x: visible !important;
+        }
+        .fi-ta-table,
+        .fi-ta-table tbody {
+            display: block !important;
+            width: 100% !important;
+            border-spacing: 0 !important;
+        }
+        .fi-ta-table thead {
+            display: none !important;
+        }
+        .fi-ta-table tr.fi-ta-row {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 0.25rem !important;
+            width: 100% !important;
+            padding: 0.8rem 0.9rem !important;
+            margin-bottom: 0.7rem !important;
+            border-radius: 1rem !important;
+            border: 1px solid rgba(15, 23, 42, 0.08) !important;
+            background-color: #ffffff !important;
+            box-shadow: 0 2px 6px -1px rgba(15, 23, 42, 0.05) !important;
+        }
+        .dark .fi-ta-table tr.fi-ta-row {
+            border-color: rgba(255, 255, 255, 0.1) !important;
+            background-color: rgba(30, 41, 59, 0.7) !important;
+        }
+        .fi-ta-table tr.fi-ta-row td,
+        .fi-ta-table tr.fi-ta-row td.fi-ta-cell {
+            display: block !important;
+            width: 100% !important;
+            padding: 0.15rem 0 !important;
+            border: none !important;
+            border-radius: 0 !important;
+            text-align: left !important;
+            white-space: normal !important;
+        }
+        .fi-ta-table tr.fi-ta-row td.fi-ta-selection-cell {
+            width: auto !important;
+            padding-bottom: 0.25rem !important;
+        }
+        .fi-ta-table tr.fi-ta-row td.fi-ta-actions-cell,
+        .fi-ta-table tr.fi-ta-row td:last-child:has(.fi-ta-actions) {
+            display: flex !important;
+            justify-content: flex-end !important;
+            width: 100% !important;
+            padding-top: 0.55rem !important;
+            margin-top: 0.35rem !important;
+            border-top: 1px solid rgba(15, 23, 42, 0.07) !important;
+        }
+        .dark .fi-ta-table tr.fi-ta-row td.fi-ta-actions-cell,
+        .dark .fi-ta-table tr.fi-ta-row td:last-child:has(.fi-ta-actions) {
+            border-top-color: rgba(255, 255, 255, 0.08) !important;
+        }
+        .fi-ta-table tr.fi-ta-group-header-row {
+            display: block !important;
+            width: 100% !important;
+            margin-bottom: 0.5rem !important;
+        }
+        .fi-ta-table tr.fi-ta-group-header-row td {
+            display: block !important;
+            width: 100% !important;
+            border-radius: 0.85rem !important;
         }
         .fi-tabs, .fi-fo-tabs-tab-list {
             overflow-x: auto !important;

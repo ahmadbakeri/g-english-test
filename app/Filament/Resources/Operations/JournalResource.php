@@ -140,12 +140,14 @@ class JournalResource extends Resource
 
     public static function table(Table $table): Table
     {
-        return $table->columns([
-            \Filament\Tables\Columns\Layout\Split::make([
+        return $table
+        ->recordAction('edit')
+        ->columns([
                 Tables\Columns\TextColumn::make('date')
                     ->label(__('Date'))
                     ->translateLabel()
                     ->date('d/m/Y')
+                    ->description(fn (Journal $record): string => ($record->jp_count ?? 0) . ' JP')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('topic')
                     ->label(__('Topic'))
@@ -153,29 +155,6 @@ class JournalResource extends Resource
                     ->description(fn (Journal $record): string => ($record->classRoom?->name ?? '-') . ' • ' . ($record->tutor?->name ?? '-'))
                     ->searchable()
                     ->limit(35),
-                Tables\Columns\TextColumn::make('classRoom.name')
-                    ->label(__('Class Room'))
-                    ->translateLabel()
-                    ->badge()
-                    ->color('info')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('tutor.name')
-                    ->label(__('Tutor'))
-                    ->translateLabel()
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('jp_count')
-                    ->label('JP')
-                    ->badge()
-                    ->color('gray')
-                    ->suffix(' JP'),
-                Tables\Columns\ImageColumn::make('photo')
-                    ->label(__('Photo'))
-                    ->circular(),
-                Tables\Columns\IconColumn::make('link')
-                    ->label(__('Link'))
-                    ->icon(fn ($state) => $state ? 'heroicon-o-link' : null)
-                    ->url(fn ($state) => $state)
-                    ->openUrlInNewTab(),
                 Tables\Columns\TextColumn::make('status')
                     ->label(__('Status'))
                     ->badge()
@@ -193,7 +172,34 @@ class JournalResource extends Resource
                         'rejected' => 'Ditolak',
                         default => $state,
                     }),
-            ])->from('md'),
+                Tables\Columns\TextColumn::make('classRoom.name')
+                    ->label(__('Class Room'))
+                    ->translateLabel()
+                    ->badge()
+                    ->color('info')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('tutor.name')
+                    ->label(__('Tutor'))
+                    ->translateLabel()
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('jp_count')
+                    ->label('JP')
+                    ->badge()
+                    ->color('gray')
+                    ->suffix(' JP')
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\ImageColumn::make('photo')
+                    ->label(__('Photo'))
+                    ->circular()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\IconColumn::make('link')
+                    ->label(__('Link'))
+                    ->icon(fn ($state) => $state ? 'heroicon-o-link' : null)
+                    ->url(fn ($state) => $state)
+                    ->openUrlInNewTab()
+                    ->toggleable(isToggledHiddenByDefault: true),
         ])
         ->defaultSort('date', 'desc')
         ->filters([
@@ -206,6 +212,9 @@ class JournalResource extends Resource
                 ->options(ClassRoom::pluck('name', 'id')),
         ])
         ->actions([
+            \Filament\Actions\EditAction::make()
+                ->button()
+                ->size('sm'),
             \Filament\Actions\ActionGroup::make([
                 \Filament\Actions\ViewAction::make(),
                 \Filament\Actions\EditAction::make(),

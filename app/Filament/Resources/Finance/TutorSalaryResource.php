@@ -94,20 +94,15 @@ class TutorSalaryResource extends Resource
             7 => 'Juli', 8 => 'Agustus', 9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
         ];
 
-        return $table->columns([
-            \Filament\Tables\Columns\Layout\Split::make([
+        return $table
+        ->recordAction('edit')
+        ->columns([
                 Tables\Columns\TextColumn::make('tutor.name')
                     ->label(__('Tutor'))
                     ->translateLabel()
                     ->weight('bold')
                     ->description(fn (TutorSalary $record): string => 'Periode: ' . ($months[$record->month] ?? $record->month) . ' ' . $record->year)
                     ->searchable()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('month')
-                    ->label(__('Month'))
-                    ->formatStateUsing(fn (int $state): string => $months[$state] ?? (string) $state),
-                Tables\Columns\TextColumn::make('year')
-                    ->label(__('Year'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('total_jp')
                     ->label(__('Total JP'))
@@ -124,23 +119,34 @@ class TutorSalaryResource extends Resource
                     ->label(__('Status'))
                     ->badge()
                     ->formatStateUsing(fn (string $state): string => $state === 'paid' ? 'Dibayar' : 'Pending')
+                    ->description(fn (TutorSalary $record): ?string => $record->paid_at ? 'Dibayar ' . $record->paid_at->format('d/m/Y') : null)
                     ->color(fn (string $state): string => match ($state) {
                         'pending' => 'warning',
                         'paid' => 'success',
                         default => 'gray',
                     }),
+                Tables\Columns\TextColumn::make('month')
+                    ->label(__('Month'))
+                    ->formatStateUsing(fn (int $state): string => $months[$state] ?? (string) $state)
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('year')
+                    ->label(__('Year'))
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('paid_at')
                     ->label(__('Paid Date'))
                     ->date('d/m/Y')
                     ->placeholder('-')
-                    ->toggleable(),
-            ])->from('md'),
+                    ->toggleable(isToggledHiddenByDefault: true),
         ])
         ->filters([
             Tables\Filters\SelectFilter::make('status')->options(['pending' => 'Pending', 'paid' => 'Dibayar']),
             Tables\Filters\SelectFilter::make('tutor_id')->label(__('Tutor'))->translateLabel()->options(\App\Models\Tutor::pluck('name', 'id')),
         ])
         ->actions([
+            \Filament\Actions\EditAction::make()
+                ->button()
+                ->size('sm'),
             \Filament\Actions\ActionGroup::make([
                 \Filament\Actions\Action::make('calculate')
                     ->label(__('Calculate Automatically'))

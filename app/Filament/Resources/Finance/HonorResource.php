@@ -56,21 +56,30 @@ class HonorResource extends Resource
 
     public static function table(Table $table): Table
     {
-        return $table->columns([
-            \Filament\Tables\Columns\Layout\Split::make([
+        return $table
+        ->recordAction('edit')
+        ->columns([
             Tables\Columns\TextColumn::make('date')->label(__('Date'))->translateLabel()->date('d/m/Y')->sortable(),
-            Tables\Columns\TextColumn::make('student.name')->label(__('Student'))->searchable()->sortable(),
-            Tables\Columns\TextColumn::make('title')->label(__('Title'))->searchable(),
+            Tables\Columns\TextColumn::make('student.name')->label(__('Student'))->weight('bold')->searchable()->sortable(),
+            Tables\Columns\TextColumn::make('title')
+                ->label(__('Title'))
+                ->description(fn (Honor $record): ?string => $record->certificate_number ? 'No: ' . $record->certificate_number : null)
+                ->searchable(),
             Tables\Columns\TextColumn::make('type')->label(__('Type'))->translateLabel()->badge()
                 ->color(fn (string $state): string => match ($state) {
                     'achievement' => 'success', 'certificate' => 'info', 'award' => 'warning', default => 'gray',
                 }),
-            Tables\Columns\TextColumn::make('certificate_number')->label(__('Certificate No.'))->toggleable(),
-            Tables\Columns\TextColumn::make('journal.topic')->label(__('Journal'))->limit(25)->toggleable(),
-            ])->from('md'),
+            Tables\Columns\TextColumn::make('certificate_number')->label(__('Certificate No.'))->toggleable(isToggledHiddenByDefault: true),
+            Tables\Columns\TextColumn::make('journal.topic')->label(__('Journal'))->limit(25)->toggleable(isToggledHiddenByDefault: true),
         ])
         ->defaultSort('date', 'desc')
-        ->actions([\Filament\Actions\ViewAction::make(), \Filament\Actions\EditAction::make(), \Filament\Actions\DeleteAction::make()])
+        ->actions([
+            \Filament\Actions\EditAction::make()->button()->size('sm'),
+            \Filament\Actions\ActionGroup::make([
+                \Filament\Actions\ViewAction::make(),
+                \Filament\Actions\DeleteAction::make(),
+            ]),
+        ])
         ->bulkActions([\Filament\Actions\BulkActionGroup::make([\Filament\Actions\DeleteBulkAction::make()])]);
     }
 

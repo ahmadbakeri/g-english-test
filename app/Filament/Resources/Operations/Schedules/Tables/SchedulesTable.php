@@ -13,10 +13,11 @@ class SchedulesTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->recordAction('edit')
             ->columns([
-                \Filament\Tables\Columns\Layout\Split::make([
                 TextColumn::make('classRoom.name')
                     ->label(__('Class Room'))->translateLabel()
+                    ->weight('bold')
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('user.name')
@@ -26,14 +27,17 @@ class SchedulesTable
                 TextColumn::make('date')
                     ->label(__('Date'))->translateLabel()
                     ->date('d/m/Y')
+                    ->description(fn ($record): string => substr((string) $record->start_time, 0, 5) . ' - ' . substr((string) $record->end_time, 0, 5))
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('start_time')
                     ->time()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('end_time')
                     ->time()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -42,13 +46,14 @@ class SchedulesTable
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                ])->from('md'),
             ])
             ->filters([
                 //
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()
+                    ->button()
+                    ->size('sm'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

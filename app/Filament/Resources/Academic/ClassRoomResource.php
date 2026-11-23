@@ -143,56 +143,62 @@ class ClassRoomResource extends Resource
 
     public static function table(Table $table): Table
     {
-        return $table->columns([
-            \Filament\Tables\Columns\Layout\Split::make([
+        return $table
+            ->recordAction('edit')
+            ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->label(__('Class Name'))
                     ->weight('bold')
-                    ->description(fn (ClassRoom $record): string => $record->academicYear?->name ?? 'Tanpa Tahun Ajaran')
+                    ->description(fn (ClassRoom $record): string => ($record->academicYear?->name ?? '-') . ' • ' . ($record->tutor?->name ?? 'Tanpa Wali Kelas'))
                     ->searchable()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('academicYear.name')
-                    ->label(__('Academic Year'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('subject.name')
                     ->label(__('Subject'))
                     ->translateLabel()
                     ->badge()
                     ->color('info'),
-                Tables\Columns\TextColumn::make('tutor.name')
-                    ->label(__('Homeroom Teacher'))
-                    ->placeholder('-'),
-                Tables\Columns\TextColumn::make('schedules.day')
-                    ->label(__('Schedule'))
-                    ->badge()
-                    ->color('gray')
-                    ->separator(', '),
                 Tables\Columns\TextColumn::make('students_count')
                     ->label(__('Student'))
                     ->counts('students')
                     ->badge()
                     ->color('success')
                     ->suffix(' Siswa'),
+                Tables\Columns\IconColumn::make('is_active')
+                    ->label(__('Active'))
+                    ->boolean(),
+                Tables\Columns\TextColumn::make('academicYear.name')
+                    ->label(__('Academic Year'))
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('tutor.name')
+                    ->label(__('Homeroom Teacher'))
+                    ->placeholder('-')
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('schedules.day')
+                    ->label(__('Schedule'))
+                    ->badge()
+                    ->color('gray')
+                    ->separator(', ')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('capacity')
                     ->label(__('Capacity'))
                     ->numeric()
                     ->suffix(' Kursi')
-                    ->alignEnd(),
-                Tables\Columns\IconColumn::make('is_active')
-                    ->label(__('Active'))
-                    ->boolean(),
-            ])->from('md'),
-        ])
-        ->actions([
-            \Filament\Actions\ActionGroup::make([
-                \Filament\Actions\ViewAction::make(),
-                \Filament\Actions\EditAction::make(),
-                \Filament\Actions\DeleteAction::make(),
+                    ->alignEnd()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
-                ->icon('heroicon-m-ellipsis-vertical')
-                ->color('gray')
-                ->tooltip('Aksi'),
-        ])
+            ->actions([
+                \Filament\Actions\EditAction::make()
+                    ->button()
+                    ->size('sm'),
+                \Filament\Actions\ActionGroup::make([
+                    \Filament\Actions\ViewAction::make(),
+                    \Filament\Actions\DeleteAction::make(),
+                ])
+                    ->icon('heroicon-m-ellipsis-vertical')
+                    ->color('gray')
+                    ->tooltip('Aksi'),
+            ])
         ->bulkActions([
             \Filament\Actions\BulkActionGroup::make([
                 \Filament\Actions\DeleteBulkAction::make(),

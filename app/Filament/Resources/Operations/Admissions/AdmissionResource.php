@@ -229,8 +229,8 @@ class AdmissionResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->recordAction('edit')
             ->columns([
-                \Filament\Tables\Columns\Layout\Split::make([
                     TextColumn::make('registration_number')
                         ->label(__('Registration No.'))
                         ->badge()
@@ -247,13 +247,6 @@ class AdmissionResource extends Resource
                         ->badge()
                         ->color(fn (?string $state): string => $state === 'external' ? 'warning' : 'info')
                         ->formatStateUsing(fn (?string $state): string => $state === 'external' ? __('External') : __('Internal')),
-                    TextColumn::make('phone')
-                        ->label(__('WhatsApp No.'))
-                        ->searchable(),
-                    TextColumn::make('school_name')
-                        ->label(__('Previous School'))
-                        ->placeholder('-')
-                        ->searchable(),
                     TextColumn::make('status')
                         ->label(__('Status'))
                         ->badge()
@@ -269,11 +262,20 @@ class AdmissionResource extends Resource
                             'rejected' => __('Rejected'),
                             default => $state,
                         }),
+                    TextColumn::make('phone')
+                        ->label(__('WhatsApp No.'))
+                        ->searchable()
+                        ->toggleable(isToggledHiddenByDefault: true),
+                    TextColumn::make('school_name')
+                        ->label(__('Previous School'))
+                        ->placeholder('-')
+                        ->searchable()
+                        ->toggleable(isToggledHiddenByDefault: true),
                     TextColumn::make('created_at')
                         ->label(__('Registration Date'))
                         ->dateTime('d M Y')
-                        ->sortable(),
-                ])->from('md'),
+                        ->sortable()
+                        ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 \Filament\Tables\Filters\SelectFilter::make('student_type')
@@ -295,8 +297,11 @@ class AdmissionResource extends Resource
                 ]),
             ])
             ->recordActions([
+                EditAction::make()
+                    ->label(__('Edit'))
+                    ->button()
+                    ->size('sm'),
                 ActionGroup::make([
-                    EditAction::make()->label(__('Edit')),
                     \Filament\Actions\Action::make('approve')
                         ->label(__('Accept & Create Student'))
                         ->icon('heroicon-o-check-badge')
