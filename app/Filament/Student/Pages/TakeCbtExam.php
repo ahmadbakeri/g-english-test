@@ -244,6 +244,7 @@ class TakeCbtExam extends Page
             ]);
             $this->isLocked = true;
             $this->isFinished = true;
+            $this->redirect(static::getUrl(['record' => $this->record]), navigate: false);
         } else {
             $this->attempt->update([
                 'violation_count' => $newCount,
@@ -272,6 +273,7 @@ class TakeCbtExam extends Page
         ]);
 
         $this->isFinished = true;
+        $this->redirect(static::getUrl(['record' => $this->record]), navigate: false);
     }
 
     public function submitExam(array $submittedAnswers = []): void
@@ -291,6 +293,7 @@ class TakeCbtExam extends Page
                 'is_completed' => true,
             ]);
             $this->isFinished = true;
+            $this->redirect(static::getUrl(['record' => $this->record]), navigate: false);
             return;
         }
 
@@ -344,5 +347,6 @@ class TakeCbtExam extends Page
         ]);
 
         $this->isFinished = true;
+        $this->redirect(static::getUrl(['record' => $this->record]), navigate: false);
     }
 }
