@@ -636,20 +636,20 @@
                 },
 
                 answeredCount() {
-                    return Object.keys(this.answers).filter(k => this.answers[k]).length;
+                    return this.questions.filter(q => Boolean(this.answers[q.id])).length;
                 },
 
                 doubtCount() {
-                    return Object.keys(this.doubts).filter(k => this.doubts[k]).length;
+                    return this.questions.filter(q => Boolean(this.doubts[q.id])).length;
                 },
 
                 unansweredCount() {
-                    return Math.max(0, this.questions.length - this.answeredCount());
+                    return this.questions.filter(q => !this.answers[q.id]).length;
                 },
 
                 progressPercent() {
                     if (!this.questions.length) return 0;
-                    return Math.round((this.answeredCount() / this.questions.length) * 100);
+                    return Math.min(100, Math.round((this.answeredCount() / this.questions.length) * 100));
                 },
 
                 tick() {
@@ -983,8 +983,8 @@
         @else
             @php
                 $examConfig = [
-                    'storageKey' => 'g_english_cbt_attempt_' . $attempt->id,
-                    'doubtKey' => 'g_english_cbt_doubt_' . $attempt->id,
+                    'storageKey' => 'g_english_cbt_' . $exam->id . '_attempt_' . $attempt->id,
+                    'doubtKey' => 'g_english_cbt_' . $exam->id . '_doubt_' . $attempt->id,
                     'questions' => $questionsData,
                     'answers' => (object) $answers,
                     'endTimeIso' => $endTimeIso,
