@@ -63,17 +63,17 @@ class CbtAllClassesSeeder extends Seeder
                 }
             }
 
-            // 2. Google Form Mode CBT Exam (linked to youtube.com/@ahmadbakeri)
+            // 2. Google Form Mode CBT Exam (demo form with submit for testing)
             CbtExam::updateOrCreate(
                 [
                     'class_id' => $class->id,
                     'title' => "English Listening / Form — {$class->name}",
                 ],
                 [
-                    'description' => "Ujian Bahasa Inggris mode link eksternal untuk kelas {$class->name}.",
+                    'description' => "Ujian Bahasa Inggris mode Google Form untuk kelas {$class->name}.",
                     'subject_id' => $subjectId,
                     'cbt_mode' => 'google_form',
-                    'gform_embed_url' => 'https://youtube.com/@ahmadbakeri',
+                    'gform_embed_url' => '/cbt-gform-demo',
                     'duration_minutes' => 30,
                     'max_attempts' => 3,
                     'is_active' => true,

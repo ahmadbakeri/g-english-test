@@ -365,7 +365,34 @@
         }
         .cbt-fullscreen-shell:fullscreen .gform-iframe-wrapper,
         .cbt-fullscreen-shell:-webkit-full-screen .gform-iframe-wrapper {
-            height: calc(100vh - 145px) !important;
+            height: calc(100vh - 105px) !important;
+        }
+        /* Sleek Modal Backdrop inside Fullscreen Shell */
+        .cbt-modal-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: rgba(11, 17, 32, 0.92);
+            backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+        .cbt-modal-card {
+            max-width: 480px;
+            width: 100%;
+            text-align: center;
+            margin: 0;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            background: #ffffff;
+            border: 2px solid rgba(10, 66, 130, 0.2);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        .dark .cbt-modal-card {
+            background: #1e293b;
+            border-color: rgba(251, 185, 0, 0.45);
         }
         .gform-iframe-wrapper iframe {
             width: 100%;
@@ -458,11 +485,20 @@
                     maxViolations: {{ (int) ($attempt->max_violations ?? 3) }},
                     lastViolationAt: 0,
                     violationWarning: '',
+                    showSubmitModal: false,
+                    gformLoadCount: 0,
+                    gformSubmitted: false,
                     init() {
                         this.inFullscreen = (document.fullscreenElement === this.$refs.examShell);
                         this.tick();
                         this.timerId = setInterval(() => this.tick(), 1000);
                         this.bindAntiCheat();
+                    },
+                    onGformLoad() {
+                        this.gformLoadCount++;
+                        if (this.gformLoadCount >= 2) {
+                            this.gformSubmitted = true;
+                        }
                     },
                     enterFullscreen() {
                         const el = this.$refs.examShell;
@@ -525,53 +561,58 @@
                     }
                 }">
                 <!-- Fullscreen Gate Overlay -->
-                <div x-show="!inFullscreen" style="position: fixed; inset: 0; z-index: 9999; background: rgba(11, 17, 32, 0.94); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; padding: 1.5rem;">
-                    <div class="glass-panel" style="max-width: 520px; width: 100%; text-align: center; margin: 0; border: 2px solid rgba(251, 185, 0, 0.5);">
-                        <div style="width: 4rem; height: 4rem; border-radius: 1rem; background: linear-gradient(135deg, #0a4282, #1a368b); color: #fbb900; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem auto;">
-                            <x-heroicon-o-arrows-pointing-out style="width: 2.2rem; height: 2.2rem;" />
+                <div x-show="!inFullscreen" class="cbt-modal-backdrop">
+                    <div class="cbt-modal-card" style="border-color: rgba(251, 185, 0, 0.55);">
+                        <div style="width: 4.25rem; height: 4.25rem; border-radius: 1.15rem; background: linear-gradient(135deg, #0a4282, #1a368b); color: #fbb900; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.1rem auto; box-shadow: 0 10px 20px -5px rgba(10, 66, 130, 0.45);">
+                            <x-heroicon-o-arrows-pointing-out style="width: 2.25rem; height: 2.25rem;" />
                         </div>
-                        <h2 class="cbt-title" style="font-size: 1.5rem;">Mode Layar Penuh Diperlukan</h2>
-                        <p class="cbt-subtitle" style="margin-bottom: 1rem;">
-                            Saat masuk layar penuh, hanya halaman soal ujian yang tampil (tanpa menu/tab). Dilarang pindah tab atau keluar layar penuh (maksimal <strong x-text="maxViolations"></strong>x pelanggaran).
+                        <span style="display: inline-block; padding: 0.25rem 0.75rem; border-radius: 9999px; background: rgba(244, 63, 94, 0.12); color: #e11d48; font-size: 0.75rem; font-weight: 800; margin-bottom: 0.65rem;">
+                            Pelanggaran: <span x-text="violationCount"></span> / <span x-text="maxViolations"></span>
+                        </span>
+                        <h2 class="cbt-title" style="font-size: 1.45rem; margin-bottom: 0.5rem;">Perbesar Layar Penuh untuk Ujian</h2>
+                        <p class="cbt-subtitle" style="margin-bottom: 1.1rem; font-size: 0.9rem;">
+                            Ujian Google Form hanya tampil dalam mode Layar Penuh. Dilarang keluar layar penuh atau pindah tab (maks. <strong x-text="maxViolations"></strong>x pelanggaran).
                         </p>
-                        <div x-show="violationWarning" x-text="violationWarning" style="margin-bottom: 1rem; padding: 0.75rem 1rem; border-radius: 0.75rem; background: rgba(244, 63, 94, 0.14); color: #e11d48; font-weight: 700; font-size: 0.875rem;"></div>
-                        <button type="button" @click="enterFullscreen()" class="cbt-btn cbt-btn-primary" style="width: 100%;">
-                            Masuk Layar Penuh &amp; Mulai Ujian
+                        <div x-show="violationWarning" x-text="violationWarning" style="margin-bottom: 1.1rem; padding: 0.85rem 1rem; border-radius: 0.85rem; background: rgba(244, 63, 94, 0.12); border: 1px solid rgba(244, 63, 94, 0.3); color: #e11d48; font-weight: 700; font-size: 0.85rem;"></div>
+                        <button type="button" @click="enterFullscreen()" class="cbt-btn cbt-btn-primary" style="width: 100%; padding: 0.95rem;">
+                            Perbesar Layar &amp; Mulai Ujian
                         </button>
                     </div>
                 </div>
 
-                <!-- Header Bar -->
-                <div class="cbt-topbar">
-                    <div>
-                        <span style="display: inline-block; padding: 0.18rem 0.65rem; border-radius: 9999px; background: #fbb900; color: #0a4282; font-size: 0.7rem; font-weight: 900; text-transform: uppercase; margin-bottom: 0.3rem;">
+                <!-- Slim Header Bar (Only Timer + Akhiri Tes after submit) -->
+                <div class="cbt-topbar" style="padding: 0.7rem 1.25rem; margin-bottom: 0.85rem;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+                        <span style="display: inline-block; padding: 0.2rem 0.65rem; border-radius: 9999px; background: #fbb900; color: #0a4282; font-size: 0.7rem; font-weight: 900; text-transform: uppercase;">
                             Google Form CBT
                         </span>
-                        <h2 style="font-weight: 800; font-size: 1.25rem; margin: 0; color: #ffffff;">{{ $exam->title }}</h2>
-                        <p style="color: #cbd5e1; font-size: 0.82rem; margin: 0.15rem 0 0 0;">
-                            {{ $exam->subject->name ?? '' }} &bull; NIS: <strong>{{ $student->nis }}</strong> &bull; {{ $student->name }}
-                        </p>
+                        <h2 style="font-weight: 800; font-size: 1.05rem; margin: 0; color: #ffffff;">{{ $exam->title }}</h2>
                     </div>
                     <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
                         <span class="cbt-violation-pill">
                             Pelanggaran: <span x-text="violationCount"></span>/<span x-text="maxViolations"></span>
                         </span>
                         <div class="cbt-timer-pill">
-                            <x-heroicon-o-clock style="width: 1.2rem; height: 1.2rem;" />
+                            <x-heroicon-o-clock style="width: 1.15rem; height: 1.15rem;" />
                             <span x-text="timeLeft"></span>
                         </div>
-                        <button type="button" @click="finishExam()" class="cbt-btn cbt-btn-success" style="padding: 0.55rem 1.25rem; font-size: 0.85rem;">
-                            <span>Selesai Mengerjakan</span>
-                            <x-heroicon-m-check style="width: 1.1rem; height: 1.1rem; margin-left: 0.35rem;" />
+                        <button type="button"
+                                x-show="gformSubmitted"
+                                x-transition
+                                @click="finishExam()"
+                                class="cbt-btn cbt-btn-success"
+                                style="padding: 0.5rem 1.2rem; font-size: 0.85rem;">
+                            <span>Akhiri Tes</span>
+                            <x-heroicon-m-check style="width: 1.05rem; height: 1.05rem; margin-left: 0.35rem;" />
                         </button>
                     </div>
                 </div>
 
                 <!-- Iframe Container -->
-                <div class="glass-panel" x-show="!isTimeUp" style="padding: 0.75rem; margin-bottom: 0;">
+                <div class="glass-panel" x-show="!isTimeUp" style="padding: 0.5rem; margin-bottom: 0;">
                     @if($prefilledGformUrl)
                         <div class="gform-iframe-wrapper">
-                            <iframe src="{{ $prefilledGformUrl }}" allowfullscreen loading="lazy">Memuat Google Form...</iframe>
+                            <iframe src="{{ $prefilledGformUrl }}" @load="onGformLoad()" allowfullscreen loading="lazy">Memuat Google Form...</iframe>
                         </div>
                     @else
                         <div style="padding: 3rem; text-align: center; color: #ef4444; font-weight: 700;">
@@ -651,6 +692,7 @@
                     maxViolations: {{ (int) ($attempt->max_violations ?? 3) }},
                     lastViolationAt: 0,
                     violationWarning: '',
+                    showSubmitModal: false,
 
                     init() {
                         try {
@@ -773,12 +815,10 @@
                     submitAll(force = false) {
                         if (this.submitting) return;
                         if (!force) {
-                            const unanswered = this.questions.length - this.answeredCount();
-                            const msg = unanswered > 0
-                                ? `Masih ada ${unanswered} soal yang belum dijawab. Yakin ingin mengumpulkan ujian sekarang?`
-                                : 'Apakah Anda yakin ingin menyelesaikan dan mengumpulkan ujian ini?';
-                            if (!confirm(msg)) return;
+                            this.showSubmitModal = true;
+                            return;
                         }
+                        this.showSubmitModal = false;
                         this.submitting = true;
                         if (document.fullscreenElement) {
                             document.exitFullscreen().catch(() => {});
@@ -793,19 +833,57 @@
                 }">
 
                 <!-- Fullscreen Gate Overlay -->
-                <div x-show="!inFullscreen" style="position: fixed; inset: 0; z-index: 9999; background: rgba(11, 17, 32, 0.94); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; padding: 1.5rem;">
-                    <div class="glass-panel" style="max-width: 520px; width: 100%; text-align: center; margin: 0; border: 2px solid rgba(251, 185, 0, 0.5);">
-                        <div style="width: 4rem; height: 4rem; border-radius: 1rem; background: linear-gradient(135deg, #0a4282, #1a368b); color: #fbb900; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem auto;">
-                            <x-heroicon-o-arrows-pointing-out style="width: 2.2rem; height: 2.2rem;" />
+                <div x-show="!inFullscreen" class="cbt-modal-backdrop">
+                    <div class="cbt-modal-card" style="border-color: rgba(251, 185, 0, 0.55);">
+                        <div style="width: 4.25rem; height: 4.25rem; border-radius: 1.15rem; background: linear-gradient(135deg, #0a4282, #1a368b); color: #fbb900; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.1rem auto; box-shadow: 0 10px 20px -5px rgba(10, 66, 130, 0.45);">
+                            <x-heroicon-o-arrows-pointing-out style="width: 2.25rem; height: 2.25rem;" />
                         </div>
-                        <h2 class="cbt-title" style="font-size: 1.5rem;">Mode Layar Penuh Diperlukan</h2>
-                        <p class="cbt-subtitle" style="margin-bottom: 1rem;">
-                            Saat masuk layar penuh, hanya soal dan peta jawaban yang tampil (tanpa menu/tab). Dilarang pindah tab atau keluar layar penuh (maksimal <strong x-text="maxViolations"></strong>x pelanggaran).
+                        <span style="display: inline-block; padding: 0.25rem 0.75rem; border-radius: 9999px; background: rgba(244, 63, 94, 0.12); color: #e11d48; font-size: 0.75rem; font-weight: 800; margin-bottom: 0.65rem;">
+                            Pelanggaran: <span x-text="violationCount"></span> / <span x-text="maxViolations"></span>
+                        </span>
+                        <h2 class="cbt-title" style="font-size: 1.45rem; margin-bottom: 0.5rem;">Perbesar Layar Penuh untuk Ujian</h2>
+                        <p class="cbt-subtitle" style="margin-bottom: 1.1rem; font-size: 0.9rem;">
+                            Saat masuk layar penuh, hanya soal dan peta jawaban yang tampil. Dilarang pindah tab atau keluar layar penuh (maks. <strong x-text="maxViolations"></strong>x pelanggaran).
                         </p>
-                        <div x-show="violationWarning" x-text="violationWarning" style="margin-bottom: 1rem; padding: 0.75rem 1rem; border-radius: 0.75rem; background: rgba(244, 63, 94, 0.14); color: #e11d48; font-weight: 700; font-size: 0.875rem;"></div>
-                        <button type="button" @click="enterFullscreen()" class="cbt-btn cbt-btn-primary" style="width: 100%;">
-                            Masuk Layar Penuh &amp; Lanjutkan Ujian
+                        <div x-show="violationWarning" x-text="violationWarning" style="margin-bottom: 1.1rem; padding: 0.85rem 1rem; border-radius: 0.85rem; background: rgba(244, 63, 94, 0.12); border: 1px solid rgba(244, 63, 94, 0.3); color: #e11d48; font-weight: 700; font-size: 0.85rem;"></div>
+                        <button type="button" @click="enterFullscreen()" class="cbt-btn cbt-btn-primary" style="width: 100%; padding: 0.95rem;">
+                            Perbesar Layar &amp; Lanjutkan Ujian
                         </button>
+                    </div>
+                </div>
+
+                <!-- Custom Submit Confirmation Modal (No native confirm() popup) -->
+                <div x-show="showSubmitModal" x-transition class="cbt-modal-backdrop" style="display: none;">
+                    <div class="cbt-modal-card">
+                        <div style="width: 4rem; height: 4rem; border-radius: 1rem; background: rgba(16, 185, 129, 0.14); color: #059669; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem auto;">
+                            <x-heroicon-o-paper-airplane style="width: 2rem; height: 2rem;" />
+                        </div>
+                        <h2 class="cbt-title" style="font-size: 1.4rem; margin-bottom: 0.4rem;">Kumpulkan Jawaban Ujian?</h2>
+                        <p class="cbt-subtitle" style="margin-bottom: 1.1rem; font-size: 0.9rem;">
+                            Pastikan semua jawaban sudah diperiksa. Setelah dikirim, jawaban tidak dapat diubah lagi.
+                        </p>
+                        <div class="cbt-map-stats" style="margin-bottom: 1.35rem;">
+                            <div class="cbt-map-stat" style="background: rgba(10, 66, 130, 0.12); color: #0a4282;">
+                                <div style="font-size: 1.15rem; font-weight: 900;" x-text="answeredCount()"></div>
+                                <div>Dijawab</div>
+                            </div>
+                            <div class="cbt-map-stat" style="background: rgba(251, 185, 0, 0.22); color: #92400e;">
+                                <div style="font-size: 1.15rem; font-weight: 900;" x-text="doubtCount()"></div>
+                                <div>Ragu</div>
+                            </div>
+                            <div class="cbt-map-stat" style="background: rgba(244, 63, 94, 0.14); color: #be123c;">
+                                <div style="font-size: 1.15rem; font-weight: 900;" x-text="unansweredCount()"></div>
+                                <div>Kosong</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 0.75rem;">
+                            <button type="button" @click="showSubmitModal = false" class="cbt-btn cbt-btn-secondary" style="flex: 1;">
+                                Kembali ke Soal
+                            </button>
+                            <button type="button" @click="submitAll(true)" :disabled="submitting" class="cbt-btn cbt-btn-success" style="flex: 1;">
+                                <span x-text="submitting ? 'Mengirim...' : 'Ya, Kirim Jawaban'"></span>
+                            </button>
+                        </div>
                     </div>
                 </div>
 

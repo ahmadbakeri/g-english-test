@@ -14,6 +14,18 @@ Route::get('/pendaftaran-siswa', [\App\Http\Controllers\AdmissionController::cla
 Route::post('/daftar', [\App\Http\Controllers\AdmissionController::class, 'store'])->name('admission.store');
 Route::get('/brain-champion', \App\Livewire\BrainChampionRegistration::class)->name('brain-champion.register');
 
+Route::get('/cbt-gform-demo', function () {
+    return view('cbt.gform-demo', ['submitted' => false]);
+})->name('cbt.gform-demo');
+
+Route::post('/cbt-gform-demo', function () {
+    return redirect()->route('cbt.gform-demo.submitted');
+});
+
+Route::get('/cbt-gform-demo/submitted', function () {
+    return view('cbt.gform-demo', ['submitted' => true]);
+})->name('cbt.gform-demo.submitted');
+
 //Route::get('/absen', \App\Livewire\FormAbsensi::class);
 
 Route::post('/login-action', function (\Illuminate\Http\Request $request) {
