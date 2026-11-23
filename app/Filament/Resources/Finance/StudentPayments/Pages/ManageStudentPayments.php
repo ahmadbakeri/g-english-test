@@ -48,6 +48,41 @@ class ManageStudentPayments extends ManageRecords
                         ->success()
                         ->send();
                 }),
+            \Filament\Actions\Action::make('download_pdf')
+                ->label('Download PDF')
+                ->icon('heroicon-o-document-arrow-down')
+                ->color('danger')
+                ->action(function () {
+                    $records = $this->getFilteredTableQuery()->with('student')->get();
+                    $filter = $this->tableFilters['date_range'] ?? [];
+                    $rows = [];
+                    foreach ($records as $i => $p) {
+                        $rows[] = [
+                            $i + 1,
+                            $p->student?->name ?? '-',
+                            $p->notes ?: 'Pembayaran Kursus',
+                            $p->due_date ? $p->due_date->format('d M Y') : '-',
+                            \App\Support\TablePdfExporter::formatIdr($p->amount),
+                            $p->status === 'paid' ? 'Lunas' : 'Belum Lunas',
+                            $p->paid_at ? $p->paid_at->format('d M Y') : '-',
+                        ];
+                    }
+                    $paidTotal = $records->where('status', 'paid')->sum('amount');
+                    $unpaidTotal = $records->where('status', '!=', 'paid')->sum('amount');
+
+                    return \App\Support\TablePdfExporter::download(
+                        filename: 'laporan-pembayaran-siswa-' . now()->format('Y-m-d') . '.pdf',
+                        title: 'Laporan Pembayaran Siswa',
+                        subtitle: \App\Support\TablePdfExporter::periodSubtitle($filter['from'] ?? null, $filter['until'] ?? null),
+                        headers: ['No', 'Siswa', 'Keterangan', 'Jatuh Tempo', 'Nominal', 'Status', 'Tgl Bayar'],
+                        rows: $rows,
+                        summary: [
+                            'Total Transaksi' => $records->count() . ' data',
+                            'Total Lunas' => \App\Support\TablePdfExporter::formatIdr($paidTotal),
+                            'Total Belum Lunas' => \App\Support\TablePdfExporter::formatIdr($unpaidTotal),
+                        ],
+                    );
+                }),
             \Filament\Actions\ExportAction::make()->exporter(\App\Filament\Exports\StudentPaymentExporter::class),
             CreateAction::make(),
         ];

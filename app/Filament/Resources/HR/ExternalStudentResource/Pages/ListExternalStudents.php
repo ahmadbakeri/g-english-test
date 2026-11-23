@@ -219,6 +219,45 @@ class ListExternalStudents extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            Actions\Action::make('download_pdf')
+                ->label('Download PDF')
+                ->icon('heroicon-o-document-arrow-down')
+                ->color('danger')
+                ->action(function () {
+                    $hierarchy = $this->hierarchy;
+                    $rows = [];
+                    $no = 1;
+                    foreach (['SD', 'MI', 'SMP', 'MTs'] as $lvl) {
+                        foreach ($hierarchy['levels'][$lvl]['schools'] ?? [] as $school) {
+                            foreach ($school['classes'] as $className => $students) {
+                                foreach ($students as $s) {
+                                    $rows[] = [
+                                        $no++,
+                                        $lvl,
+                                        $school['name'],
+                                        $className,
+                                        $s->user?->username ?: ($s->competition_code ?: ($s->nis ?: '-')),
+                                        $s->nisn ?: '-',
+                                        $s->name,
+                                        ($s->parent_name ?: ($s->father_name ?: '-')) . ' / ' . ($s->parent_phone ?: ($s->phone ?: '-')),
+                                    ];
+                                }
+                            }
+                        }
+                    }
+
+                    return \App\Support\TablePdfExporter::download(
+                        filename: 'daftar-siswa-eksternal-' . now()->format('Y-m-d') . '.pdf',
+                        title: 'Daftar Siswa Eksternal (Brain Champion)',
+                        subtitle: $this->search ? 'Filter pencarian: "' . $this->search . '"' : 'Seluruh jenjang SD, MI, SMP, dan MTs',
+                        headers: ['No', 'Jenjang', 'Sekolah', 'Kelas', 'Kode / User', 'NISN', 'Nama Siswa', 'Orang Tua / WA'],
+                        rows: $rows,
+                        summary: [
+                            'Total Peserta' => $hierarchy['totalStudents'] . ' siswa',
+                            'Total Sekolah' => $hierarchy['totalSchools'] . ' sekolah',
+                        ],
+                    );
+                }),
             Actions\Action::make('download_brain_champion_template')
                 ->label('Download Template Excel')
                 ->icon('heroicon-o-arrow-down-tray')

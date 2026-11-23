@@ -43,7 +43,26 @@ class EvaluationsTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                \Filament\Tables\Filters\Filter::make('date_range')
+                    ->label('Rentang Tanggal')
+                    ->form([
+                        \Filament\Forms\Components\DatePicker::make('from')->label('Dari Tanggal'),
+                        \Filament\Forms\Components\DatePicker::make('until')->label('Sampai Tanggal'),
+                    ])
+                    ->columns(2)
+                    ->query(fn ($query, array $data) => $query
+                        ->when($data['from'] ?? null, fn ($q, $date) => $q->whereDate('date', '>=', $date))
+                        ->when($data['until'] ?? null, fn ($q, $date) => $q->whereDate('date', '<=', $date)))
+                    ->indicateUsing(function (array $data): array {
+                        $indicators = [];
+                        if ($data['from'] ?? null) {
+                            $indicators[] = 'Dari: ' . \Carbon\Carbon::parse($data['from'])->format('d/m/Y');
+                        }
+                        if ($data['until'] ?? null) {
+                            $indicators[] = 'Sampai: ' . \Carbon\Carbon::parse($data['until'])->format('d/m/Y');
+                        }
+                        return $indicators;
+                    }),
             ])
             ->recordActions([
                 \Filament\Actions\EditAction::make()

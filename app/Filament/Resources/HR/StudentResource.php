@@ -345,11 +345,7 @@ class StudentResource extends Resource
                     ->color('gray')
                     ->tooltip('Aksi'),
             ])
-            ->bulkActions([
-                \Filament\Actions\BulkActionGroup::make([
-                    \Filament\Actions\DeleteBulkAction::make(),
-                ]),
-            ]);
+            ->bulkActions([]);
     }
 
     public static function getRelations(): array

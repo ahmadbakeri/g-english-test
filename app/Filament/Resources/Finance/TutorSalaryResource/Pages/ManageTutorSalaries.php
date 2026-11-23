@@ -74,6 +74,39 @@ class ManageTutorSalaries extends ManageRecords
                         ->success()
                         ->send();
                 }),
+            Action::make('download_pdf')
+                ->label('Download PDF')
+                ->icon('heroicon-o-document-arrow-down')
+                ->color('danger')
+                ->action(function () {
+                    $months = [1=>'Januari',2=>'Februari',3=>'Maret',4=>'April',5=>'Mei',6=>'Juni',7=>'Juli',8=>'Agustus',9=>'September',10=>'Oktober',11=>'November',12=>'Desember'];
+                    $records = $this->getFilteredTableQuery()->with('tutor')->get();
+                    $rows = [];
+                    foreach ($records as $i => $r) {
+                        $rows[] = [
+                            $i + 1,
+                            $r->tutor?->name ?? '-',
+                            ($months[$r->month] ?? $r->month) . ' ' . $r->year,
+                            $r->total_jp . ' JP',
+                            \App\Support\TablePdfExporter::formatIdr($r->total_amount),
+                            $r->status === 'paid' ? 'Dibayar' : 'Pending',
+                            $r->paid_at ? $r->paid_at->format('d M Y') : '-',
+                        ];
+                    }
+
+                    return \App\Support\TablePdfExporter::download(
+                        filename: 'rekap-gaji-tutor-' . now()->format('Y-m-d') . '.pdf',
+                        title: 'Rekap Gaji & Honor Tutor',
+                        subtitle: 'Data penggajian sesuai filter aktif',
+                        headers: ['No', 'Tutor', 'Periode', 'Total JP', 'Total Gaji', 'Status', 'Tgl Dibayar'],
+                        rows: $rows,
+                        summary: [
+                            'Total Data' => $records->count() . ' tutor',
+                            'Total JP' => $records->sum('total_jp') . ' JP',
+                            'Total Nominal' => \App\Support\TablePdfExporter::formatIdr($records->sum('total_amount')),
+                        ],
+                    );
+                }),
             CreateAction::make()->label(__('Create Manually')),
         ];
     }
