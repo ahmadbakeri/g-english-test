@@ -29,9 +29,9 @@ class CbtAttemptResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-computer-desktop';
     
-    protected static ?string $modelLabel = 'Monitoring';
-    
-    protected static ?string $pluralModelLabel = 'Monitoring Ujian';
+    public static function getModelLabel(): string { return __('Monitoring'); }
+    public static function getPluralModelLabel(): string { return __('Exam Monitoring'); }
+    public static function getNavigationLabel(): string { return __('Exam Monitoring'); }
     
     public static function getNavigationGroup(): ?string
     {

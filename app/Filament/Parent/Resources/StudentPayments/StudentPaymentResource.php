@@ -17,10 +17,11 @@ class StudentPaymentResource extends Resource
     protected static ?string $model = StudentPayment::class;
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-banknotes';
-    protected static ?string $navigationLabel = 'Kwitansi';
-    protected static ?string $pluralModelLabel = 'Kwitansi Pembayaran';
-    protected static ?string $modelLabel = 'Kwitansi';
     protected static ?int $navigationSort = 3;
+
+    public static function getNavigationLabel(): string { return __('Receipts'); }
+    public static function getPluralModelLabel(): string { return __('Payment Receipts'); }
+    public static function getModelLabel(): string { return __('Receipt'); }
 
     public static function canCreate(): bool
     {

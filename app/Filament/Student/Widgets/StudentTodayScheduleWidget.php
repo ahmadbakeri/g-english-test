@@ -26,7 +26,7 @@ class StudentTodayScheduleWidget extends TableWidget
         $studentId = $student?->id;
 
         return $table
-            ->heading('Ã°Å¸â€œâ€¦ ' . __('Today\'s Class Schedule'))
+            ->heading('📅 ' . __('Today\'s Class Schedule'))
             ->query(
                 fn (): Builder => ClassSchedule::query()
                     ->whereJsonContains('schedule_items', ['day' => $today])
@@ -70,7 +70,7 @@ class StudentTodayScheduleWidget extends TableWidget
                 ])->from('md'),
             ])
             ->emptyStateHeading(__('No schedule today'))
-            ->emptyStateDescription(__('You have no classes scheduled for today. Have a good rest! Ã°Å¸Å½â€°'))
+            ->emptyStateDescription(__('You have no classes scheduled for today. Have a good rest! 🎉'))
             ->emptyStateIcon('heroicon-o-calendar')
             ->paginated(false);
     }

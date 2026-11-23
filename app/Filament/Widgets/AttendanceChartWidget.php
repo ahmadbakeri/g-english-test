@@ -8,7 +8,10 @@ class AttendanceChartWidget extends ChartWidget
 {
     protected static bool $isLazy = false;
 
-    protected ?string $heading = 'Statistik Kehadiran (Bulan Ini)';
+    public function getHeading(): ?string
+    {
+        return __('Attendance Statistics (This Month)');
+    }
 
     protected function getData(): array
     {

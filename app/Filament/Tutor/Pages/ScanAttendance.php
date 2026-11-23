@@ -13,9 +13,13 @@ use Illuminate\Support\Carbon;
 class ScanAttendance extends Page
 {
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-camera';
-    protected static ?string $title = 'Scan Attendance QR Code';
     protected static ?int $navigationSort = 0;
     protected string $view = 'filament.pages.scan-attendance';
+
+    public function getTitle(): string
+    {
+        return __('Scan Attendance QR Code');
+    }
 
     public static function getNavigationLabel(): string
     {

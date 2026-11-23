@@ -22,8 +22,16 @@ class StudentJournals extends Page implements HasTable
         return 'heroicon-o-book-open';
     }
 
-    protected static ?string $navigationLabel = 'My Learning Journals';
-    protected static ?string $title = 'Learning Journals';
+    public static function getNavigationLabel(): string
+    {
+        return __('My Learning Journals');
+    }
+
+    public function getTitle(): string
+    {
+        return __('Learning Journals');
+    }
+
     protected static ?string $slug = 'my-learning-journals';
     
     public static function getNavigationGroup(): ?string

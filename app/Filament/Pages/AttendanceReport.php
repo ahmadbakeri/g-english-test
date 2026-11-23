@@ -14,7 +14,7 @@ class AttendanceReport extends Page
 {
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-document-chart-bar';
     public static function getNavigationLabel(): string { return __('Attendance Report'); }
-    protected static ?string $title = 'Attendance Recap Report';
+    public function getTitle(): string { return __('Attendance Recap Report'); }
     public static function getNavigationGroup(): ?string
     {
         return __('Reports');

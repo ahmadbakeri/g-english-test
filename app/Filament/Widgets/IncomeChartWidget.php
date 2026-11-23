@@ -8,7 +8,10 @@ class IncomeChartWidget extends ChartWidget
 {
     protected static bool $isLazy = false;
 
-    protected ?string $heading = 'Grafik Pendapatan Tahun Ini';
+    public function getHeading(): ?string
+    {
+        return __('Income Chart This Year');
+    }
 
     protected function getData(): array
     {

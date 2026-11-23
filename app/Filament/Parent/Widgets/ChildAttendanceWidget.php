@@ -12,7 +12,11 @@ class ChildAttendanceWidget extends BaseWidget
     protected static bool $isLazy = false;
 
     protected static ?int $sort = 0;
-    protected static ?string $heading = 'Riwayat Presensi Anak';
+
+    public function getHeading(): string
+    {
+        return __('Child Attendance History');
+    }
 
     public function table(Table $table): Table
     {

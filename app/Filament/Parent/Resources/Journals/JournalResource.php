@@ -17,10 +17,11 @@ class JournalResource extends Resource
     protected static ?string $model = Journal::class;
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-book-open';
-    protected static ?string $navigationLabel = 'Progres & Jurnal Anak';
-    protected static ?string $pluralModelLabel = 'Jurnal Belajar Anak';
-    protected static ?string $modelLabel = 'Jurnal';
     protected static ?int $navigationSort = 4;
+
+    public static function getNavigationLabel(): string { return __('Child Progress & Journals'); }
+    public static function getPluralModelLabel(): string { return __('Child Learning Journals'); }
+    public static function getModelLabel(): string { return __('Journal'); }
 
     public static function canCreate(): bool
     {

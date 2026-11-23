@@ -14,7 +14,7 @@ class StudentReport extends Page
 {
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-academic-cap';
     public static function getNavigationLabel(): string { return __('Report Card'); }
-    protected static ?string $title = 'Student Report Card';
+    public function getTitle(): string { return __('Student Report Card'); }
     public static function getNavigationGroup(): ?string
     {
         return __('Reports');

@@ -15,12 +15,17 @@ class GradeReport extends Page
 
     public static function getNavigationGroup(): ?string
     {
-        return 'Evaluation';
+        return __('Evaluation');
     }
 
     public static function getNavigationLabel(): string
     {
-        return 'Grade Report';
+        return __('Grade Report');
+    }
+
+    public function getTitle(): string
+    {
+        return __('Grade Report');
     }
 
     public static function getNavigationSort(): ?int

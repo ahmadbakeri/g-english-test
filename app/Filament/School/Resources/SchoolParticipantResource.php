@@ -29,10 +29,11 @@ class SchoolParticipantResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-trophy';
     protected static ?string $slug = 'school-participants';
-    protected static ?string $navigationLabel = 'Delegasi Peserta';
-    protected static ?string $modelLabel = 'Peserta Brain Champion';
-    protected static ?string $pluralModelLabel = 'Delegasi Peserta Brain Champion';
     protected static ?int $navigationSort = 1;
+
+    public static function getNavigationLabel(): string { return __('Participant Delegation'); }
+    public static function getModelLabel(): string { return __('Brain Champion Participant'); }
+    public static function getPluralModelLabel(): string { return __('Brain Champion Participant Delegations'); }
 
     public static function canViewAny(): bool
     {

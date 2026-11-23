@@ -7,8 +7,16 @@ use Filament\Pages\Page;
 class StudentCbtExams extends Page
 {
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-academic-cap';
-    protected static ?string $navigationLabel = 'Exam';
-    protected static ?string $title = 'Available Exams';
+
+    public static function getNavigationLabel(): string
+    {
+        return __('Exam');
+    }
+
+    public function getTitle(): string
+    {
+        return __('Available Exams');
+    }
 
     public static function getNavigationGroup(): ?string
     {

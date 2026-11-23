@@ -14,7 +14,11 @@ class TodayScheduleWidget extends TableWidget
     protected static bool $isLazy = false;
 
     protected static ?int $sort = 2; // Position after StatsOverview
-    protected static ?string $heading = 'Jadwal Kelas Hari Ini';
+
+    public function getHeading(): ?string
+    {
+        return __("Today's Class Schedule");
+    }
 
     public function table(Table $table): Table
     {

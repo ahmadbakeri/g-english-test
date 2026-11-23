@@ -25,8 +25,16 @@ class StudentJournalDetails extends Page implements HasInfolists
         return 'heroicon-o-document-text';
     }
 
-    protected static ?string $navigationLabel = 'Journal Details';
-    protected static ?string $title = 'Journal Details';
+    public static function getNavigationLabel(): string
+    {
+        return __('Journal Details');
+    }
+
+    public function getTitle(): string
+    {
+        return __('Journal Details');
+    }
+
     protected static ?string $slug = 'my-learning-journals/{record}';
 
     public function getHeading(): string|\Illuminate\Contracts\Support\Htmlable
@@ -37,7 +45,7 @@ class StudentJournalDetails extends Page implements HasInfolists
                     <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
                 </a>
                 <h1 style="font-size: 1.875rem; line-height: 2.25rem; font-weight: 800; letter-spacing: -0.025em; color: inherit; margin: 0;">
-                    ' . static::$title . '
+                    ' . e(__('Journal Details')) . '
                 </h1>
             </div>
         ');
