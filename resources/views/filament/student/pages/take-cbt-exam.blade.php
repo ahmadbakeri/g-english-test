@@ -1,53 +1,84 @@
 <x-filament-panels::page>
     <style>
-        /* Base Reset & Variables for CBT (Aligned with DESIGN_SYSTEM.md & exam.css) */
         .cbt-container {
             font-family: "Outfit", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            color: #1f2937;
+            color: #0f172a;
             line-height: 1.5;
             -webkit-user-select: none;
             -moz-user-select: none;
-            -ms-user-select: none;
             user-select: none;
         }
         .dark .cbt-container {
-            color: #f3f4f6;
+            color: #f8fafc;
         }
 
-        /* Glass Panel (DESIGN_SYSTEM.md Rule 3 & 6) */
+        /* True Fullscreen Shell — hides all Filament sidebars, topbars & menus */
+        .cbt-fullscreen-shell {
+            width: 100%;
+        }
+        .cbt-fullscreen-shell:fullscreen,
+        .cbt-fullscreen-shell:-webkit-full-screen {
+            width: 100vw !important;
+            height: 100vh !important;
+            overflow-y: auto !important;
+            padding: 1.25rem 1.75rem 2rem 1.75rem !important;
+            background: radial-gradient(circle at top right, rgba(251, 185, 0, 0.08), transparent 35%),
+                        radial-gradient(circle at top left, rgba(10, 66, 130, 0.10), transparent 40%),
+                        #f1f5f9 !important;
+            box-sizing: border-box;
+        }
+        .dark .cbt-fullscreen-shell:fullscreen,
+        .dark .cbt-fullscreen-shell:-webkit-full-screen {
+            background: radial-gradient(circle at top right, rgba(251, 185, 0, 0.07), transparent 35%),
+                        radial-gradient(circle at top left, rgba(10, 66, 130, 0.25), transparent 40%),
+                        #0b1120 !important;
+        }
+
+        /* Glass Panel */
         .glass-panel {
-            background: rgba(255, 255, 255, 0.88);
-            backdrop-filter: blur(12px) saturate(180%);
-            -webkit-backdrop-filter: blur(12px) saturate(180%);
-            border: 1px solid rgba(15, 23, 42, 0.06);
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(14px) saturate(180%);
+            -webkit-backdrop-filter: blur(14px) saturate(180%);
+            border: 1px solid rgba(15, 23, 42, 0.08);
             border-radius: 1.25rem;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.04), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
-            padding: 1.85rem;
-            margin-bottom: 1.35rem;
+            box-shadow: 0 12px 30px -8px rgba(10, 66, 130, 0.08);
+            padding: 1.6rem;
+            margin-bottom: 1.25rem;
         }
         .dark .glass-panel {
-            background: rgba(30, 41, 59, 0.78);
+            background: rgba(30, 41, 59, 0.85);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.35), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 12px 30px -8px rgba(0, 0, 0, 0.45);
         }
 
-        /* Grid Layouts */
+        /* Sticky Exam Header */
+        .cbt-topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            border-radius: 1.25rem;
+            background: linear-gradient(135deg, #0a4282 0%, #102a5c 100%);
+            color: #ffffff;
+            border-bottom: 4px solid #fbb900;
+            box-shadow: 0 12px 28px -6px rgba(10, 66, 130, 0.35);
+            margin-bottom: 1.25rem;
+        }
+
+        /* Grid Layout */
         .cbt-grid {
             display: grid;
-            gap: 1.5rem;
+            gap: 1.35rem;
         }
         .cbt-grid-cols-4 {
             grid-template-columns: 1fr;
         }
         @media (min-width: 1024px) {
             .cbt-grid-cols-4 {
-                grid-template-columns: repeat(4, minmax(0, 1fr));
-            }
-            .cbt-col-span-3 {
-                grid-column: span 3 / span 3;
-            }
-            .cbt-col-span-1 {
-                grid-column: span 1 / span 1;
+                grid-template-columns: minmax(0, 1fr) 330px;
+                align-items: start;
             }
         }
         .cbt-flex-between {
@@ -55,32 +86,27 @@
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 1rem;
-        }
-        .cbt-flex-center {
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            gap: 0.85rem;
         }
 
-        /* Pill Buttons (DESIGN_SYSTEM.md Rule 3) */
+        /* Pill Buttons */
         .cbt-btn {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            padding: 0.85rem 1.75rem;
+            padding: 0.78rem 1.5rem;
             border-radius: 9999px;
             font-weight: 700;
-            font-size: 0.975rem;
+            font-size: 0.925rem;
             cursor: pointer;
-            transition: all 0.22s ease-in-out;
+            transition: all 0.2s ease;
             border: none;
             text-decoration: none;
         }
         .cbt-btn-primary {
             background: linear-gradient(135deg, #0a4282, #1a368b);
-            color: white;
-            box-shadow: 0 4px 15px -3px rgba(10, 66, 130, 0.4);
+            color: #ffffff;
+            box-shadow: 0 4px 14px -3px rgba(10, 66, 130, 0.45);
         }
         .cbt-btn-primary:hover:not(:disabled) {
             transform: translateY(-2px);
@@ -99,51 +125,44 @@
         .cbt-btn-secondary {
             background: #ffffff;
             color: #334155;
-            border: 1px solid #cbd5e1;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.04);
+            border: 1.5px solid #cbd5e1;
         }
         .dark .cbt-btn-secondary {
             background: #1e293b;
-            color: #cbd5e1;
-            border: 1px solid #334155;
+            color: #e2e8f0;
+            border: 1.5px solid #334155;
         }
         .cbt-btn-secondary:hover:not(:disabled) {
-            background: #f8fafc;
             border-color: #0a4282;
             transform: translateY(-2px);
         }
-        .dark .cbt-btn-secondary:hover:not(:disabled) {
-            background: #334155;
-            border-color: #fbb900;
+        .cbt-btn-success {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #ffffff;
+            box-shadow: 0 4px 14px -3px rgba(16, 185, 129, 0.45);
+        }
+        .cbt-btn-success:hover:not(:disabled) {
+            transform: translateY(-2px);
+            background: linear-gradient(135deg, #059669, #047857);
         }
         .cbt-btn:disabled {
-            opacity: 0.5;
+            opacity: 0.45;
             cursor: not-allowed;
             transform: none !important;
         }
-        .cbt-btn-success {
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: white;
-            box-shadow: 0 4px 15px -3px rgba(16, 185, 129, 0.4);
-        }
-        .cbt-btn-success:hover:not(:disabled) {
-            background: linear-gradient(135deg, #059669, #047857);
-            transform: translateY(-2px);
-        }
 
-        /* Typography & Header */
         .cbt-title {
-            font-size: 1.75rem;
+            font-size: 1.65rem;
             font-weight: 800;
-            margin-bottom: 0.4rem;
+            margin-bottom: 0.35rem;
             color: #0a4282;
         }
         .dark .cbt-title { color: #f8fafc; }
 
         .cbt-subtitle {
-            font-size: 0.975rem;
+            font-size: 0.95rem;
             color: #64748b;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.35rem;
         }
         .dark .cbt-subtitle { color: #94a3b8; }
 
@@ -159,19 +178,18 @@
             font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 0.04em;
-            margin-bottom: 1rem;
         }
         .dark .cbt-question-badge {
-            background: rgba(251, 185, 0, 0.16);
+            background: rgba(251, 185, 0, 0.18);
             color: #fbb900;
         }
 
         .cbt-question-text {
-            font-size: 1.2rem;
+            font-size: 1.18rem;
             font-weight: 600;
-            margin-bottom: 1.75rem;
+            margin: 1rem 0 1.6rem 0;
             color: #0f172a;
-            line-height: 1.65;
+            line-height: 1.7;
         }
         .dark .cbt-question-text { color: #f1f5f9; }
 
@@ -179,18 +197,17 @@
         .cbt-options-list {
             display: flex;
             flex-direction: column;
-            gap: 0.9rem;
+            gap: 0.8rem;
         }
         .cbt-option-label {
             display: flex;
             align-items: center;
-            padding: 1.1rem 1.25rem;
+            padding: 1rem 1.2rem;
             border-radius: 1rem;
             border: 2px solid #e2e8f0;
             background: #ffffff;
             cursor: pointer;
-            transition: all 0.18s ease;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+            transition: all 0.16s ease;
         }
         .dark .cbt-option-label {
             border-color: #334155;
@@ -208,16 +225,16 @@
         .cbt-option-label.selected {
             border-color: #0a4282;
             background: #eff6ff;
-            box-shadow: 0 0 0 1px #0a4282;
+            box-shadow: 0 0 0 2px rgba(10, 66, 130, 0.18);
         }
         .dark .cbt-option-label.selected {
-            background: rgba(10, 66, 130, 0.35);
+            background: rgba(10, 66, 130, 0.42);
             border-color: #fbb900;
-            box-shadow: 0 0 0 1px #fbb900;
+            box-shadow: 0 0 0 2px rgba(251, 185, 0, 0.22);
         }
         .cbt-option-badge {
-            width: 2.5rem;
-            height: 2.5rem;
+            width: 2.35rem;
+            height: 2.35rem;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -225,10 +242,10 @@
             color: #334155;
             font-weight: 800;
             border-radius: 0.7rem;
-            margin-right: 1.15rem;
+            margin-right: 1rem;
             flex-shrink: 0;
-            font-size: 1rem;
-            transition: all 0.18s ease;
+            font-size: 0.95rem;
+            transition: all 0.16s ease;
         }
         .dark .cbt-option-badge {
             background: #0f172a;
@@ -243,48 +260,71 @@
             color: #0a4282;
         }
 
-        /* Timer Box (DESIGN_SYSTEM.md Monospace) */
-        .cbt-timer {
+        /* Timer & Violation Pills */
+        .cbt-timer-pill {
             display: inline-flex;
             align-items: center;
-            padding: 0.65rem 1.25rem;
-            background: rgba(244, 63, 94, 0.1);
-            color: #e11d48;
-            border: 2px solid rgba(244, 63, 94, 0.25);
+            gap: 0.45rem;
+            padding: 0.5rem 1.05rem;
+            background: rgba(255, 255, 255, 0.14);
+            border: 1.5px solid rgba(251, 185, 0, 0.65);
+            color: #fbb900;
             border-radius: 9999px;
             font-family: ui-monospace, monospace;
-            font-weight: 800;
-            font-size: 1.2rem;
-            letter-spacing: 0.03em;
+            font-weight: 900;
+            font-size: 1.1rem;
+            letter-spacing: 0.04em;
         }
-        .dark .cbt-timer {
-            background: rgba(244, 63, 94, 0.2);
-            color: #FDA4AF;
-            border-color: rgba(244, 63, 94, 0.35);
+        .cbt-violation-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.45rem 0.9rem;
+            border-radius: 9999px;
+            background: rgba(244, 63, 94, 0.22);
+            border: 1px solid rgba(253, 164, 175, 0.45);
+            color: #fecdd3;
+            font-size: 0.8rem;
+            font-weight: 800;
         }
 
-        /* Navigation Grid Buttons (Aligned with exam.css data-status) */
+        /* Answer Mapping Grid */
+        .cbt-map-stats {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0.5rem;
+            margin-bottom: 0.9rem;
+        }
+        .cbt-map-stat {
+            padding: 0.5rem 0.4rem;
+            border-radius: 0.75rem;
+            text-align: center;
+            font-size: 0.72rem;
+            font-weight: 700;
+        }
         .cbt-nav-container {
             display: grid;
             grid-template-columns: repeat(5, minmax(0, 1fr));
-            gap: 0.55rem;
+            gap: 0.5rem;
         }
         .cbt-nav-btn {
-            height: 2.85rem;
+            height: 2.75rem;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             border-radius: 0.75rem;
             font-weight: 800;
-            font-size: 0.95rem;
+            font-size: 0.88rem;
+            line-height: 1.1;
             background: #ffffff;
             border: 2px solid #cbd5e1;
             color: #334155;
             cursor: pointer;
-            transition: all 0.18s ease;
+            transition: all 0.15s ease;
         }
         .dark .cbt-nav-btn {
-            background: #1e293b;
+            background: #0f172a;
             border-color: #334155;
             color: #cbd5e1;
         }
@@ -303,45 +343,33 @@
             color: #0a4282;
         }
         .cbt-nav-btn.active {
-            outline: 3px solid #0ea5e9;
+            outline: 3px solid #38bdf8;
             outline-offset: 2px;
             transform: scale(1.06);
-            z-index: 10;
+            z-index: 5;
         }
-
-        .cbt-legend-item {
-            display: flex;
-            align-items: center;
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            color: #475569;
-        }
-        .dark .cbt-legend-item { color: #94a3b8; }
-        .cbt-dot {
-            width: 0.8rem;
-            height: 0.8rem;
-            border-radius: 50%;
-            margin-right: 0.6rem;
-            flex-shrink: 0;
+        .cbt-nav-sub {
+            font-size: 0.65rem;
+            opacity: 0.85;
+            font-weight: 700;
         }
 
         /* Google Form Iframe Wrapper */
         .gform-iframe-wrapper {
             width: 100%;
-            min-height: 75vh;
+            height: 75vh;
             border-radius: 1rem;
             overflow: hidden;
-            border: 1px solid rgba(15, 23, 42, 0.08);
+            border: 1px solid rgba(15, 23, 42, 0.1);
             background: #ffffff;
         }
-        .dark .gform-iframe-wrapper {
-            border-color: rgba(255, 255, 255, 0.12);
-            background: #0f172a;
+        .cbt-fullscreen-shell:fullscreen .gform-iframe-wrapper,
+        .cbt-fullscreen-shell:-webkit-full-screen .gform-iframe-wrapper {
+            height: calc(100vh - 145px) !important;
         }
         .gform-iframe-wrapper iframe {
             width: 100%;
-            height: 75vh;
+            height: 100%;
             border: 0;
         }
     </style>
@@ -414,28 +442,31 @@
             </div>
 
         {{-- ========================================================= --}}
-        {{-- MODE A: GOOGLE FORM (Pre-filled Iframe + Pure Alpine Timer) --}}
+        {{-- MODE A: GOOGLE FORM (True Element Fullscreen + Timer)      --}}
         {{-- ========================================================= --}}
         @elseif($mode === 'google_form')
-            <div x-data="{
+            <div x-ref="examShell"
+                 class="cbt-fullscreen-shell"
+                 x-data="{
                     endTime: new Date('{{ $endTimeIso }}').getTime(),
                     timeLeft: '00:00:00',
                     isTimeUp: false,
                     timerId: null,
-                    inFullscreen: !!document.fullscreenElement,
+                    inFullscreen: false,
                     hasEnteredFullscreen: false,
                     violationCount: {{ (int) ($attempt->violation_count ?? 0) }},
                     maxViolations: {{ (int) ($attempt->max_violations ?? 3) }},
                     lastViolationAt: 0,
                     violationWarning: '',
                     init() {
+                        this.inFullscreen = (document.fullscreenElement === this.$refs.examShell);
                         this.tick();
                         this.timerId = setInterval(() => this.tick(), 1000);
                         this.bindAntiCheat();
                     },
                     enterFullscreen() {
-                        const el = document.documentElement;
-                        if (el.requestFullscreen) {
+                        const el = this.$refs.examShell;
+                        if (el && el.requestFullscreen) {
                             el.requestFullscreen().then(() => {
                                 this.inFullscreen = true;
                                 this.hasEnteredFullscreen = true;
@@ -444,7 +475,7 @@
                     },
                     bindAntiCheat() {
                         document.addEventListener('fullscreenchange', () => {
-                            this.inFullscreen = !!document.fullscreenElement;
+                            this.inFullscreen = (document.fullscreenElement === this.$refs.examShell);
                             if (this.hasEnteredFullscreen && !this.inFullscreen && !this.isTimeUp) {
                                 this.triggerViolation('Keluar dari mode layar penuh');
                             }
@@ -472,6 +503,12 @@
                             }
                         });
                     },
+                    finishExam() {
+                        if (document.fullscreenElement) {
+                            document.exitFullscreen().catch(() => {});
+                        }
+                        $wire.submitExam();
+                    },
                     tick() {
                         const now = Date.now();
                         const distance = this.endTime - now;
@@ -488,47 +525,50 @@
                     }
                 }">
                 <!-- Fullscreen Gate Overlay -->
-                <div x-show="!inFullscreen" style="position: fixed; inset: 0; z-index: 9999; background: rgba(15, 23, 42, 0.92); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; padding: 1.5rem;">
-                    <div class="glass-panel" style="max-width: 520px; width: 100%; text-align: center; margin: 0;">
+                <div x-show="!inFullscreen" style="position: fixed; inset: 0; z-index: 9999; background: rgba(11, 17, 32, 0.94); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; padding: 1.5rem;">
+                    <div class="glass-panel" style="max-width: 520px; width: 100%; text-align: center; margin: 0; border: 2px solid rgba(251, 185, 0, 0.5);">
+                        <div style="width: 4rem; height: 4rem; border-radius: 1rem; background: linear-gradient(135deg, #0a4282, #1a368b); color: #fbb900; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem auto;">
+                            <x-heroicon-o-arrows-pointing-out style="width: 2.2rem; height: 2.2rem;" />
+                        </div>
                         <h2 class="cbt-title" style="font-size: 1.5rem;">Mode Layar Penuh Diperlukan</h2>
                         <p class="cbt-subtitle" style="margin-bottom: 1rem;">
-                            Ujian wajib dikerjakan dalam mode layar penuh (Fullscreen). Dilarang pindah tab atau keluar layar penuh (maksimal <strong x-text="maxViolations"></strong>x pelanggaran).
+                            Saat masuk layar penuh, hanya halaman soal ujian yang tampil (tanpa menu/tab). Dilarang pindah tab atau keluar layar penuh (maksimal <strong x-text="maxViolations"></strong>x pelanggaran).
                         </p>
                         <div x-show="violationWarning" x-text="violationWarning" style="margin-bottom: 1rem; padding: 0.75rem 1rem; border-radius: 0.75rem; background: rgba(244, 63, 94, 0.14); color: #e11d48; font-weight: 700; font-size: 0.875rem;"></div>
                         <button type="button" @click="enterFullscreen()" class="cbt-btn cbt-btn-primary" style="width: 100%;">
-                            Masuk Layar Penuh &amp; Lanjutkan Ujian
+                            Masuk Layar Penuh &amp; Mulai Ujian
                         </button>
                     </div>
                 </div>
 
                 <!-- Header Bar -->
-                <div class="glass-panel cbt-flex-between" style="padding: 1.25rem 1.75rem;">
+                <div class="cbt-topbar">
                     <div>
-                        <span style="display: inline-block; padding: 0.2rem 0.75rem; border-radius: 9999px; background: rgba(10, 66, 130, 0.12); color: #0a4282; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; margin-bottom: 0.3rem;" class="dark:text-amber-300">
+                        <span style="display: inline-block; padding: 0.18rem 0.65rem; border-radius: 9999px; background: #fbb900; color: #0a4282; font-size: 0.7rem; font-weight: 900; text-transform: uppercase; margin-bottom: 0.3rem;">
                             Google Form CBT
                         </span>
-                        <h2 style="font-weight: 800; font-size: 1.35rem; margin: 0;">{{ $exam->title }}</h2>
-                        <p style="color: #64748b; font-size: 0.875rem; margin: 0.2rem 0 0 0;">
+                        <h2 style="font-weight: 800; font-size: 1.25rem; margin: 0; color: #ffffff;">{{ $exam->title }}</h2>
+                        <p style="color: #cbd5e1; font-size: 0.82rem; margin: 0.15rem 0 0 0;">
                             {{ $exam->subject->name ?? '' }} &bull; NIS: <strong>{{ $student->nis }}</strong> &bull; {{ $student->name }}
                         </p>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 0.85rem; flex-wrap: wrap;">
-                        <span style="padding: 0.5rem 0.9rem; border-radius: 9999px; background: rgba(244, 63, 94, 0.12); color: #e11d48; font-size: 0.8rem; font-weight: 800;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+                        <span class="cbt-violation-pill">
                             Pelanggaran: <span x-text="violationCount"></span>/<span x-text="maxViolations"></span>
                         </span>
-                        <div class="cbt-timer">
-                            <x-heroicon-o-clock style="width: 1.4rem; height: 1.4rem; margin-right: 0.45rem;" />
+                        <div class="cbt-timer-pill">
+                            <x-heroicon-o-clock style="width: 1.2rem; height: 1.2rem;" />
                             <span x-text="timeLeft"></span>
                         </div>
-                        <button type="button" wire:click="submitExam" class="cbt-btn cbt-btn-success">
+                        <button type="button" @click="finishExam()" class="cbt-btn cbt-btn-success" style="padding: 0.55rem 1.25rem; font-size: 0.85rem;">
                             <span>Selesai Mengerjakan</span>
-                            <x-heroicon-m-check style="width: 1.2rem; height: 1.2rem; margin-left: 0.45rem;" />
+                            <x-heroicon-m-check style="width: 1.1rem; height: 1.1rem; margin-left: 0.35rem;" />
                         </button>
                     </div>
                 </div>
 
-                <!-- Iframe Container (Hidden when timer reaches 00:00) -->
-                <div class="glass-panel" x-show="!isTimeUp" style="padding: 1rem;">
+                <!-- Iframe Container -->
+                <div class="glass-panel" x-show="!isTimeUp" style="padding: 0.75rem; margin-bottom: 0;">
                     @if($prefilledGformUrl)
                         <div class="gform-iframe-wrapper">
                             <iframe src="{{ $prefilledGformUrl }}" allowfullscreen loading="lazy">Memuat Google Form...</iframe>
@@ -547,8 +587,8 @@
                     </div>
                     <h2 class="cbt-title" style="color: #e11d48;">Waktu Ujian Telah Habis (00:00)</h2>
                     <p class="cbt-subtitle">Batas waktu pengerjaan ujian ini sudah berakhir. Klik tombol di bawah untuk kembali ke daftar ujian.</p>
-                    <button type="button" wire:click="submitExam" class="cbt-btn cbt-btn-primary">
-                        Simpan & Kembali ke Daftar Ujian
+                    <button type="button" @click="finishExam()" class="cbt-btn cbt-btn-primary">
+                        Simpan &amp; Kembali ke Daftar Ujian
                     </button>
                 </div>
             </div>
@@ -589,10 +629,12 @@
             </div>
 
         {{-- ========================================================= --}}
-        {{-- MODE B: INTERNAL EXCEL - ACTIVE EXAM (ZERO NETWORK CLICK) --}}
+        {{-- MODE B: INTERNAL EXCEL - ACTIVE EXAM (TRUE FULLSCREEN)    --}}
         {{-- ========================================================= --}}
         @else
-            <div x-data="{
+            <div x-ref="examShell"
+                 class="cbt-fullscreen-shell"
+                 x-data="{
                     storageKey: 'g_english_cbt_attempt_{{ $attempt->id }}',
                     doubtKey: 'g_english_cbt_doubt_{{ $attempt->id }}',
                     questions: @js($questionsData),
@@ -603,7 +645,7 @@
                     timeLeft: '00:00:00',
                     submitting: false,
                     timerId: null,
-                    inFullscreen: !!document.fullscreenElement,
+                    inFullscreen: false,
                     hasEnteredFullscreen: false,
                     violationCount: {{ (int) ($attempt->violation_count ?? 0) }},
                     maxViolations: {{ (int) ($attempt->max_violations ?? 3) }},
@@ -623,14 +665,15 @@
                             }
                         } catch (e) {}
 
+                        this.inFullscreen = (document.fullscreenElement === this.$refs.examShell);
                         this.tick();
                         this.timerId = setInterval(() => this.tick(), 1000);
                         this.bindAntiCheat();
                     },
 
                     enterFullscreen() {
-                        const el = document.documentElement;
-                        if (el.requestFullscreen) {
+                        const el = this.$refs.examShell;
+                        if (el && el.requestFullscreen) {
                             el.requestFullscreen().then(() => {
                                 this.inFullscreen = true;
                                 this.hasEnteredFullscreen = true;
@@ -640,7 +683,7 @@
 
                     bindAntiCheat() {
                         document.addEventListener('fullscreenchange', () => {
-                            this.inFullscreen = !!document.fullscreenElement;
+                            this.inFullscreen = (document.fullscreenElement === this.$refs.examShell);
                             if (this.hasEnteredFullscreen && !this.inFullscreen && !this.submitting) {
                                 this.triggerViolation('Keluar dari mode layar penuh');
                             }
@@ -653,6 +696,14 @@
                         window.addEventListener('blur', () => {
                             if (this.hasEnteredFullscreen && !this.submitting) {
                                 this.triggerViolation('Keluar dari jendela ujian');
+                            }
+                        });
+                        window.addEventListener('keydown', (e) => {
+                            if (!this.inFullscreen || this.submitting || !this.currentQuestion) return;
+                            if (e.key === 'ArrowRight' && this.currentIndex < this.questions.length - 1) {
+                                this.currentIndex++;
+                            } else if (e.key === 'ArrowLeft' && this.currentIndex > 0) {
+                                this.currentIndex--;
                             }
                         });
                     },
@@ -692,6 +743,19 @@
                         return Object.keys(this.answers).filter(k => this.answers[k]).length;
                     },
 
+                    doubtCount() {
+                        return Object.keys(this.doubts).filter(k => this.doubts[k]).length;
+                    },
+
+                    unansweredCount() {
+                        return Math.max(0, this.questions.length - this.answeredCount());
+                    },
+
+                    progressPercent() {
+                        if (!this.questions.length) return 0;
+                        return Math.round((this.answeredCount() / this.questions.length) * 100);
+                    },
+
                     tick() {
                         const distance = this.endTime - Date.now();
                         if (distance <= 0) {
@@ -716,6 +780,9 @@
                             if (!confirm(msg)) return;
                         }
                         this.submitting = true;
+                        if (document.fullscreenElement) {
+                            document.exitFullscreen().catch(() => {});
+                        }
                         $wire.submitExam(this.answers).then(() => {
                             try {
                                 localStorage.removeItem(this.storageKey);
@@ -723,15 +790,17 @@
                             } catch (e) {}
                         });
                     }
-                }"
-                class="cbt-grid cbt-grid-cols-4">
+                }">
 
                 <!-- Fullscreen Gate Overlay -->
-                <div x-show="!inFullscreen" style="position: fixed; inset: 0; z-index: 9999; background: rgba(15, 23, 42, 0.92); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; padding: 1.5rem;">
-                    <div class="glass-panel" style="max-width: 520px; width: 100%; text-align: center; margin: 0;">
+                <div x-show="!inFullscreen" style="position: fixed; inset: 0; z-index: 9999; background: rgba(11, 17, 32, 0.94); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; padding: 1.5rem;">
+                    <div class="glass-panel" style="max-width: 520px; width: 100%; text-align: center; margin: 0; border: 2px solid rgba(251, 185, 0, 0.5);">
+                        <div style="width: 4rem; height: 4rem; border-radius: 1rem; background: linear-gradient(135deg, #0a4282, #1a368b); color: #fbb900; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem auto;">
+                            <x-heroicon-o-arrows-pointing-out style="width: 2.2rem; height: 2.2rem;" />
+                        </div>
                         <h2 class="cbt-title" style="font-size: 1.5rem;">Mode Layar Penuh Diperlukan</h2>
                         <p class="cbt-subtitle" style="margin-bottom: 1rem;">
-                            Ujian wajib dikerjakan dalam mode layar penuh (Fullscreen). Dilarang pindah tab atau keluar layar penuh (maksimal <strong x-text="maxViolations"></strong>x pelanggaran).
+                            Saat masuk layar penuh, hanya soal dan peta jawaban yang tampil (tanpa menu/tab). Dilarang pindah tab atau keluar layar penuh (maksimal <strong x-text="maxViolations"></strong>x pelanggaran).
                         </p>
                         <div x-show="violationWarning" x-text="violationWarning" style="margin-bottom: 1rem; padding: 0.75rem 1rem; border-radius: 0.75rem; background: rgba(244, 63, 94, 0.14); color: #e11d48; font-weight: 700; font-size: 0.875rem;"></div>
                         <button type="button" @click="enterFullscreen()" class="cbt-btn cbt-btn-primary" style="width: 100%;">
@@ -740,147 +809,166 @@
                     </div>
                 </div>
 
-                <!-- Left Panel: Question -->
-                <div class="cbt-col-span-3">
-                    <!-- Header / Timer -->
-                    <div class="glass-panel cbt-flex-between" style="padding: 1.15rem 1.75rem;">
-                        <div>
-                            <h2 style="font-weight: 800; font-size: 1.25rem; margin: 0;">{{ $exam->title }}</h2>
-                            <p style="color: #64748b; font-size: 0.85rem; margin: 0.2rem 0 0 0; font-weight: 600;">
-                                Soal <span x-text="currentIndex + 1"></span> dari <span x-text="questions.length"></span>
-                                &bull; Terjawab: <strong style="color: #0a4282;" class="dark:text-amber-400" x-text="answeredCount()"></strong>/<span x-text="questions.length"></span>
-                            </p>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
-                            <span style="padding: 0.45rem 0.85rem; border-radius: 9999px; background: rgba(244, 63, 94, 0.12); color: #e11d48; font-size: 0.78rem; font-weight: 800;">
-                                Pelanggaran: <span x-text="violationCount"></span>/<span x-text="maxViolations"></span>
-                            </span>
-                            <div class="cbt-timer">
-                                <x-heroicon-o-clock style="width: 1.4rem; height: 1.4rem; margin-right: 0.45rem;" />
-                                <span x-text="timeLeft"></span>
-                            </div>
-                        </div>
+                <!-- Sleek Topbar -->
+                <div class="cbt-topbar">
+                    <div>
+                        <span style="display: inline-block; padding: 0.18rem 0.65rem; border-radius: 9999px; background: #fbb900; color: #0a4282; font-size: 0.7rem; font-weight: 900; text-transform: uppercase; margin-bottom: 0.25rem;">
+                            G-English CBT
+                        </span>
+                        <h2 style="font-weight: 800; font-size: 1.2rem; margin: 0; color: #ffffff;">{{ $exam->title }}</h2>
+                        <p style="color: #cbd5e1; font-size: 0.82rem; margin: 0.15rem 0 0 0;">
+                            {{ $student->name }} ({{ $student->nis }}) &bull; Soal <strong x-text="currentIndex + 1"></strong> / <span x-text="questions.length"></span>
+                        </p>
                     </div>
-
-                    <!-- Question Body -->
-                    <template x-if="currentQuestion">
-                        <div class="glass-panel" style="padding: 2rem;">
-                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
-                                <span class="cbt-question-badge" style="margin-bottom: 0;">
-                                    Pertanyaan #<span x-text="currentIndex + 1"></span>
-                                </span>
-                                <span style="font-size: 0.8rem; font-weight: 700; color: #64748b;">
-                                    Bobot: <strong x-text="currentQuestion.points || 1"></strong> Poin
-                                </span>
-                            </div>
-
-                            <div class="cbt-question-text" x-html="currentQuestion.question_text"></div>
-
-                            <template x-if="currentQuestion.attachment_url">
-                                <div style="margin-top: 1.25rem; margin-bottom: 1.75rem; text-align: center;">
-                                    <template x-if="currentQuestion.attachment_type === 'image'">
-                                        <img :src="currentQuestion.attachment_url" alt="Attachment" style="max-width: 100%; max-height: 380px; border-radius: 12px; display: inline-block;">
-                                    </template>
-                                    <template x-if="currentQuestion.attachment_type === 'audio'">
-                                        <audio controls style="width: 100%; max-width: 500px; display: inline-block;" :src="currentQuestion.attachment_url"></audio>
-                                    </template>
-                                </div>
-                            </template>
-
-                            <div class="cbt-options-list">
-                                <template x-for="(optText, optKey) in currentQuestion.options" :key="optKey">
-                                    <div @click="selectOption(currentQuestion.id, optKey)"
-                                         class="cbt-option-label"
-                                         :class="{ 'selected': answers[currentQuestion.id] === optKey }">
-                                        <span class="cbt-option-badge" x-text="optKey"></span>
-                                        <span style="font-size: 1.025rem; font-weight: 600;" x-text="optText"></span>
-                                    </div>
-                                </template>
-                            </div>
+                    <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+                        <span class="cbt-violation-pill">
+                            Pelanggaran: <span x-text="violationCount"></span>/<span x-text="maxViolations"></span>
+                        </span>
+                        <div class="cbt-timer-pill">
+                            <x-heroicon-o-clock style="width: 1.2rem; height: 1.2rem;" />
+                            <span x-text="timeLeft"></span>
                         </div>
-                    </template>
-
-                    <!-- Bottom Navigation Actions -->
-                    <div class="cbt-flex-between" style="margin-top: 1.15rem;">
-                        <button type="button"
-                                @click="if (currentIndex > 0) currentIndex--"
-                                :disabled="currentIndex === 0"
-                                class="cbt-btn cbt-btn-secondary">
-                            <x-heroicon-m-arrow-left style="width: 1.15rem; height: 1.15rem; margin-right: 0.45rem;" />
-                            <span>Sebelumnya</span>
-                        </button>
-
-                        <template x-if="currentQuestion">
-                            <button type="button"
-                                    @click="toggleDoubt(currentQuestion.id)"
-                                    class="cbt-btn cbt-btn-gold">
-                                <span x-text="doubts[currentQuestion.id] ? 'Hapus Ragu-Ragu' : 'Ragu-Ragu'"></span>
-                            </button>
-                        </template>
-
-                        <button type="button"
-                                x-show="currentIndex < questions.length - 1"
-                                @click="if (currentIndex < questions.length - 1) currentIndex++"
-                                class="cbt-btn cbt-btn-primary">
-                            <span>Selanjutnya</span>
-                            <x-heroicon-m-arrow-right style="width: 1.15rem; height: 1.15rem; margin-left: 0.45rem; color: #fbb900;" />
-                        </button>
-
-                        <button type="button"
-                                x-show="currentIndex >= questions.length - 1"
-                                @click="submitAll(false)"
-                                :disabled="submitting"
-                                class="cbt-btn cbt-btn-success">
-                            <span x-text="submitting ? 'Mengirim Jawaban...' : 'Selesai & Submit Ujian'"></span>
-                            <x-heroicon-m-check style="width: 1.15rem; height: 1.15rem; margin-left: 0.45rem;" />
-                        </button>
                     </div>
                 </div>
 
-                <!-- Right Panel: Navigation Grid -->
-                <div class="cbt-col-span-1">
-                    <div class="glass-panel" style="position: sticky; top: 1.5rem; padding: 1.5rem;">
-                        <h3 style="font-weight: 800; font-size: 1.05rem; margin: 0 0 1.15rem 0; display: flex; align-items: center; border-bottom: 1px solid rgba(148, 163, 184, 0.25); padding-bottom: 0.85rem;">
-                            <x-heroicon-m-squares-2x2 style="width: 1.25rem; height: 1.25rem; margin-right: 0.5rem; color: #0a4282;" class="dark:text-amber-400" />
-                            <span>Navigasi Soal</span>
-                        </h3>
+                <div class="cbt-grid cbt-grid-cols-4">
+                    <!-- Left Panel: Question -->
+                    <div>
+                        <template x-if="currentQuestion">
+                            <div class="glass-panel" style="padding: 1.85rem;">
+                                <div class="cbt-flex-between" style="border-bottom: 1px solid rgba(148, 163, 184, 0.22); padding-bottom: 0.85rem;">
+                                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                        <span class="cbt-question-badge">
+                                            Soal #<span x-text="currentIndex + 1"></span>
+                                        </span>
+                                        <span x-show="doubts[currentQuestion.id]" style="padding: 0.25rem 0.7rem; border-radius: 9999px; background: #fbb900; color: #0a4282; font-size: 0.72rem; font-weight: 800;">
+                                            Ragu-Ragu
+                                        </span>
+                                    </div>
+                                    <span style="font-size: 0.82rem; font-weight: 700; color: #64748b;" class="dark:text-slate-300">
+                                        Bobot: <strong x-text="currentQuestion.points || 1"></strong> Poin
+                                    </span>
+                                </div>
 
-                        <div class="cbt-nav-container">
-                            <template x-for="(q, idx) in questions" :key="q.id">
+                                <div class="cbt-question-text" x-html="currentQuestion.question_text"></div>
+
+                                <template x-if="currentQuestion.attachment_url">
+                                    <div style="margin: 1rem 0 1.5rem 0; text-align: center;">
+                                        <template x-if="currentQuestion.attachment_type === 'image'">
+                                            <img :src="currentQuestion.attachment_url" alt="Attachment" style="max-width: 100%; max-height: 360px; border-radius: 12px; display: inline-block;">
+                                        </template>
+                                        <template x-if="currentQuestion.attachment_type === 'audio'">
+                                            <audio controls style="width: 100%; max-width: 500px; display: inline-block;" :src="currentQuestion.attachment_url"></audio>
+                                        </template>
+                                    </div>
+                                </template>
+
+                                <div class="cbt-options-list">
+                                    <template x-for="(optText, optKey) in currentQuestion.options" :key="optKey">
+                                        <div @click="selectOption(currentQuestion.id, optKey)"
+                                             class="cbt-option-label"
+                                             :class="{ 'selected': answers[currentQuestion.id] === optKey }">
+                                            <span class="cbt-option-badge" x-text="optKey"></span>
+                                            <span style="font-size: 1rem; font-weight: 600;" x-text="optText"></span>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+
+                        <!-- Bottom Navigation Actions -->
+                        <div class="cbt-flex-between" style="margin-top: 0.5rem;">
+                            <button type="button"
+                                    @click="if (currentIndex > 0) currentIndex--"
+                                    :disabled="currentIndex === 0"
+                                    class="cbt-btn cbt-btn-secondary">
+                                <x-heroicon-m-arrow-left style="width: 1.1rem; height: 1.1rem; margin-right: 0.4rem;" />
+                                <span>Sebelumnya</span>
+                            </button>
+
+                            <template x-if="currentQuestion">
                                 <button type="button"
-                                        @click="currentIndex = idx"
-                                        class="cbt-nav-btn"
-                                        :class="{
-                                            'active': currentIndex === idx,
-                                            'doubt': doubts[q.id],
-                                            'answered': !doubts[q.id] && answers[q.id]
-                                        }"
-                                        x-text="idx + 1">
+                                        @click="toggleDoubt(currentQuestion.id)"
+                                        class="cbt-btn cbt-btn-gold">
+                                    <span x-text="doubts[currentQuestion.id] ? 'Batal Ragu' : 'Tandai Ragu-Ragu'"></span>
                                 </button>
                             </template>
+
+                            <button type="button"
+                                    x-show="currentIndex < questions.length - 1"
+                                    @click="if (currentIndex < questions.length - 1) currentIndex++"
+                                    class="cbt-btn cbt-btn-primary">
+                                <span>Selanjutnya</span>
+                                <x-heroicon-m-arrow-right style="width: 1.1rem; height: 1.1rem; margin-left: 0.4rem; color: #fbb900;" />
+                            </button>
+
+                            <button type="button"
+                                    x-show="currentIndex >= questions.length - 1"
+                                    @click="submitAll(false)"
+                                    :disabled="submitting"
+                                    class="cbt-btn cbt-btn-success">
+                                <span x-text="submitting ? 'Mengirim...' : 'Selesai & Submit'"></span>
+                                <x-heroicon-m-check style="width: 1.1rem; height: 1.1rem; margin-left: 0.4rem;" />
+                            </button>
                         </div>
+                    </div>
 
-                        <hr style="margin: 1.35rem 0; border: none; border-top: 1px solid rgba(148, 163, 184, 0.25);">
+                    <!-- Right Panel: Answer Mapping -->
+                    <div>
+                        <div class="glass-panel" style="position: sticky; top: 1rem; padding: 1.35rem; margin-bottom: 0;">
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+                                <h3 style="font-weight: 800; font-size: 1rem; margin: 0; display: flex; align-items: center; gap: 0.45rem;">
+                                    <x-heroicon-m-squares-2x2 style="width: 1.15rem; height: 1.15rem; color: #0a4282;" class="dark:text-amber-400" />
+                                    <span>Peta Jawaban</span>
+                                </h3>
+                                <span style="font-size: 0.78rem; font-weight: 800; color: #0a4282;" class="dark:text-amber-400" x-text="progressPercent() + '%'"></span>
+                            </div>
 
-                        <div style="margin-bottom: 1.35rem;">
-                            <div class="cbt-legend-item">
-                                <span class="cbt-dot" style="background: #0a4282;"></span> Sudah Dijawab
+                            <!-- Progress bar -->
+                            <div style="width: 100%; height: 6px; border-radius: 9999px; background: rgba(148, 163, 184, 0.25); overflow: hidden; margin-bottom: 0.9rem;">
+                                <div style="height: 100%; background: linear-gradient(90deg, #0a4282, #fbb900); transition: width 0.25s ease;" :style="'width: ' + progressPercent() + '%'"></div>
                             </div>
-                            <div class="cbt-legend-item">
-                                <span class="cbt-dot" style="background: #fbb900;"></span> Ragu-Ragu
+
+                            <!-- Summary Counters -->
+                            <div class="cbt-map-stats">
+                                <div class="cbt-map-stat" style="background: rgba(10, 66, 130, 0.12); color: #0a4282;" class="dark:text-sky-300">
+                                    <div style="font-size: 1rem; font-weight: 900;" x-text="answeredCount()"></div>
+                                    <div>Dijawab</div>
+                                </div>
+                                <div class="cbt-map-stat" style="background: rgba(251, 185, 0, 0.22); color: #92400e;" class="dark:text-amber-300">
+                                    <div style="font-size: 1rem; font-weight: 900;" x-text="doubtCount()"></div>
+                                    <div>Ragu</div>
+                                </div>
+                                <div class="cbt-map-stat" style="background: rgba(148, 163, 184, 0.18); color: #475569;" class="dark:text-slate-300">
+                                    <div style="font-size: 1rem; font-weight: 900;" x-text="unansweredCount()"></div>
+                                    <div>Kosong</div>
+                                </div>
                             </div>
-                            <div class="cbt-legend-item">
-                                <span class="cbt-dot" style="background: #ffffff; border: 2px solid #cbd5e1;"></span> Belum Dijawab
+
+                            <div class="cbt-nav-container">
+                                <template x-for="(q, idx) in questions" :key="q.id">
+                                    <button type="button"
+                                            @click="currentIndex = idx"
+                                            class="cbt-nav-btn"
+                                            :class="{
+                                                'active': currentIndex === idx,
+                                                'doubt': doubts[q.id],
+                                                'answered': !doubts[q.id] && answers[q.id]
+                                            }">
+                                        <span x-text="idx + 1"></span>
+                                        <span class="cbt-nav-sub" x-show="answers[q.id]" x-text="answers[q.id]"></span>
+                                    </button>
+                                </template>
                             </div>
+
+                            <button type="button"
+                                    @click="submitAll(false)"
+                                    :disabled="submitting"
+                                    class="cbt-btn cbt-btn-success"
+                                    style="width: 100%; margin-top: 1.25rem;">
+                                <span x-text="submitting ? 'Memproses...' : 'Selesai & Submit Ujian'"></span>
+                            </button>
                         </div>
-
-                        <button type="button"
-                                @click="submitAll(false)"
-                                :disabled="submitting"
-                                class="cbt-btn cbt-btn-success"
-                                style="width: 100%;">
-                            <span x-text="submitting ? 'Memproses...' : 'Selesai / Submit Ujian'"></span>
-                        </button>
                     </div>
                 </div>
             </div>
