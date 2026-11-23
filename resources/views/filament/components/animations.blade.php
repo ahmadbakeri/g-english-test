@@ -790,6 +790,39 @@
         box-shadow: 0 2px 4px -1px rgba(0,0,0,0.05) !important;
     }
 
+    /* 7. Browser Surfaces & Accessibility Craft (Selection, Caret, Focus-Visible, Scrollbars) */
+    ::selection {
+        background-color: #0a4282;
+        color: #ffffff;
+    }
+    .dark ::selection {
+        background-color: #fbb900;
+        color: #0a4282;
+    }
+    input, textarea, select {
+        caret-color: #0a4282;
+    }
+    .dark input, .dark textarea, .dark select {
+        caret-color: #fbb900;
+    }
+    :focus-visible {
+        outline: 2px solid #0a4282;
+        outline-offset: 2px;
+    }
+    .dark :focus-visible {
+        outline-color: #fbb900;
+    }
+    * {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(10, 66, 130, 0.28) transparent;
+    }
+    .dark * {
+        scrollbar-color: rgba(251, 185, 0, 0.3) transparent;
+    }
+    .fi-ta-ctn {
+        overflow-x: auto !important;
+    }
+
 </style>
 
 <div id="lang-switch-overlay">
