@@ -345,7 +345,7 @@
     "Created At": "Chuàngjiàn shíjiān",
     "Religion": "Zōngjiào",
     "Social Media Account": "Shèjiāo méitǐ zhànghào",
-    "School Name": "Xuéxiào míngchēng",
+    "School Name": "Xuéxiào Míngchēng",
     "Class (Kelas)": "Niánjí (Kelas)",
     "Student successfully admitted and student data created.": "Xuéshēng yǐ chénggōng lùqǔ, xuéshēng dàng'àn yǐ chuàngjiàn.",
     "All": "Quánbù",
@@ -410,5 +410,10 @@
     "Internal Students": "Nèibù Xuésheng",
     "Internal Student": "Nèibù Xuésheng",
     "External Students": "Wàibù Xuésheng",
-    "External Student": "Wàibù Xuésheng"
+    "External Student": "Wàibù Xuésheng",
+    "Manage Schools": "Xuéxiào Guǎnlǐ",
+    "School": "Xuéxiào",
+    "Add School": "Tiānjiā Xuéxiào",
+    "School Data": "Xuéxiào Zīliào",
+    "School Code / Username": "Xuéxiào Dàimǎ / Yònghùmíng"
 }

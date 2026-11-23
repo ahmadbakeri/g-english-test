@@ -345,7 +345,7 @@
     "Created At": "Sakusei nichiji",
     "Religion": "Shūkyō",
     "Social Media Account": "SNS akaunto",
-    "School Name": "Gakkōmei",
+    "School Name": "Gakkoumei",
     "Class (Kelas)": "Gakunen (Kelas)",
     "Student successfully admitted and student data created.": "Seito no nyūgaku ga shōnin sare, seito dēta ga sakusei saremashita.",
     "All": "Subete",
@@ -410,5 +410,10 @@
     "Internal Students": "Naibu Seito",
     "Internal Student": "Naibu Seito",
     "External Students": "Gaibu Seito",
-    "External Student": "Gaibu Seito"
+    "External Student": "Gaibu Seito",
+    "Manage Schools": "Gakkou Kanri",
+    "School": "Gakkou",
+    "Add School": "Gakkou o Tsuika",
+    "School Data": "Gakkou Jouhou",
+    "School Code / Username": "Gakkou Koodo / Yuzaamei"
 }

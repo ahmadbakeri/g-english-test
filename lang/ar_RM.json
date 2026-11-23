@@ -345,7 +345,7 @@
     "Created At": "Tarikh al-insha'",
     "Religion": "Al-diyanah",
     "Social Media Account": "Hisab al-tawasul al-ijtima'i",
-    "School Name": "Ism al-madrasah",
+    "School Name": "Ism Al-Madrasa",
     "Class (Kelas)": "Al-saff (Kelas)",
     "Student successfully admitted and student data created.": "Tamma qabul al-talib binajah wa insha' bayanat al-talib.",
     "All": "Al-kull",
@@ -410,5 +410,10 @@
     "Internal Students": "Al-Tullab Al-Dakhiliyun",
     "Internal Student": "Talib Dakhili",
     "External Students": "Al-Tullab Al-Kharijiyun",
-    "External Student": "Talib Khariji"
+    "External Student": "Talib Khariji",
+    "Manage Schools": "Idarat Al-Madaris",
+    "School": "Madrasa",
+    "Add School": "Idafat Madrasa",
+    "School Data": "Bayanat Al-Madrasa",
+    "School Code / Username": "Ramz Al-Madrasa / Ism Al-Mustakhdim"
 }

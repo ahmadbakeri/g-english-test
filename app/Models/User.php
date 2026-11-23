@@ -87,6 +87,11 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         return $this->hasOne(Student::class);
     }
 
+    public function schoolStudents(): HasMany
+    {
+        return $this->hasMany(Student::class, 'school_user_id');
+    }
+
     public function children(): BelongsToMany
     {
         return $this->belongsToMany(Student::class, 'student_parent');

@@ -410,5 +410,10 @@
     "Internal Students": "الطلاب الداخليون",
     "Internal Student": "طالب داخلي",
     "External Students": "الطلاب الخارجيون",
-    "External Student": "طالب خارجي"
+    "External Student": "طالب خارجي",
+    "Manage Schools": "إدارة المدارس",
+    "School": "مدرسة",
+    "Add School": "إضافة مدرسة",
+    "School Data": "بيانات المدرسة",
+    "School Code / Username": "رمز المدرسة / اسم المستخدم"
 }
