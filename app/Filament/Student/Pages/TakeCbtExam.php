@@ -219,6 +219,8 @@ class TakeCbtExam extends Page
             'max_violations' => 3,
             'sync_status' => 'internal',
         ]);
+
+        $this->redirect(static::getUrl(['record' => $this->record]), navigate: false);
     }
 
     public function recordViolation(string $reason = 'tab_switch'): array
