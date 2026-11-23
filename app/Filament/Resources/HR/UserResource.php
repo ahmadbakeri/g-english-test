@@ -19,17 +19,17 @@ class UserResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return 'Kelola Employee';
+        return __('Manage Employees');
     }
 
     public static function getModelLabel(): string
     {
-        return 'Employee';
+        return __('Employee');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return 'Kelola Employee';
+        return __('Manage Employees');
     }
 
     public static function getNavigationGroup(): ?string
