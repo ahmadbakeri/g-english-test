@@ -235,21 +235,18 @@
                                                                 </thead>
                                                                 <tbody>
                                                                     @foreach ($students as $i => $student)
-                                                                        <tr>
+                                                                        <tr wire:click="startInlineEdit({{ $student->id }})" style="cursor:pointer;" title="Klik baris untuk edit siswa">
                                                                             <td class="gx-mono">{{ $i + 1 }}</td>
                                                                             <td class="gx-mono">{{ $student->user?->username ?: ($student->competition_code ?: $student->nis) }}</td>
                                                                             <td class="gx-mono">{{ $student->nisn ?: '-' }}</td>
-                                                                            <td style="font-weight:700;">{{ $student->name }}</td>
+                                                                            <td style="font-weight:700;color:#0a4282;" class="dark:!text-sky-300">{{ $student->name }}</td>
                                                                             <td>
                                                                                 <div>{{ $student->parent_name ?: ($student->father_name ?: ($student->mother_name ?: '-')) }}</div>
                                                                                 <div class="gx-mono" style="color:#10b981;font-weight:600;">{{ $student->parent_phone ?: ($student->phone ?: '-') }}</div>
                                                                             </td>
-                                                                            <td style="text-align:right;white-space:nowrap;">
-                                                                                <button type="button" wire:click="startInlineEdit({{ $student->id }})" class="gx-btn gx-btn-edit">
-                                                                                    {{ $editingStudentId === $student->id ? 'Tutup' : 'Edit' }}
-                                                                                </button>
+                                                                            <td style="text-align:right;white-space:nowrap;" onclick="event.stopPropagation()">
                                                                                 <a href="{{ route('report.brain-champion-card', $student->id) }}" target="_blank" class="gx-btn gx-btn-card">Kartu</a>
-                                                                                <button type="button" wire:click="deleteStudent({{ $student->id }})" wire:confirm="Hapus siswa {{ $student->name }}?" class="gx-btn gx-btn-del">Hapus</button>
+                                                                                <button type="button" wire:click.stop="deleteStudent({{ $student->id }})" wire:confirm="Hapus siswa {{ $student->name }}?" class="gx-btn gx-btn-del">Hapus</button>
                                                                             </td>
                                                                         </tr>
                                                                         @if ($editingStudentId === $student->id)
@@ -267,19 +264,18 @@
                                                         <div class="gx-mobile-list">
                                                             @foreach ($students as $i => $student)
                                                                 <div class="gx-m-card">
-                                                                    <div class="gx-kv"><span class="gx-kv-k">No</span><span class="gx-kv-v gx-mono">{{ $i + 1 }}</span></div>
-                                                                    <div class="gx-kv"><span class="gx-kv-k">Username / Kode</span><span class="gx-kv-v gx-mono">{{ $student->user?->username ?: ($student->competition_code ?: $student->nis) }}</span></div>
-                                                                    <div class="gx-kv"><span class="gx-kv-k">Nama</span><span class="gx-kv-v">{{ $student->name }}</span></div>
-                                                                    <div class="gx-kv"><span class="gx-kv-k">NISN</span><span class="gx-kv-v gx-mono">{{ $student->nisn ?: '-' }}</span></div>
-                                                                    <div class="gx-kv"><span class="gx-kv-k">Orang Tua</span><span class="gx-kv-v">{{ $student->parent_name ?: ($student->father_name ?: ($student->mother_name ?: '-')) }}</span></div>
-                                                                    <div class="gx-kv" style="border-bottom:none;"><span class="gx-kv-k">No. HP / WA</span><span class="gx-kv-v gx-mono" style="color:#10b981;">{{ $student->parent_phone ?: ($student->phone ?: '-') }}</span></div>
+                                                                    <div wire:click="startInlineEdit({{ $student->id }})" style="cursor:pointer;">
+                                                                        <div class="gx-kv"><span class="gx-kv-k">No</span><span class="gx-kv-v gx-mono">{{ $i + 1 }}</span></div>
+                                                                        <div class="gx-kv"><span class="gx-kv-k">Username / Kode</span><span class="gx-kv-v gx-mono">{{ $student->user?->username ?: ($student->competition_code ?: $student->nis) }}</span></div>
+                                                                        <div class="gx-kv"><span class="gx-kv-k">Nama</span><span class="gx-kv-v" style="color:#0a4282;font-weight:700;">{{ $student->name }}</span></div>
+                                                                        <div class="gx-kv"><span class="gx-kv-k">NISN</span><span class="gx-kv-v gx-mono">{{ $student->nisn ?: '-' }}</span></div>
+                                                                        <div class="gx-kv"><span class="gx-kv-k">Orang Tua</span><span class="gx-kv-v">{{ $student->parent_name ?: ($student->father_name ?: ($student->mother_name ?: '-')) }}</span></div>
+                                                                        <div class="gx-kv" style="border-bottom:none;"><span class="gx-kv-k">No. HP / WA</span><span class="gx-kv-v gx-mono" style="color:#10b981;">{{ $student->parent_phone ?: ($student->phone ?: '-') }}</span></div>
+                                                                    </div>
 
                                                                     <div class="gx-m-actions">
-                                                                        <button type="button" wire:click="startInlineEdit({{ $student->id }})" class="gx-btn gx-btn-edit">
-                                                                            {{ $editingStudentId === $student->id ? 'Tutup' : 'Edit' }}
-                                                                        </button>
                                                                         <a href="{{ route('report.brain-champion-card', $student->id) }}" target="_blank" class="gx-btn gx-btn-card">Kartu</a>
-                                                                        <button type="button" wire:click="deleteStudent({{ $student->id }})" wire:confirm="Hapus siswa {{ $student->name }}?" class="gx-btn gx-btn-del">Hapus</button>
+                                                                        <button type="button" wire:click.stop="deleteStudent({{ $student->id }})" wire:confirm="Hapus siswa {{ $student->name }}?" class="gx-btn gx-btn-del">Hapus</button>
                                                                     </div>
 
                                                                     @if ($editingStudentId === $student->id)
