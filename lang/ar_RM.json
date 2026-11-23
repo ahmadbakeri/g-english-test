@@ -406,5 +406,9 @@
     "Coordinator Phone": "Hatif al-munassiq",
     "No participating schools yet.": "La tujad madaris musharikah ba'd.",
     "Total": "Al-ijmali",
-    "Search": "Bahth"
+    "Search": "Bahth",
+    "Internal Students": "Al-Tullab Al-Dakhiliyun",
+    "Internal Student": "Talib Dakhili",
+    "External Students": "Al-Tullab Al-Kharijiyun",
+    "External Student": "Talib Khariji"
 }

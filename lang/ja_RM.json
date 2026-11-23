@@ -406,5 +406,9 @@
     "Coordinator Phone": "Insotsu kyōin renrakusaki",
     "No participating schools yet.": "Sankakō wa mada arimasen.",
     "Total": "Gōkei",
-    "Search": "Kensaku"
+    "Search": "Kensaku",
+    "Internal Students": "Naibu Seito",
+    "Internal Student": "Naibu Seito",
+    "External Students": "Gaibu Seito",
+    "External Student": "Gaibu Seito"
 }

@@ -130,13 +130,14 @@ class StudentPaymentResource extends Resource
                         'unpaid' => 'Belum Lunas',
                         'paid' => 'Lunas',
                         default => $state,
-                    }),
+                    })
+                    ->description(fn (StudentPayment $record): ?string => $record->paid_at ? $record->paid_at->format('d M Y') : null),
                 TextColumn::make('paid_at')
                     ->label(__('Payment Date'))
                     ->dateTime('d M Y, H:i')
                     ->placeholder('-')
                     ->sortable()
-                    ->toggleable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 \Filament\Tables\Filters\SelectFilter::make('status')
@@ -148,8 +149,8 @@ class StudentPaymentResource extends Resource
                     ->searchable(),
             ])
             ->recordActions([
+                EditAction::make()->button()->size('sm'),
                 ActionGroup::make([
-                    EditAction::make(),
                     \Filament\Actions\Action::make('pay')
                         ->label(__('Set as Paid'))
                         ->icon('heroicon-o-check-circle')

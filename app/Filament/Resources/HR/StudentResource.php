@@ -21,9 +21,9 @@ class StudentResource extends Resource
 
     protected static ?string $model = Student::class;
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-user-group';
-    public static function getNavigationLabel(): string { return __('Student Management'); }
-    public static function getModelLabel(): string { return __('Student'); }
-    public static function getPluralModelLabel(): string { return __('Student'); }
+    public static function getNavigationLabel(): string { return __('Internal Students'); }
+    public static function getModelLabel(): string { return __('Internal Student'); }
+    public static function getPluralModelLabel(): string { return __('Internal Students'); }
     public static function getNavigationGroup(): ?string
     {
         return __('Academic');
@@ -326,86 +326,13 @@ class StudentResource extends Resource
                     ->label(__('Active Status')),
             ])
             ->actions([
+                \Filament\Actions\EditAction::make()
+                    ->button()
+                    ->size('sm')
+                    ->slideOver()
+                    ->modalWidth('4xl'),
                 \Filament\Actions\ActionGroup::make([
                     \Filament\Actions\ViewAction::make()->slideOver()->modalWidth('4xl'),
-                    \Filament\Actions\EditAction::make()->slideOver()->modalWidth('4xl'),
-                    \Filament\Actions\Action::make('brain_champion_card')
-                        ->label('Cetak Kartu Peserta')
-                        ->icon('heroicon-o-identification')
-                        ->color('warning')
-                        ->visible(fn (Student $record): bool => $record->course_level === 'G-English Brain Champion' || !empty($record->competition_code))
-                        ->url(fn (Student $record): string => route('report.brain-champion-card', $record->id))
-                        ->openUrlInNewTab(),
-                    \Filament\Actions\Action::make('resend_school_credentials')
-                        ->label('Kirim Ulang Akun Sekolah (Email)')
-                        ->icon('heroicon-o-envelope')
-                        ->color('info')
-                        ->visible(fn (Student $record): bool => !empty($record->school_user_id) || $record->course_level === 'G-English Brain Champion')
-                        ->form(function (Student $record): array {
-                            $schoolUser = $record->school_user_id ? \App\Models\User::find($record->school_user_id) : null;
-                            return [
-                                Forms\Components\TextInput::make('email')
-                                    ->label('Email Tujuan Koordinator Sekolah')
-                                    ->email()
-                                    ->default($schoolUser?->email)
-                                    ->required(),
-                                Forms\Components\TextInput::make('new_password')
-                                    ->label('Password / PIN Baru')
-                                    ->default(\Illuminate\Support\Str::upper(\Illuminate\Support\Str::random(6)))
-                                    ->required()
-                                    ->helperText('Password akun sekolah akan direset ke PIN ini dan dikirimkan via email.'),
-                            ];
-                        })
-                        ->action(function (Student $record, array $data): void {
-                            $schoolUser = $record->school_user_id
-                                ? \App\Models\User::find($record->school_user_id)
-                                : \App\Models\User::where('role', 'school')->where('name', $record->school_name)->first();
-
-                            if (!$schoolUser) {
-                                $username = $record->parent_phone ?: ('SCH' . rand(10000, 99999));
-                                $schoolUser = \App\Models\User::create([
-                                    'username' => $username,
-                                    'name' => $record->school_name ?: 'Sekolah Peserta',
-                                    'email' => strtolower(trim((string) $data['email'])),
-                                    'password' => \Illuminate\Support\Facades\Hash::make($data['new_password']),
-                                    'role' => 'school',
-                                ]);
-                                $record->update(['school_user_id' => $schoolUser->id]);
-                            } else {
-                                $schoolUser->update([
-                                    'email' => strtolower(trim((string) $data['email'])),
-                                    'password' => \Illuminate\Support\Facades\Hash::make($data['new_password']),
-                                ]);
-                            }
-
-                            $participants = Student::where('school_user_id', $schoolUser->id)
-                                ->where('course_level', 'G-English Brain Champion')
-                                ->get()
-                                ->map(fn (Student $s) => [
-                                    'competition_code' => $s->competition_code ?: $s->nis,
-                                    'nisn' => $s->nisn,
-                                    'name' => $s->name,
-                                    'class_name' => $s->class_name,
-                                    'gender' => $s->gender,
-                                ])
-                                ->toArray();
-
-                            \Illuminate\Support\Facades\Mail::to($schoolUser->email)->queue(
-                                new \App\Mail\SchoolAccountCredentialsMail(
-                                    schoolName: $schoolUser->name,
-                                    coordinatorName: $record->parent_name ?: 'Koordinator Sekolah',
-                                    loginUrl: url('/login'),
-                                    username: (string) $schoolUser->username,
-                                    plainPassword: (string) $data['new_password'],
-                                    participants: $participants,
-                                )
-                            );
-
-                            \Filament\Notifications\Notification::make()
-                                ->title("Email akun sekolah berhasil dikirim ke {$schoolUser->email}")
-                                ->success()
-                                ->send();
-                        }),
                     \Filament\Actions\Action::make('certificate')
                         ->label(__('Certificate'))
                         ->icon('heroicon-o-academic-cap')
@@ -432,7 +359,9 @@ class StudentResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->with(['user', 'classes', 'parents']);
+        return parent::getEloquentQuery()
+            ->where(fn (Builder $q) => $q->where('student_type', 'internal')->orWhereNull('student_type'))
+            ->with(['user', 'classes', 'parents']);
     }
 
     public static function getPages(): array

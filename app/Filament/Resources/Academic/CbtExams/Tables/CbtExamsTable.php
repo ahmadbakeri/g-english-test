@@ -22,10 +22,12 @@ class CbtExamsTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->recordAction('edit')
             ->columns([
                 \Filament\Tables\Columns\TextColumn::make('title')
                     ->label('Judul Ujian')
                     ->weight('bold')
+                    ->color('primary')
                     ->description(fn (CbtExam $record): string => ($record->classRoom?->name ?? '-') . ' • ' . ($record->subject?->name ?? '-'))
                     ->searchable()
                     ->sortable(),
@@ -33,33 +35,28 @@ class CbtExamsTable
                     ->label('Mode')
                     ->badge()
                     ->color(fn (?string $state): string => $state === 'internal_excel' ? 'primary' : 'info')
-                    ->formatStateUsing(fn (?string $state): string => $state === 'internal_excel' ? 'Real CBT (Excel)' : 'Google Form'),
-                \Filament\Tables\Columns\TextColumn::make('classRoom.name')
-                    ->label('Kelas')
-                    ->searchable()
-                    ->sortable(),
-                \Filament\Tables\Columns\TextColumn::make('subject.name')
-                    ->label('Mata Pelajaran')
-                    ->badge()
-                    ->color('info')
-                    ->searchable()
-                    ->sortable(),
+                    ->formatStateUsing(fn (?string $state): string => $state === 'internal_excel' ? 'Real CBT' : 'Google Form'),
                 \Filament\Tables\Columns\TextColumn::make('duration_minutes')
                     ->label('Durasi')
                     ->numeric()
-                    ->suffix(' Menit')
+                    ->suffix(' Min')
                     ->alignEnd()
                     ->sortable(),
                 \Filament\Tables\Columns\ToggleColumn::make('is_active')
                     ->label('Aktif'),
+                \Filament\Tables\Columns\TextColumn::make('classRoom.name')
+                    ->label('Kelas')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                \Filament\Tables\Columns\TextColumn::make('subject.name')
+                    ->label('Mata Pelajaran')
+                    ->badge()
+                    ->color('info')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 \Filament\Tables\Columns\TextColumn::make('last_synced_at')
                     ->label('Last Synced')
                     ->dateTime('d M Y H:i')
                     ->placeholder('-')
-                    ->toggleable(isToggledHiddenByDefault: true),
-                \Filament\Tables\Columns\TextColumn::make('start_time')
-                    ->dateTime()
-                    ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
@@ -71,9 +68,9 @@ class CbtExamsTable
                     ]),
             ])
             ->recordActions([
+                EditAction::make()->button()->size('sm'),
                 ActionGroup::make([
                     ViewAction::make(),
-                    EditAction::make(),
                     Action::make('sync_gform')
                         ->label('Sync Nilai GForm')
                         ->icon('heroicon-o-arrow-path')

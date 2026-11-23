@@ -406,5 +406,9 @@
     "Coordinator Phone": "هاتف المنسق",
     "No participating schools yet.": "لا توجد مدارس مشاركة بعد.",
     "Total": "الإجمالي",
-    "Search": "بحث"
+    "Search": "بحث",
+    "Internal Students": "الطلاب الداخليون",
+    "Internal Student": "طالب داخلي",
+    "External Students": "الطلاب الخارجيون",
+    "External Student": "طالب خارجي"
 }

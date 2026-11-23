@@ -127,10 +127,13 @@ class CbtAttemptResource extends Resource
             ->columns([
                 TextColumn::make('exam.title')
                     ->label('Ujian')
+                    ->weight('bold')
+                    ->description(fn (\App\Models\CbtAttempt $record): string => $record->start_time ? 'Mulai: ' . $record->start_time->format('d M H:i') : '-')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('student.name')
                     ->label('Siswa')
+                    ->description(fn (\App\Models\CbtAttempt $record): string => $record->student?->nis ?? '-')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('status')
@@ -138,31 +141,25 @@ class CbtAttemptResource extends Resource
                     ->color(fn (string $state): string => match ($state) {
                         'in_progress' => 'warning',
                         'finished' => 'success',
+                        'locked' => 'danger',
                         default => 'gray',
-                    }),
+                    })
+                    ->description(fn (\App\Models\CbtAttempt $record): string => 'Pelanggaran: ' . ($record->violation_count ?? 0) . '/' . ($record->max_violations ?? 3)),
                 TextColumn::make('score')
                     ->label('Skor')
                     ->numeric()
+                    ->placeholder('-')
+                    ->weight('bold')
+                    ->alignEnd()
                     ->sortable(),
                 IconColumn::make('is_completed')
                     ->label('Selesai?')
-                    ->boolean(),
+                    ->boolean()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('violation_count')
                     ->label('Pelanggaran')
                     ->numeric()
-                    ->sortable()
-                    ->color(fn (string $state): string => $state > 0 ? 'danger' : 'gray'),
-                IconColumn::make('is_force_submitted')
-                    ->label('Disubmit Paksa')
-                    ->boolean(),
-                TextColumn::make('start_time')
-                    ->label('Waktu Mulai')
-                    ->dateTime('d M Y H:i')
-                    ->sortable(),
-                TextColumn::make('end_time')
-                    ->label('Waktu Selesai')
-                    ->dateTime('d M Y H:i')
-                    ->sortable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 \Filament\Tables\Filters\SelectFilter::make('cbt_exam_id')
@@ -181,6 +178,8 @@ class CbtAttemptResource extends Resource
             ->recordActions([
                 \Filament\Actions\Action::make('unlock')
                     ->label('Buka Kunci')
+                    ->button()
+                    ->size('sm')
                     ->icon('heroicon-o-lock-open')
                     ->color('warning')
                     ->form([
