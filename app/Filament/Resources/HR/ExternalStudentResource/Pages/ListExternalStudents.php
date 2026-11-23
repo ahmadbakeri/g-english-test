@@ -3,43 +3,217 @@
 namespace App\Filament\Resources\HR\ExternalStudentResource\Pages;
 
 use App\Filament\Resources\HR\ExternalStudentResource;
+use App\Livewire\BrainChampionRegistration;
 use App\Models\Student;
 use App\Support\SchoolAgencyClassifier;
 use Filament\Actions;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Schemas\Components\Tabs\Tab;
-use Illuminate\Database\Eloquent\Builder;
 
 class ListExternalStudents extends ListRecords
 {
     protected static string $resource = ExternalStudentResource::class;
 
-    public function getTabs(): array
+    protected string $view = 'filament.admin.pages.external-students-hierarchy';
+
+    public string $search = '';
+
+    /** @var array<int, string> */
+    public array $openLevels = [];
+
+    /** @var array<int, string> */
+    public array $openSchools = [];
+
+    /** @var array<int, string> */
+    public array $openClasses = [];
+
+    public ?int $editingStudentId = null;
+
+    /** @var array<string, mixed> */
+    public array $editForm = [];
+
+    public function toggleLevel(string $level): void
     {
-        $levels = ['SD', 'MI', 'SMP', 'MTs'];
+        if (in_array($level, $this->openLevels, true)) {
+            $this->openLevels = array_values(array_diff($this->openLevels, [$level]));
+        } else {
+            $this->openLevels[] = $level;
+        }
+    }
+
+    public function toggleSchool(string $schoolKey): void
+    {
+        if (in_array($schoolKey, $this->openSchools, true)) {
+            $this->openSchools = array_values(array_diff($this->openSchools, [$schoolKey]));
+        } else {
+            $this->openSchools[] = $schoolKey;
+        }
+    }
+
+    public function toggleClass(string $classKey): void
+    {
+        if (in_array($classKey, $this->openClasses, true)) {
+            $this->openClasses = array_values(array_diff($this->openClasses, [$classKey]));
+        } else {
+            $this->openClasses[] = $classKey;
+        }
+    }
+
+    public function startInlineEdit(int $studentId): void
+    {
+        if ($this->editingStudentId === $studentId) {
+            $this->cancelInlineEdit();
+            return;
+        }
+
+        $student = Student::where('student_type', 'external')->find($studentId);
+        if (!$student) {
+            return;
+        }
+
+        $this->editingStudentId = $student->id;
+        $this->editForm = [
+            'name' => (string) $student->name,
+            'nisn' => (string) ($student->nisn ?? ''),
+            'class_name' => (string) ($student->class_name ?: 'Kelas 4'),
+            'school_name' => (string) ($student->school_name ?? ''),
+            'gender' => (string) ($student->gender ?: 'L'),
+            'phone' => (string) ($student->phone ?? ''),
+            'parent_name' => (string) ($student->parent_name ?? ''),
+            'parent_phone' => (string) ($student->parent_phone ?? ''),
+            'is_active' => (bool) $student->is_active,
+        ];
+    }
+
+    public function cancelInlineEdit(): void
+    {
+        $this->editingStudentId = null;
+        $this->editForm = [];
+    }
+
+    public function saveInlineEdit(): void
+    {
+        if (!$this->editingStudentId) {
+            return;
+        }
+
+        $student = Student::where('student_type', 'external')->find($this->editingStudentId);
+        if (!$student) {
+            $this->cancelInlineEdit();
+            return;
+        }
+
+        $student->update([
+            'name' => trim((string) ($this->editForm['name'] ?? $student->name)),
+            'nisn' => trim((string) ($this->editForm['nisn'] ?? '')) ?: null,
+            'class_name' => trim((string) ($this->editForm['class_name'] ?? $student->class_name)),
+            'school_name' => trim((string) ($this->editForm['school_name'] ?? '')) ?: null,
+            'gender' => (string) ($this->editForm['gender'] ?? 'L'),
+            'phone' => trim((string) ($this->editForm['phone'] ?? '')) ?: null,
+            'parent_name' => trim((string) ($this->editForm['parent_name'] ?? '')) ?: null,
+            'parent_phone' => trim((string) ($this->editForm['parent_phone'] ?? '')) ?: null,
+            'is_active' => (bool) ($this->editForm['is_active'] ?? true),
+        ]);
+
+        Notification::make()
+            ->title('Data siswa diperbarui')
+            ->success()
+            ->send();
+
+        $this->cancelInlineEdit();
+    }
+
+    public function deleteStudent(int $studentId): void
+    {
+        $student = Student::where('student_type', 'external')->find($studentId);
+        if ($student) {
+            $student->delete();
+            Notification::make()
+                ->title('Siswa dihapus')
+                ->success()
+                ->send();
+        }
+        if ($this->editingStudentId === $studentId) {
+            $this->cancelInlineEdit();
+        }
+    }
+
+    public function getHierarchyProperty(): array
+    {
+        $needle = mb_strtolower(trim($this->search));
+
         $students = Student::query()
-            ->select(['id', 'school_name', 'education_level', 'class_name'])
+            ->with(['user:id,username', 'schoolUser:id,username,name'])
             ->where('student_type', 'external')
+            ->orderBy('school_name')
+            ->orderBy('class_name')
+            ->orderBy('name')
             ->get();
 
-        $counts = ['SD' => 0, 'MI' => 0, 'SMP' => 0, 'MTs' => 0];
-        foreach ($students as $student) {
-            $lvl = SchoolAgencyClassifier::classifyLevel($student->school_name, $student->education_level, $student->class_name);
-            $counts[$lvl] = ($counts[$lvl] ?? 0) + 1;
+        if ($needle !== '') {
+            $students = $students->filter(function (Student $s) use ($needle): bool {
+                $haystack = implode(' ', [
+                    $s->name,
+                    $s->nis,
+                    $s->nisn,
+                    $s->competition_code,
+                    $s->school_name,
+                    $s->class_name,
+                    $s->user?->username,
+                    $s->schoolUser?->username,
+                ]);
+                return str_contains(mb_strtolower($haystack), $needle);
+            });
         }
 
-        $tabs = [
-            'all' => Tab::make('Semua')
-                ->badge($students->count()),
+        $levels = [
+            'SD' => ['schools' => [], 'schoolCount' => 0, 'studentCount' => 0],
+            'MI' => ['schools' => [], 'schoolCount' => 0, 'studentCount' => 0],
+            'SMP' => ['schools' => [], 'schoolCount' => 0, 'studentCount' => 0],
+            'MTs' => ['schools' => [], 'schoolCount' => 0, 'studentCount' => 0],
         ];
 
-        foreach ($levels as $lvl) {
-            $tabs[$lvl] = Tab::make($lvl)
-                ->badge($counts[$lvl] ?? 0)
-                ->modifyQueryUsing(fn (Builder $query): Builder => $query->whereIn('id', SchoolAgencyClassifier::externalStudentIdsForLevel($lvl) ?: [0]));
+        $schoolKeysSeen = [];
+
+        foreach ($students as $student) {
+            $level = SchoolAgencyClassifier::classifyLevel($student->school_name, $student->education_level, $student->class_name);
+            $schoolName = trim((string) $student->school_name) ?: 'Tanpa Sekolah';
+            $schoolKey = BrainChampionRegistration::normalizeSchoolName($schoolName) ?: 'tanpa-sekolah';
+            $className = trim((string) $student->class_name) ?: 'Tanpa Kelas';
+
+            if (!isset($levels[$level]['schools'][$schoolKey])) {
+                $levels[$level]['schools'][$schoolKey] = [
+                    'key' => $schoolKey,
+                    'name' => $schoolName,
+                    'username' => $student->schoolUser?->username,
+                    'studentCount' => 0,
+                    'classes' => [],
+                ];
+                $schoolKeysSeen[$level . '::' . $schoolKey] = true;
+            }
+
+            if (!$levels[$level]['schools'][$schoolKey]['username'] && $student->schoolUser?->username) {
+                $levels[$level]['schools'][$schoolKey]['username'] = $student->schoolUser->username;
+            }
+
+            $levels[$level]['schools'][$schoolKey]['classes'][$className][] = $student;
+            $levels[$level]['schools'][$schoolKey]['studentCount']++;
+            $levels[$level]['studentCount']++;
         }
 
-        return $tabs;
+        foreach ($levels as $lvl => &$lvlData) {
+            foreach ($lvlData['schools'] as &$sch) {
+                ksort($sch['classes'], SORT_NATURAL);
+            }
+            $lvlData['schools'] = array_values($lvlData['schools']);
+            $lvlData['schoolCount'] = count($lvlData['schools']);
+        }
+
+        return [
+            'levels' => $levels,
+            'totalStudents' => $students->count(),
+            'totalSchools' => count($schoolKeysSeen),
+        ];
     }
 
     protected function getHeaderActions(): array
@@ -96,7 +270,7 @@ class ListExternalStudents extends ListRecords
                         $summary .= " Dilewati: {$importer->skippedCount} baris.";
                     }
 
-                    \Filament\Notifications\Notification::make()
+                    Notification::make()
                         ->title('Import Excel Brain Champion Selesai')
                         ->body($summary)
                         ->success()

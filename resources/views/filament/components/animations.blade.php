@@ -900,68 +900,78 @@
         }
         .fi-ta-table tr.fi-ta-row {
             display: flex !important;
-            flex-direction: row !important;
-            flex-wrap: wrap !important;
-            align-items: center !important;
-            gap: 0.35rem 0.6rem !important;
+            flex-direction: column !important;
+            gap: 0 !important;
             width: 100% !important;
-            padding: 0.75rem 0.85rem !important;
-            margin-bottom: 0.6rem !important;
+            padding: 0.55rem 0.85rem !important;
+            margin-bottom: 0.65rem !important;
             border-radius: 0.95rem !important;
-            border: 1px solid rgba(15, 23, 42, 0.08) !important;
+            border: 1px solid rgba(15, 23, 42, 0.09) !important;
             background-color: #ffffff !important;
             box-shadow: 0 2px 6px -1px rgba(15, 23, 42, 0.05) !important;
         }
         .dark .fi-ta-table tr.fi-ta-row {
             border-color: rgba(255, 255, 255, 0.1) !important;
-            background-color: rgba(30, 41, 59, 0.7) !important;
+            background-color: rgba(30, 41, 59, 0.72) !important;
         }
         .fi-ta-table tr.fi-ta-row td,
         .fi-ta-table tr.fi-ta-row td.fi-ta-cell {
-            display: block !important;
-            flex: 1 1 44% !important;
-            min-width: 0 !important;
-            width: auto !important;
-            padding: 0.1rem 0 !important;
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            gap: 0.75rem !important;
+            width: 100% !important;
+            padding: 0.42rem 0 !important;
             border: none !important;
+            border-bottom: 1px dashed rgba(15, 23, 42, 0.08) !important;
             border-radius: 0 !important;
-            text-align: left !important;
+            text-align: right !important;
             white-space: normal !important;
+        }
+        .dark .fi-ta-table tr.fi-ta-row td,
+        .dark .fi-ta-table tr.fi-ta-row td.fi-ta-cell {
+            border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+        }
+        .fi-ta-table tr.fi-ta-row td[data-label]::before {
+            content: attr(data-label);
+            font-size: 0.75rem !important;
+            font-weight: 600 !important;
+            color: #64748b !important;
+            text-align: left !important;
+            flex-shrink: 0 !important;
+            max-width: 42%;
+        }
+        .dark .fi-ta-table tr.fi-ta-row td[data-label]::before {
+            color: #94a3b8 !important;
+        }
+        .fi-ta-table tr.fi-ta-row td[data-label=""]::before,
+        .fi-ta-table tr.fi-ta-row td.fi-ta-selection-cell::before,
+        .fi-ta-table tr.fi-ta-row td.fi-ta-actions-cell::before,
+        .fi-ta-table tr.fi-ta-row td:last-child:has(.fi-ta-actions)::before {
+            display: none !important;
         }
         .fi-ta-table tr.fi-ta-row td .fi-ta-col-wrp {
             padding: 0 !important;
+            text-align: right !important;
+        }
+        .fi-ta-table tr.fi-ta-row td .fi-ta-text,
+        .fi-ta-table tr.fi-ta-row td .fi-ta-text-item {
+            text-align: right !important;
+            justify-content: flex-end !important;
         }
         .fi-ta-table tr.fi-ta-row td.fi-ta-selection-cell {
-            flex: 0 0 auto !important;
-            width: auto !important;
-            padding: 0 !important;
-        }
-        .fi-ta-table tr.fi-ta-row td:has(.fi-ta-image),
-        .fi-ta-table tr.fi-ta-row td:has(img.rounded-full) {
-            flex: 0 0 auto !important;
-            width: auto !important;
-        }
-        .fi-ta-table tr.fi-ta-row td:has(.fi-ta-icon) {
-            flex: 0 0 auto !important;
-            width: auto !important;
-        }
-        .fi-ta-table tr.fi-ta-row td:has(.fi-ta-icon) .fi-ta-icon {
             justify-content: flex-start !important;
+            padding-bottom: 0.35rem !important;
         }
         .fi-ta-table tr.fi-ta-row td.fi-ta-actions-cell,
         .fi-ta-table tr.fi-ta-row td:last-child:has(.fi-ta-actions) {
             display: flex !important;
             justify-content: flex-end !important;
             align-items: center !important;
-            flex: 1 0 100% !important;
             width: 100% !important;
-            padding-top: 0.45rem !important;
-            margin-top: 0.25rem !important;
-            border-top: 1px solid rgba(15, 23, 42, 0.07) !important;
-        }
-        .dark .fi-ta-table tr.fi-ta-row td.fi-ta-actions-cell,
-        .dark .fi-ta-table tr.fi-ta-row td:last-child:has(.fi-ta-actions) {
-            border-top-color: rgba(255, 255, 255, 0.08) !important;
+            padding-top: 0.5rem !important;
+            padding-bottom: 0.1rem !important;
+            border-bottom: none !important;
         }
         .fi-ta-table tr.fi-ta-group-header-row {
             display: block !important;
@@ -1000,7 +1010,37 @@
 </div>
 
 <script>
+    function hydrateFilamentTableLabels() {
+        document.querySelectorAll('.fi-ta-table').forEach((table) => {
+            const headers = Array.from(table.querySelectorAll('thead tr th')).map((th) =>
+                (th.innerText || '').replace(/\s+/g, ' ').trim()
+            );
+            if (!headers.length) return;
+            table.querySelectorAll('tbody tr.fi-ta-row').forEach((row) => {
+                const cells = Array.from(row.children).filter((el) => el.tagName === 'TD');
+                cells.forEach((td, idx) => {
+                    if (td.classList.contains('fi-ta-selection-cell') || td.classList.contains('fi-ta-actions-cell')) {
+                        return;
+                    }
+                    const label = headers[idx] || '';
+                    if (label) {
+                        td.setAttribute('data-label', label);
+                    }
+                });
+            });
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', hydrateFilamentTableLabels);
+    document.addEventListener('livewire:navigated', hydrateFilamentTableLabels);
+
     document.addEventListener('livewire:init', () => {
+        hydrateFilamentTableLabels();
+        if (window.Livewire && typeof Livewire.hook === 'function') {
+            Livewire.hook('commit', ({ succeed }) => {
+                succeed(() => queueMicrotask(hydrateFilamentTableLabels));
+            });
+        }
         Livewire.on('language-changed', (event) => {
             const locale = event[0]?.locale || event.locale || 'en';
             const overlay = document.getElementById('lang-switch-overlay');
