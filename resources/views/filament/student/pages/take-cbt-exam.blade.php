@@ -472,102 +472,123 @@
         {{-- MODE A: GOOGLE FORM (True Element Fullscreen + Timer)      --}}
         {{-- ========================================================= --}}
         @elseif($mode === 'google_form')
-            <div x-ref="examShell"
-                 wire:ignore
-                 class="cbt-fullscreen-shell"
-                 x-data="{
-                    endTime: new Date('{{ $endTimeIso }}').getTime(),
-                    timeLeft: '00:00:00',
-                    isTimeUp: false,
-                    submitting: false,
-                    timerId: null,
-                    inFullscreen: false,
-                    hasEnteredFullscreen: false,
-                    violationCount: {{ (int) ($attempt->violation_count ?? 0) }},
-                    maxViolations: {{ (int) ($attempt->max_violations ?? 3) }},
-                    lastViolationAt: 0,
-                    violationWarning: '',
-                    showSubmitModal: false,
-                    gformLoadCount: 0,
-                    gformSubmitted: false,
-                    init() {
-                        this.inFullscreen = (document.fullscreenElement === this.$refs.examShell);
-                        this.tick();
-                        this.timerId = setInterval(() => this.tick(), 1000);
-                        this.bindAntiCheat();
-                    },
-                    onGformLoad() {
-                        this.gformLoadCount++;
-                        if (this.gformLoadCount >= 2) {
-                            this.gformSubmitted = true;
-                        }
-                    },
-                    enterFullscreen() {
-                        const el = this.$refs.examShell;
-                        if (el && el.requestFullscreen) {
-                            el.requestFullscreen().then(() => {
+            @php
+                $gformConfig = [
+                    'endTimeIso' => $endTimeIso,
+                    'violationCount' => (int) ($attempt->violation_count ?? 0),
+                    'maxViolations' => (int) ($attempt->max_violations ?? 3),
+                ];
+            @endphp
+            <script id="cbt-gform-data-{{ $attempt->id }}" type="application/json">@json($gformConfig)</script>
+            <script>
+                window.cbtGformApp = window.cbtGformApp || function (configId, wire) {
+                    let cfg = {};
+                    try {
+                        cfg = JSON.parse(document.getElementById(configId)?.textContent || '{}');
+                    } catch (e) {}
+                    return {
+                        endTime: new Date(cfg.endTimeIso || Date.now()).getTime(),
+                        timeLeft: '00:00:00',
+                        isTimeUp: false,
+                        submitting: false,
+                        timerId: null,
+                        inFullscreen: false,
+                        hasEnteredFullscreen: false,
+                        violationCount: Number(cfg.violationCount || 0),
+                        maxViolations: Number(cfg.maxViolations || 3),
+                        lastViolationAt: 0,
+                        violationWarning: '',
+                        gformLoadCount: 0,
+                        gformSubmitted: false,
+                        init() {
+                            this.inFullscreen = (document.fullscreenElement === this.$refs.examShell);
+                            this.tick();
+                            this.timerId = setInterval(() => this.tick(), 1000);
+                            this.bindAntiCheat();
+                        },
+                        onGformLoad() {
+                            this.gformLoadCount++;
+                            if (this.gformLoadCount >= 2) {
+                                this.gformSubmitted = true;
+                            }
+                        },
+                        enterFullscreen() {
+                            const el = this.$refs.examShell;
+                            if (el && el.requestFullscreen) {
+                                el.requestFullscreen().then(() => {
+                                    this.inFullscreen = true;
+                                    this.hasEnteredFullscreen = true;
+                                }).catch(() => {
+                                    this.inFullscreen = true;
+                                    this.hasEnteredFullscreen = true;
+                                });
+                            } else {
                                 this.inFullscreen = true;
                                 this.hasEnteredFullscreen = true;
-                            }).catch(() => {});
-                        }
-                    },
-                    bindAntiCheat() {
-                        document.addEventListener('fullscreenchange', () => {
-                            this.inFullscreen = (document.fullscreenElement === this.$refs.examShell);
-                            if (this.hasEnteredFullscreen && !this.inFullscreen && !this.isTimeUp && !this.submitting) {
-                                this.triggerViolation('Keluar dari mode layar penuh');
                             }
-                        });
-                        document.addEventListener('visibilitychange', () => {
-                            if (document.hidden && this.hasEnteredFullscreen && !this.isTimeUp && !this.submitting) {
-                                this.triggerViolation('Pindah tab atau meminimalkan browser');
-                            }
-                        });
-                        window.addEventListener('blur', () => {
-                            if (this.hasEnteredFullscreen && !this.isTimeUp && !this.submitting && document.activeElement?.tagName !== 'IFRAME') {
-                                this.triggerViolation('Keluar dari jendela ujian');
-                            }
-                        });
-                    },
-                    triggerViolation(reason) {
-                        if (this.submitting || this.isTimeUp) return;
-                        const now = Date.now();
-                        if (now - this.lastViolationAt < 1500) return;
-                        this.lastViolationAt = now;
-                        $wire.recordViolation(reason).then((res) => {
-                            if (res) {
-                                this.violationCount = res.violation_count;
-                                this.maxViolations = res.max_violations;
-                                this.violationWarning = `Peringatan (${res.violation_count}/${res.max_violations}): ${reason}. Jika mencapai ${res.max_violations}x, ujian otomatis terkunci!`;
-                                if (res.locked && document.fullscreenElement) {
-                                    document.exitFullscreen().catch(() => {});
+                        },
+                        bindAntiCheat() {
+                            document.addEventListener('fullscreenchange', () => {
+                                this.inFullscreen = (document.fullscreenElement === this.$refs.examShell);
+                                if (this.hasEnteredFullscreen && !this.inFullscreen && !this.isTimeUp && !this.submitting) {
+                                    this.triggerViolation('Keluar dari mode layar penuh');
                                 }
+                            });
+                            document.addEventListener('visibilitychange', () => {
+                                if (document.hidden && this.hasEnteredFullscreen && !this.isTimeUp && !this.submitting) {
+                                    this.triggerViolation('Pindah tab atau meminimalkan browser');
+                                }
+                            });
+                            window.addEventListener('blur', () => {
+                                if (this.hasEnteredFullscreen && !this.isTimeUp && !this.submitting && document.activeElement?.tagName !== 'IFRAME') {
+                                    this.triggerViolation('Keluar dari jendela ujian');
+                                }
+                            });
+                        },
+                        triggerViolation(reason) {
+                            if (this.submitting || this.isTimeUp) return;
+                            const now = Date.now();
+                            if (now - this.lastViolationAt < 1500) return;
+                            this.lastViolationAt = now;
+                            wire.recordViolation(reason).then((res) => {
+                                if (res) {
+                                    this.violationCount = res.violation_count;
+                                    this.maxViolations = res.max_violations;
+                                    this.violationWarning = `Peringatan (${res.violation_count}/${res.max_violations}): ${reason}. Jika mencapai ${res.max_violations}x, ujian otomatis terkunci!`;
+                                    if (res.locked && document.fullscreenElement) {
+                                        document.exitFullscreen().catch(() => {});
+                                    }
+                                }
+                            });
+                        },
+                        finishExam() {
+                            if (this.submitting) return;
+                            this.submitting = true;
+                            if (document.fullscreenElement) {
+                                document.exitFullscreen().catch(() => {});
                             }
-                        });
-                    },
-                    finishExam() {
-                        if (this.submitting) return;
-                        this.submitting = true;
-                        if (document.fullscreenElement) {
-                            document.exitFullscreen().catch(() => {});
+                            wire.submitExam();
+                        },
+                        tick() {
+                            const distance = this.endTime - Date.now();
+                            if (distance <= 0) {
+                                this.timeLeft = '00:00:00';
+                                this.isTimeUp = true;
+                                if (this.timerId) clearInterval(this.timerId);
+                            } else {
+                                const h = Math.floor(distance / (1000 * 60 * 60));
+                                const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                                const s = Math.floor((distance % (1000 * 60)) / 1000);
+                                this.timeLeft = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+                            }
                         }
-                        $wire.submitExam();
-                    },
-                    tick() {
-                        const now = Date.now();
-                        const distance = this.endTime - now;
-                        if (distance <= 0) {
-                            this.timeLeft = '00:00:00';
-                            this.isTimeUp = true;
-                            if (this.timerId) clearInterval(this.timerId);
-                        } else {
-                            const h = Math.floor(distance / (1000 * 60 * 60));
-                            const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                            const s = Math.floor((distance % (1000 * 60)) / 1000);
-                            this.timeLeft = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
-                        }
-                    }
-                }">
+                    };
+                };
+            </script>
+            <div x-ref="examShell"
+                 wire:key="cbt-gform-shell-{{ $attempt->id }}"
+                 class="cbt-fullscreen-shell"
+                 x-data="window.cbtGformApp('cbt-gform-data-{{ $attempt->id }}', $wire)">
                 <!-- Fullscreen Gate Overlay -->
                 <div x-show="!inFullscreen && !submitting" class="cbt-modal-backdrop">
                     <div class="cbt-modal-card" style="border-color: rgba(251, 185, 0, 0.55);">
@@ -681,169 +702,196 @@
         {{-- MODE B: INTERNAL EXCEL - ACTIVE EXAM (TRUE FULLSCREEN)    --}}
         {{-- ========================================================= --}}
         @else
-            <div x-ref="examShell"
-                 wire:ignore
-                 class="cbt-fullscreen-shell"
-                 x-data="{
-                    storageKey: 'g_english_cbt_attempt_{{ $attempt->id }}',
-                    doubtKey: 'g_english_cbt_doubt_{{ $attempt->id }}',
-                    questions: @js($questionsData),
-                    answers: @js((object) $answers),
-                    doubts: {},
-                    currentIndex: 0,
-                    endTime: new Date('{{ $endTimeIso }}').getTime(),
-                    timeLeft: '00:00:00',
-                    submitting: false,
-                    timerId: null,
-                    inFullscreen: false,
-                    hasEnteredFullscreen: false,
-                    violationCount: {{ (int) ($attempt->violation_count ?? 0) }},
-                    maxViolations: {{ (int) ($attempt->max_violations ?? 3) }},
-                    lastViolationAt: 0,
-                    violationWarning: '',
-                    showSubmitModal: false,
+            @php
+                $examConfig = [
+                    'storageKey' => 'g_english_cbt_attempt_' . $attempt->id,
+                    'doubtKey' => 'g_english_cbt_doubt_' . $attempt->id,
+                    'questions' => $questionsData,
+                    'answers' => (object) $answers,
+                    'endTimeIso' => $endTimeIso,
+                    'violationCount' => (int) ($attempt->violation_count ?? 0),
+                    'maxViolations' => (int) ($attempt->max_violations ?? 3),
+                ];
+            @endphp
+            <script id="cbt-exam-data-{{ $attempt->id }}" type="application/json">@json($examConfig)</script>
+            <script>
+                window.cbtExamApp = window.cbtExamApp || function (configId, wire) {
+                    let cfg = {};
+                    try {
+                        cfg = JSON.parse(document.getElementById(configId)?.textContent || '{}');
+                    } catch (e) {}
+                    return {
+                        storageKey: cfg.storageKey || 'g_english_cbt_attempt',
+                        doubtKey: cfg.doubtKey || 'g_english_cbt_doubt',
+                        questions: Array.isArray(cfg.questions) ? cfg.questions : [],
+                        answers: cfg.answers || {},
+                        doubts: {},
+                        currentIndex: 0,
+                        endTime: new Date(cfg.endTimeIso || Date.now()).getTime(),
+                        timeLeft: '00:00:00',
+                        submitting: false,
+                        timerId: null,
+                        inFullscreen: false,
+                        hasEnteredFullscreen: false,
+                        violationCount: Number(cfg.violationCount || 0),
+                        maxViolations: Number(cfg.maxViolations || 3),
+                        lastViolationAt: 0,
+                        violationWarning: '',
+                        showSubmitModal: false,
 
-                    init() {
-                        try {
-                            const saved = localStorage.getItem(this.storageKey);
-                            if (saved) {
-                                const parsed = JSON.parse(saved);
-                                this.answers = { ...this.answers, ...parsed };
-                            }
-                            const savedDoubts = localStorage.getItem(this.doubtKey);
-                            if (savedDoubts) {
-                                this.doubts = JSON.parse(savedDoubts);
-                            }
-                        } catch (e) {}
+                        init() {
+                            try {
+                                const saved = localStorage.getItem(this.storageKey);
+                                if (saved) {
+                                    const parsed = JSON.parse(saved);
+                                    this.answers = { ...this.answers, ...parsed };
+                                }
+                                const savedDoubts = localStorage.getItem(this.doubtKey);
+                                if (savedDoubts) {
+                                    this.doubts = JSON.parse(savedDoubts);
+                                }
+                            } catch (e) {}
 
-                        this.inFullscreen = (document.fullscreenElement === this.$refs.examShell);
-                        this.tick();
-                        this.timerId = setInterval(() => this.tick(), 1000);
-                        this.bindAntiCheat();
-                    },
+                            this.inFullscreen = (document.fullscreenElement === this.$refs.examShell);
+                            this.tick();
+                            this.timerId = setInterval(() => this.tick(), 1000);
+                            this.bindAntiCheat();
+                        },
 
-                    enterFullscreen() {
-                        const el = this.$refs.examShell;
-                        if (el && el.requestFullscreen) {
-                            el.requestFullscreen().then(() => {
+                        enterFullscreen() {
+                            const el = this.$refs.examShell;
+                            if (el && el.requestFullscreen) {
+                                el.requestFullscreen().then(() => {
+                                    this.inFullscreen = true;
+                                    this.hasEnteredFullscreen = true;
+                                }).catch(() => {
+                                    this.inFullscreen = true;
+                                    this.hasEnteredFullscreen = true;
+                                });
+                            } else {
                                 this.inFullscreen = true;
                                 this.hasEnteredFullscreen = true;
-                            }).catch(() => {});
-                        }
-                    },
+                            }
+                        },
 
-                    bindAntiCheat() {
-                        document.addEventListener('fullscreenchange', () => {
-                            this.inFullscreen = (document.fullscreenElement === this.$refs.examShell);
-                            if (this.hasEnteredFullscreen && !this.inFullscreen && !this.submitting) {
-                                this.triggerViolation('Keluar dari mode layar penuh');
-                            }
-                        });
-                        document.addEventListener('visibilitychange', () => {
-                            if (document.hidden && this.hasEnteredFullscreen && !this.submitting) {
-                                this.triggerViolation('Pindah tab atau meminimalkan browser');
-                            }
-                        });
-                        window.addEventListener('blur', () => {
-                            if (this.hasEnteredFullscreen && !this.submitting) {
-                                this.triggerViolation('Keluar dari jendela ujian');
-                            }
-                        });
-                        window.addEventListener('keydown', (e) => {
-                            if (!this.inFullscreen || this.submitting || !this.currentQuestion) return;
-                            if (e.key === 'ArrowRight' && this.currentIndex < this.questions.length - 1) {
-                                this.currentIndex++;
-                            } else if (e.key === 'ArrowLeft' && this.currentIndex > 0) {
-                                this.currentIndex--;
-                            }
-                        });
-                    },
-
-                    triggerViolation(reason) {
-                        if (this.submitting) return;
-                        const now = Date.now();
-                        if (now - this.lastViolationAt < 1500) return;
-                        this.lastViolationAt = now;
-                        $wire.recordViolation(reason).then((res) => {
-                            if (res) {
-                                this.violationCount = res.violation_count;
-                                this.maxViolations = res.max_violations;
-                                this.violationWarning = `Peringatan (${res.violation_count}/${res.max_violations}): ${reason}. Jika mencapai ${res.max_violations}x, ujian otomatis terkunci!`;
-                                if (res.locked && document.fullscreenElement) {
-                                    document.exitFullscreen().catch(() => {});
+                        bindAntiCheat() {
+                            document.addEventListener('fullscreenchange', () => {
+                                this.inFullscreen = (document.fullscreenElement === this.$refs.examShell);
+                                if (this.hasEnteredFullscreen && !this.inFullscreen && !this.submitting) {
+                                    this.triggerViolation('Keluar dari mode layar penuh');
                                 }
-                            }
-                        });
-                    },
+                            });
+                            document.addEventListener('visibilitychange', () => {
+                                if (document.hidden && this.hasEnteredFullscreen && !this.submitting) {
+                                    this.triggerViolation('Pindah tab atau meminimalkan browser');
+                                }
+                            });
+                            window.addEventListener('blur', () => {
+                                if (this.hasEnteredFullscreen && !this.submitting) {
+                                    this.triggerViolation('Keluar dari jendela ujian');
+                                }
+                            });
+                            window.addEventListener('keydown', (e) => {
+                                if (!this.inFullscreen || this.submitting || !this.currentQuestion) return;
+                                if (e.key === 'ArrowRight' && this.currentIndex < this.questions.length - 1) {
+                                    this.currentIndex++;
+                                } else if (e.key === 'ArrowLeft' && this.currentIndex > 0) {
+                                    this.currentIndex--;
+                                }
+                            });
+                        },
 
-                    get currentQuestion() {
-                        return this.questions[this.currentIndex] || null;
-                    },
+                        triggerViolation(reason) {
+                            if (this.submitting) return;
+                            const now = Date.now();
+                            if (now - this.lastViolationAt < 1500) return;
+                            this.lastViolationAt = now;
+                            wire.recordViolation(reason).then((res) => {
+                                if (res) {
+                                    this.violationCount = res.violation_count;
+                                    this.maxViolations = res.max_violations;
+                                    this.violationWarning = `Peringatan (${res.violation_count}/${res.max_violations}): ${reason}. Jika mencapai ${res.max_violations}x, ujian otomatis terkunci!`;
+                                    if (res.locked && document.fullscreenElement) {
+                                        document.exitFullscreen().catch(() => {});
+                                    }
+                                }
+                            });
+                        },
 
-                    selectOption(questionId, key) {
-                        this.answers[questionId] = key;
-                        try {
-                            localStorage.setItem(this.storageKey, JSON.stringify(this.answers));
-                        } catch (e) {}
-                    },
+                        get currentQuestion() {
+                            return this.questions[this.currentIndex] || null;
+                        },
 
-                    toggleDoubt(questionId) {
-                        this.doubts[questionId] = !this.doubts[questionId];
-                        try {
-                            localStorage.setItem(this.doubtKey, JSON.stringify(this.doubts));
-                        } catch (e) {}
-                    },
-
-                    answeredCount() {
-                        return Object.keys(this.answers).filter(k => this.answers[k]).length;
-                    },
-
-                    doubtCount() {
-                        return Object.keys(this.doubts).filter(k => this.doubts[k]).length;
-                    },
-
-                    unansweredCount() {
-                        return Math.max(0, this.questions.length - this.answeredCount());
-                    },
-
-                    progressPercent() {
-                        if (!this.questions.length) return 0;
-                        return Math.round((this.answeredCount() / this.questions.length) * 100);
-                    },
-
-                    tick() {
-                        const distance = this.endTime - Date.now();
-                        if (distance <= 0) {
-                            this.timeLeft = '00:00:00';
-                            if (this.timerId) clearInterval(this.timerId);
-                            this.submitAll(true);
-                        } else {
-                            const h = Math.floor(distance / (1000 * 60 * 60));
-                            const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                            const s = Math.floor((distance % (1000 * 60)) / 1000);
-                            this.timeLeft = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
-                        }
-                    },
-
-                    submitAll(force = false) {
-                        if (this.submitting) return;
-                        if (!force) {
-                            this.showSubmitModal = true;
-                            return;
-                        }
-                        this.showSubmitModal = false;
-                        this.submitting = true;
-                        if (document.fullscreenElement) {
-                            document.exitFullscreen().catch(() => {});
-                        }
-                        $wire.submitExam(this.answers).then(() => {
+                        selectOption(questionId, key) {
+                            this.answers[questionId] = key;
                             try {
-                                localStorage.removeItem(this.storageKey);
-                                localStorage.removeItem(this.doubtKey);
+                                localStorage.setItem(this.storageKey, JSON.stringify(this.answers));
                             } catch (e) {}
-                        });
-                    }
-                }">
+                        },
+
+                        toggleDoubt(questionId) {
+                            this.doubts[questionId] = !this.doubts[questionId];
+                            try {
+                                localStorage.setItem(this.doubtKey, JSON.stringify(this.doubts));
+                            } catch (e) {}
+                        },
+
+                        answeredCount() {
+                            return Object.keys(this.answers).filter(k => this.answers[k]).length;
+                        },
+
+                        doubtCount() {
+                            return Object.keys(this.doubts).filter(k => this.doubts[k]).length;
+                        },
+
+                        unansweredCount() {
+                            return Math.max(0, this.questions.length - this.answeredCount());
+                        },
+
+                        progressPercent() {
+                            if (!this.questions.length) return 0;
+                            return Math.round((this.answeredCount() / this.questions.length) * 100);
+                        },
+
+                        tick() {
+                            const distance = this.endTime - Date.now();
+                            if (distance <= 0) {
+                                this.timeLeft = '00:00:00';
+                                if (this.timerId) clearInterval(this.timerId);
+                                this.submitAll(true);
+                            } else {
+                                const h = Math.floor(distance / (1000 * 60 * 60));
+                                const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                                const s = Math.floor((distance % (1000 * 60)) / 1000);
+                                this.timeLeft = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+                            }
+                        },
+
+                        submitAll(force = false) {
+                            if (this.submitting) return;
+                            if (!force) {
+                                this.showSubmitModal = true;
+                                return;
+                            }
+                            this.showSubmitModal = false;
+                            this.submitting = true;
+                            if (document.fullscreenElement) {
+                                document.exitFullscreen().catch(() => {});
+                            }
+                            wire.submitExam(this.answers).then(() => {
+                                try {
+                                    localStorage.removeItem(this.storageKey);
+                                    localStorage.removeItem(this.doubtKey);
+                                } catch (e) {}
+                            });
+                        }
+                    };
+                };
+            </script>
+            <div x-ref="examShell"
+                 wire:key="cbt-exam-shell-{{ $attempt->id }}"
+                 class="cbt-fullscreen-shell"
+                 x-data="window.cbtExamApp('cbt-exam-data-{{ $attempt->id }}', $wire)">
 
                 <!-- Fullscreen Gate Overlay -->
                 <div x-show="!inFullscreen && !submitting" class="cbt-modal-backdrop">
