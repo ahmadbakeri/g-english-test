@@ -130,7 +130,7 @@ class StudentPaymentResource extends Resource
                     ->sortable(),
                 TextColumn::make('amount')
                     ->label('Nominal')
-                    ->money('IDR', locale: 'id')
+                    ->formatStateUsing(fn ($state): string => 'Rp ' . number_format((float) ($state ?? 0), 0, ',', '.'))
                     ->weight('bold')
                     ->alignEnd()
                     ->sortable(),

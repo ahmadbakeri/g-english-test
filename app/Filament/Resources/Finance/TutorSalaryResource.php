@@ -112,7 +112,7 @@ class TutorSalaryResource extends Resource
                     ->suffix(' JP'),
                 Tables\Columns\TextColumn::make('total_amount')
                     ->label(__('Total Salary'))
-                    ->money('IDR', locale: 'id')
+                    ->formatStateUsing(fn ($state): string => 'Rp ' . number_format((float) ($state ?? 0), 0, ',', '.'))
                     ->weight('bold')
                     ->alignEnd(),
                 Tables\Columns\TextColumn::make('status')
