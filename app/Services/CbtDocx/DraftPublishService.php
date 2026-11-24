@@ -96,7 +96,9 @@ class DraftPublishService
             ]);
         });
 
+        Cache::forget("cbt_exam_meta_{$exam->id}");
         Cache::forget("exam_q_{$exam->id}");
+        Cache::forget("exam_grade_{$exam->id}");
         Cache::forget("exam_{$exam->id}_question_ids");
 
         return $publishedCount;

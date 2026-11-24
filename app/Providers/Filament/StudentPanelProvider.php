@@ -39,7 +39,8 @@ class StudentPanelProvider extends PanelProvider
                 'success' => Color::Emerald,
                 'warning' => Color::Amber,
             ])
-            ->databaseNotifications()
+            ->databaseNotifications(isLazy: true)
+            ->databaseNotificationsPolling(null)
             ->favicon(asset('images/logo.png'))
             ->renderHook(
                 PanelsRenderHook::USER_MENU_BEFORE,

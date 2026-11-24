@@ -27,6 +27,18 @@ class CbtQuestion extends Model
         'statements' => 'array',
     ];
 
+    protected static function booted(): void
+    {
+        $flush = function (CbtQuestion $q) {
+            if ($q->cbt_exam_id) {
+                \Illuminate\Support\Facades\Cache::forget("exam_q_{$q->cbt_exam_id}");
+                \Illuminate\Support\Facades\Cache::forget("exam_grade_{$q->cbt_exam_id}");
+            }
+        };
+        static::saved($flush);
+        static::deleted($flush);
+    }
+
     public function exam()
     {
         return $this->belongsTo(CbtExam::class, 'cbt_exam_id');

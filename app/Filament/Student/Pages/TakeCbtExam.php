@@ -29,7 +29,12 @@ class TakeCbtExam extends Page
     public function mount($record): void
     {
         $this->record = $record;
-        $this->exam = CbtExam::with('subject:id,name')->findOrFail($record);
+        $this->exam = Cache::remember("cbt_exam_meta_{$record}", 300, function () use ($record) {
+            return CbtExam::with('subject:id,name')->find($record);
+        });
+        if (!$this->exam) {
+            abort(404);
+        }
 
         $user = auth()->user();
         if (!$user || !$user->student) {
@@ -322,7 +327,13 @@ class TakeCbtExam extends Page
         }
 
         $isDeferred = $this->exam->isDeferredScoring();
-        $examQuestions = $this->exam->questions()->orderBy('order_number')->orderBy('id')->get();
+        $examQuestions = Cache::remember("exam_grade_{$this->exam->id}", 3600, function () {
+            return $this->exam->questions()
+                ->select(['id', 'question_type', 'statements', 'correct_answer', 'points', 'order_number'])
+                ->orderBy('order_number')
+                ->orderBy('id')
+                ->get();
+        });
 
         $earnedPoints = 0;
         $totalPoints = 0;

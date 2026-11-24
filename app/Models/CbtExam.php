@@ -46,6 +46,15 @@ class CbtExam extends Model
         'allow_review' => 'boolean',
     ];
 
+    protected static function booted(): void
+    {
+        static::saved(function (CbtExam $exam) {
+            \Illuminate\Support\Facades\Cache::forget("cbt_exam_meta_{$exam->id}");
+            \Illuminate\Support\Facades\Cache::forget("exam_q_{$exam->id}");
+            \Illuminate\Support\Facades\Cache::forget("exam_grade_{$exam->id}");
+        });
+    }
+
     public function classRoom()
     {
         return $this->belongsTo(ClassRoom::class, 'class_id');

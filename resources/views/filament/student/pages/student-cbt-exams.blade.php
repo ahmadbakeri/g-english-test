@@ -182,10 +182,7 @@
             <div class="exam-grid">
                 @foreach($exams as $exam)
                     @php
-                        $student = auth()->user()->student;
-                        $attempt = \App\Models\CbtAttempt::where('cbt_exam_id', $exam->id)
-                            ->where('student_id', $student->id)
-                            ->first();
+                        $attempt = $attemptsByExam[$exam->id] ?? null;
 
                         $hasAttempt = $attempt !== null;
                         $isCompleted = $hasAttempt && $attempt->is_completed;
