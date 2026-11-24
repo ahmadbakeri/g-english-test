@@ -68,8 +68,10 @@ class TestSessionResource extends Resource
                     ->label('Kapasitas Maksimal Server (Peserta/Sesi)')
                     ->numeric()
                     ->minValue(1)
-                    ->default(35)
+                    ->maxValue(1500)
+                    ->default(500)
                     ->suffix('peserta')
+                    ->helperText('Rekomendasi nyaman: 500–1.000 peserta/sesi (2 jam). Batas pengaman puncak: 1.500 peserta.')
                     ->required(),
                 Forms\Components\Toggle::make('is_active')
                     ->label('Sesi Dibuka untuk Request')

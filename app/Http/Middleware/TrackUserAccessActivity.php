@@ -42,9 +42,9 @@ class TrackUserAccessActivity
 
             $pageLabel = self::resolvePageLabel($path);
 
-            // Throttle duplicate DB writes per user+page (15s via Redis/Cache)
+            // Throttle duplicate DB writes per user+page (60s via Redis/Cache) to keep MySQL light during 1,000+ CBT surges
             $throttleKey = 'access_log:' . $user->id . ':' . md5($pageLabel);
-            if (!Cache::add($throttleKey, 1, 15)) {
+            if (!Cache::add($throttleKey, 1, 60)) {
                 return $response;
             }
 
@@ -93,6 +93,8 @@ class TrackUserAccessActivity
             'school/school-participants' => 'Kelola Peserta Sekolah',
             'school/test-schedule-requests' => 'Request Jadwal Tes',
             'school' => 'Dashboard Sekolah',
+            'student/take-cbt-exam' => 'Kerjakan Ujian CBT',
+            'student/student-cbt-exams' => 'Daftar Ujian CBT',
             'student/cbt' => 'Kerjakan Ujian CBT',
             'student/test-schedule-requests' => 'Request Jadwal Tes',
             'student/study-materials' => 'Materi Belajar',

@@ -38,6 +38,16 @@ Route::post('/login-action', function (\Illuminate\Http\Request $request) {
         $request->session()->regenerate();
         $authUser = \Illuminate\Support\Facades\Auth::user();
 
+        // Auto-rehash legacy high-cost bcrypt hashes down to configured BCRYPT_ROUNDS (10) for 4x faster future logins
+        try {
+            if (\Illuminate\Support\Facades\Hash::needsRehash($authUser->password)) {
+                $authUser->forceFill([
+                    'password' => \Illuminate\Support\Facades\Hash::make($credentials['password']),
+                ])->saveQuietly();
+            }
+        } catch (\Throwable) {
+        }
+
         try {
             \App\Models\ActivityLog::create([
                 'user_id' => $authUser->id,

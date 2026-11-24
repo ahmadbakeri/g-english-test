@@ -29,7 +29,11 @@ class TakeCbtExam extends Page
     public function mount($record): void
     {
         $this->record = $record;
-        $this->exam = CbtExam::with('subject')->findOrFail($record);
+        $this->exam = Cache::remember(
+            "exam_meta_{$record}",
+            300,
+            fn () => CbtExam::with('subject:id,name')->findOrFail($record)
+        );
 
         $user = auth()->user();
         if (!$user || !$user->student) {
@@ -334,7 +338,9 @@ class TakeCbtExam extends Page
         }
 
         if (!empty($rowsToUpsert)) {
-            CbtAnswer::where('cbt_attempt_id', $this->attempt->id)->delete();
+            if (CbtAnswer::where('cbt_attempt_id', $this->attempt->id)->exists()) {
+                CbtAnswer::where('cbt_attempt_id', $this->attempt->id)->delete();
+            }
             CbtAnswer::insert($rowsToUpsert);
         }
 

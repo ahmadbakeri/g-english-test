@@ -89,7 +89,7 @@
                     </div>
                 @endif
 
-                <form action="{{ route('login.action') }}" method="POST" class="space-y-5">
+                <form id="login-form" action="{{ route('login.action') }}" method="POST" class="space-y-5">
                     @csrf
                     <div>
                         <label for="username" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Username / ID</label>
@@ -116,8 +116,8 @@
                     </div>
 
                     <div class="pt-1">
-                        <button type="submit" class="w-full inline-flex items-center justify-center gap-2 bg-genza-blue hover:bg-[#083568] text-white text-base font-extrabold px-8 py-3.5 rounded-full hover:-translate-y-0.5 transition-all duration-200 shadow-lg shadow-[#0a4282]/25">
-                            <span>Login</span>
+                        <button id="login-submit-btn" type="submit" class="w-full inline-flex items-center justify-center gap-2 bg-genza-blue hover:bg-[#083568] disabled:opacity-65 disabled:cursor-not-allowed text-white text-base font-extrabold px-8 py-3.5 rounded-full hover:-translate-y-0.5 transition-all duration-200 shadow-lg shadow-[#0a4282]/25">
+                            <span id="login-submit-label">Login</span>
                             <svg class="w-4 h-4 text-genza-yellow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                         </button>
                     </div>
@@ -153,6 +153,17 @@
                     passInput.setAttribute('type', isPassword ? 'text' : 'password');
                     eyeOpen.classList.toggle('hidden', isPassword);
                     eyeClosed.classList.toggle('hidden', !isPassword);
+                });
+            }
+
+            var loginForm = document.getElementById('login-form');
+            var submitBtn = document.getElementById('login-submit-btn');
+            var submitLabel = document.getElementById('login-submit-label');
+            if (loginForm && submitBtn) {
+                loginForm.addEventListener('submit', function () {
+                    if (submitBtn.disabled) return;
+                    submitBtn.disabled = true;
+                    if (submitLabel) submitLabel.textContent = 'Memproses Login...';
                 });
             }
         })();

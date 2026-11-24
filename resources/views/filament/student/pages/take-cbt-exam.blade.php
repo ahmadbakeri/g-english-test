@@ -787,6 +787,8 @@
                         timeLeft: '00:00:00',
                         isTimeUp: false,
                         submitting: false,
+                        submitNotice: '',
+                        submitFailed: false,
                         timerId: null,
                         inFullscreen: false,
                         hasEnteredFullscreen: false,
@@ -857,13 +859,27 @@
                                 }
                             });
                         },
-                        finishExam() {
-                            if (this.submitting) return;
+                        finishExam(attemptNo = 1) {
+                            if (this.submitting && attemptNo === 1) return;
                             this.submitting = true;
+                            this.submitFailed = false;
+                            this.submitNotice = attemptNo === 1
+                                ? 'Menyimpan status selesai ujian...'
+                                : `Server sedang ramai, mengirim ulang otomatis (${attemptNo}/8)...`;
                             if (document.fullscreenElement) {
                                 document.exitFullscreen().catch(() => {});
                             }
-                            wire.submitExam();
+                            Promise.resolve(wire.submitExam()).catch(() => {
+                                if (attemptNo < 8) {
+                                    const waitMs = Math.min(2000 + attemptNo * 1500, 8000) + Math.floor(Math.random() * 2000);
+                                    this.submitNotice = `Server sibuk, mencoba ulang otomatis dalam ${Math.ceil(waitMs / 1000)} dtk (${attemptNo}/8)...`;
+                                    setTimeout(() => this.finishExam(attemptNo + 1), waitMs);
+                                } else {
+                                    this.submitting = false;
+                                    this.submitFailed = true;
+                                    this.submitNotice = 'Koneksi terputus saat mengakhiri tes. Klik tombol lagi saat internet stabil.';
+                                }
+                            });
                         },
                         tick() {
                             const distance = this.endTime - Date.now();
@@ -924,13 +940,20 @@
                         <button type="button"
                                 x-show="gformSubmitted"
                                 x-transition
-                                @click="finishExam()"
+                                :disabled="submitting"
+                                @click="finishExam(1)"
                                 class="cbt-btn cbt-btn-success"
                                 style="padding: 0.5rem 1.2rem; font-size: 0.85rem;">
-                            <span>Akhiri Tes</span>
+                            <span x-text="submitting ? 'Menyimpan...' : 'Akhiri Tes'"></span>
                             <x-heroicon-m-check style="width: 1.05rem; height: 1.05rem; margin-left: 0.35rem;" />
                         </button>
                     </div>
+                </div>
+
+                <!-- Live Submit / Retry Status Banner (G-Form) -->
+                <div x-show="submitNotice" x-cloak x-transition style="margin-bottom:0.85rem;padding:0.75rem 1.1rem;border-radius:0.85rem;font-size:0.85rem;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:0.75rem;" :style="submitFailed ? 'background:rgba(244,63,94,0.14);border:1px solid rgba(244,63,94,0.35);color:#be123c;' : 'background:rgba(251,185,0,0.2);border:1px solid rgba(251,185,0,0.45);color:#0a4282;'">
+                    <span x-text="submitNotice"></span>
+                    <button x-show="submitFailed" type="button" @click="finishExam(1)" class="cbt-btn cbt-btn-primary" style="padding:0.4rem 0.95rem;font-size:0.78rem;">Coba Lagi</button>
                 </div>
 
                 <!-- Iframe Container -->
@@ -988,8 +1011,9 @@
                     <p style="white-space: pre-line; line-height: 1.65; margin: 0; font-size: 0.95rem;">{{ $exam->description ?? 'Pilihlah jawaban yang paling tepat. Jawaban Anda tersimpan otomatis di perangkat dan dikirim sekaligus saat menekan tombol Selesai & Submit Ujian.' }}</p>
                 </div>
 
-                <button wire:click="startExam" class="cbt-btn cbt-btn-primary" style="width: 100%; padding: 1.15rem; font-size: 1.1rem;">
-                    <span>Mulai Ujian Sekarang</span>
+                <button wire:click="startExam" wire:loading.attr="disabled" class="cbt-btn cbt-btn-primary" style="width: 100%; padding: 1.15rem; font-size: 1.1rem;">
+                    <span wire:loading.remove wire:target="startExam">Mulai Ujian Sekarang</span>
+                    <span wire:loading wire:target="startExam">Menyiapkan Lembar Ujian...</span>
                     <x-heroicon-m-play style="width: 1.35rem; height: 1.35rem; margin-left: 0.5rem; color: #fbb900;" />
                 </button>
             </div>
@@ -1026,6 +1050,10 @@
                         endTime: new Date(cfg.endTimeIso || Date.now()).getTime(),
                         timeLeft: '00:00:00',
                         submitting: false,
+                        isTimeUp: false,
+                        jitterCountdown: 0,
+                        submitNotice: '',
+                        submitFailed: false,
                         timerId: null,
                         inFullscreen: false,
                         hasEnteredFullscreen: false,
@@ -1119,6 +1147,7 @@
                         },
 
                         selectOption(questionId, key) {
+                            if (this.isTimeUp || this.submitting) return;
                             this.answers[questionId] = key;
                             try {
                                 localStorage.setItem(this.storageKey, JSON.stringify(this.answers));
@@ -1153,14 +1182,34 @@
                             const distance = this.endTime - Date.now();
                             if (distance <= 0) {
                                 this.timeLeft = '00:00:00';
+                                this.isTimeUp = true;
                                 if (this.timerId) clearInterval(this.timerId);
-                                this.submitAll(true);
+                                this.queueAutoSubmitWithJitter();
                             } else {
                                 const h = Math.floor(distance / (1000 * 60 * 60));
                                 const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
                                 const s = Math.floor((distance % (1000 * 60)) / 1000);
                                 this.timeLeft = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
                             }
+                        },
+
+                        queueAutoSubmitWithJitter() {
+                            if (this.submitting) return;
+                            this.showSubmitModal = false;
+                            this.submitting = true;
+                            // Spread simultaneous 00:00 auto-submits across 1..18s so 1,000-1,500 browsers never slam the server in 1 second
+                            const delaySec = 1 + Math.floor(Math.random() * 18);
+                            this.jitterCountdown = delaySec;
+                            this.submitNotice = `Waktu habis! Jawaban aman tersimpan di perangkat. Mengantre pengiriman otomatis dalam ${delaySec} detik...`;
+                            const jt = setInterval(() => {
+                                this.jitterCountdown--;
+                                if (this.jitterCountdown <= 0) {
+                                    clearInterval(jt);
+                                    this.sendSubmitWithRetry(1);
+                                } else {
+                                    this.submitNotice = `Waktu habis! Jawaban aman tersimpan di perangkat. Mengantre pengiriman otomatis dalam ${this.jitterCountdown} detik...`;
+                                }
+                            }, 1000);
                         },
 
                         submitAll(force = false) {
@@ -1171,14 +1220,33 @@
                             }
                             this.showSubmitModal = false;
                             this.submitting = true;
+                            this.sendSubmitWithRetry(1);
+                        },
+
+                        sendSubmitWithRetry(attemptNo = 1) {
+                            this.submitting = true;
+                            this.submitFailed = false;
+                            this.submitNotice = attemptNo === 1
+                                ? 'Mengirim jawaban Anda ke server...'
+                                : `Server sedang ramai, mengirim ulang otomatis (percobaan ${attemptNo}/10)...`;
                             if (document.fullscreenElement) {
                                 document.exitFullscreen().catch(() => {});
                             }
-                            wire.submitExam(this.answers).then(() => {
+                            Promise.resolve(wire.submitExam(this.answers)).then(() => {
                                 try {
                                     localStorage.removeItem(this.storageKey);
                                     localStorage.removeItem(this.doubtKey);
                                 } catch (e) {}
+                            }).catch(() => {
+                                if (attemptNo < 10) {
+                                    const waitMs = Math.min(2000 + attemptNo * 1500, 9000) + Math.floor(Math.random() * 2500);
+                                    this.submitNotice = `Koneksi/server sibuk — jawaban aman di perangkat. Mencoba kirim ulang dalam ${Math.ceil(waitMs / 1000)} dtk (${attemptNo}/10)...`;
+                                    setTimeout(() => this.sendSubmitWithRetry(attemptNo + 1), waitMs);
+                                } else {
+                                    this.submitting = false;
+                                    this.submitFailed = true;
+                                    this.submitNotice = 'Gagal terhubung ke server setelah 10 percobaan. Jangan tutup halaman — jawaban Anda aman di perangkat. Klik Kirim Ulang saat internet aktif.';
+                                }
                             });
                         }
                     };
@@ -1242,6 +1310,14 @@
                             </button>
                         </div>
                     </div>
+                </div>
+
+                <!-- Live Submit / Anti-Stampede Jitter / Auto-Retry Banner (CBT Native) -->
+                <div x-show="submitNotice" x-cloak x-transition style="margin-bottom:0.9rem;padding:0.85rem 1.15rem;border-radius:0.95rem;font-size:0.88rem;font-weight:700;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:0.75rem;" :style="submitFailed ? 'background:rgba(244,63,94,0.14);border:1px solid rgba(244,63,94,0.35);color:#be123c;' : 'background:rgba(251,185,0,0.22);border:1px solid rgba(251,185,0,0.5);color:#0a4282;'">
+                    <span x-text="submitNotice"></span>
+                    <button x-show="submitFailed" type="button" @click="sendSubmitWithRetry(1)" class="cbt-btn cbt-btn-primary" style="padding:0.45rem 1.05rem;font-size:0.8rem;">
+                        Kirim Ulang Sekarang
+                    </button>
                 </div>
 
                 <!-- Sleek Topbar -->
