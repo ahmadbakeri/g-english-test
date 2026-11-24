@@ -418,5 +418,18 @@
     "School Code / Username": "Gakkou Koodo / Yuzaamei",
     "Period": "Kikan",
     "Category": "Kategorii",
-    "Value": "Atai"
+    "Value": "Atai",
+    "Manage Tests": "Tesuto Kanri",
+    "Test": "Tesuto",
+    "Add Test": "Tesuto Tsuika",
+    "Test Data": "Tesuto Deeta",
+    "Test Name": "Tesutomei",
+    "Test Type": "Tesuto Shubetsu",
+    "Test Sessions & Server": "Shiken Sesshon & Saaba",
+    "Test Session": "Shiken Sesshon",
+    "Add Test Session": "Sesshon Tsuika",
+    "Server Capacity & Session Schedule": "Saaba Youryou to Sukejuru",
+    "Test Schedule Requests": "Shiken Nittei Rikuesuto",
+    "Test Schedule Request": "Shiken Nittei Rikuesuto",
+    "Test Schedule Request Data": "Rikuesuto Jouhou"
 }

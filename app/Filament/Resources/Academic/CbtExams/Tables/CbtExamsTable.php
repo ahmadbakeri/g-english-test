@@ -59,6 +59,16 @@ class CbtExamsTable
                     ->placeholder('-')
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->groups([
+                \Filament\Tables\Grouping\Group::make('classRoom.name')
+                    ->label('Kelas')
+                    ->collapsible(),
+                \Filament\Tables\Grouping\Group::make('cbt_mode')
+                    ->label('Mode CBT')
+                    ->getTitleFromRecordUsing(fn (CbtExam $record): string => $record->cbt_mode === 'internal_excel' ? 'Real CBT (Excel)' : 'Google Form')
+                    ->collapsible(),
+            ])
+            ->defaultGroup('classRoom.name')
             ->filters([
                 \Filament\Tables\Filters\SelectFilter::make('cbt_mode')
                     ->label('Mode CBT')
@@ -66,6 +76,16 @@ class CbtExamsTable
                         'google_form' => 'Google Form',
                         'internal_excel' => 'Real CBT (Excel)',
                     ]),
+                \Filament\Tables\Filters\SelectFilter::make('class_id')
+                    ->label('Kelas')
+                    ->relationship('classRoom', 'name')
+                    ->searchable()
+                    ->preload(),
+                \Filament\Tables\Filters\SelectFilter::make('subject_id')
+                    ->label('Mata Pelajaran')
+                    ->relationship('subject', 'name')
+                    ->searchable()
+                    ->preload(),
             ])
             ->recordActions([
                 EditAction::make()->button()->size('sm'),

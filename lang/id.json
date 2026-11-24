@@ -420,5 +420,18 @@
     "School Code / Username": "Kode / Username Sekolah",
     "Period": "Periode",
     "Category": "Kategori",
-    "Value": "Nilai"
+    "Value": "Nilai",
+    "Manage Tests": "Kelola Tes",
+    "Test": "Tes",
+    "Add Test": "Tambah Tes",
+    "Test Data": "Data Tes",
+    "Test Name": "Nama Tes",
+    "Test Type": "Jenis Tes",
+    "Test Sessions & Server": "Sesi & Server Tes",
+    "Test Session": "Sesi Tes",
+    "Add Test Session": "Tambah Sesi Server",
+    "Server Capacity & Session Schedule": "Kapasitas Server & Jadwal Sesi",
+    "Test Schedule Requests": "Kelola Jadwal Tes",
+    "Test Schedule Request": "Request Jadwal Tes",
+    "Test Schedule Request Data": "Data Request Jadwal Tes"
 }

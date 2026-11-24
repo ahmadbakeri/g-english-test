@@ -23,6 +23,9 @@ use App\Models\Student;
 use App\Models\StudentPayment;
 use App\Models\StudyMaterial;
 use App\Models\Subject;
+use App\Models\Test;
+use App\Models\TestScheduleRequest;
+use App\Models\TestSession;
 use App\Models\Tutor;
 use App\Models\TutorSalary;
 use App\Models\User;
@@ -577,7 +580,137 @@ class FullDemoSeeder extends Seeder
             ]
         );
 
-        // 13. Settings
+        // 13. Tests, Server Sessions & Test Schedule Requests
+        $testPlacement = Test::updateOrCreate(
+            ['name' => 'Placement Test Speaking — Ms Hana'],
+            [
+                'class_id' => $classes['Speaking Kids & Junior']->id,
+                'subject_id' => $subSpeaking->id,
+                'type' => 'placement',
+                'date' => Carbon::today()->addDays(2)->toDateString(),
+                'max_score' => 100,
+            ]
+        );
+        $testCompetition = Test::updateOrCreate(
+            ['name' => 'Tryout Brain Champion SD/MI'],
+            [
+                'class_id' => $classes['Survival English SD']->id,
+                'subject_id' => $subSurvival->id,
+                'type' => 'competition',
+                'date' => Carbon::today()->addDays(5)->toDateString(),
+                'max_score' => 100,
+            ]
+        );
+
+        $session1 = TestSession::updateOrCreate(
+            ['title' => 'Sesi 1 Pagi — Brain Champion SD/MI'],
+            [
+                'cbt_exam_id' => $cbtReal->id,
+                'test_id' => $testCompetition->id,
+                'session_date' => Carbon::today()->addDays(5)->toDateString(),
+                'start_time' => '08:00:00',
+                'end_time' => '09:30:00',
+                'server_name' => 'Server CBT-01 (Kapasitas 35)',
+                'max_capacity' => 35,
+                'is_active' => true,
+                'notes' => 'Maksimal 35 peserta aktif bersamaan per sesi.',
+            ]
+        );
+        $session2 = TestSession::updateOrCreate(
+            ['title' => 'Sesi 2 Siang — Brain Champion SMP/MTs'],
+            [
+                'cbt_exam_id' => $cbtReal->id,
+                'test_id' => $testCompetition->id,
+                'session_date' => Carbon::today()->addDays(5)->toDateString(),
+                'start_time' => '10:30:00',
+                'end_time' => '12:00:00',
+                'server_name' => 'Server CBT-02 (Kapasitas 25)',
+                'max_capacity' => 25,
+                'is_active' => true,
+                'notes' => 'Khusus jenjang SMP/MTs.',
+            ]
+        );
+        $session3 = TestSession::updateOrCreate(
+            ['title' => 'Sesi Placement — Speaking Kids Ms Hana'],
+            [
+                'cbt_exam_id' => $cbtReal->id,
+                'test_id' => $testPlacement->id,
+                'session_date' => Carbon::today()->addDays(2)->toDateString(),
+                'start_time' => '14:30:00',
+                'end_time' => '16:00:00',
+                'server_name' => 'Server Lab-A (Kapasitas 15)',
+                'max_capacity' => 15,
+                'is_active' => true,
+                'notes' => 'Placement test kelas Ms Hana.',
+            ]
+        );
+
+        $sdnUser = User::where('username', '48001')->first();
+        $minUser = User::where('username', '48002')->first();
+        if ($sdnUser) {
+            TestScheduleRequest::updateOrCreate(
+                ['test_session_id' => $session1->id, 'requester_user_id' => $sdnUser->id],
+                [
+                    'requester_role' => 'school',
+                    'school_name' => $sdnUser->name,
+                    'requested_seats' => 6,
+                    'status' => 'approved',
+                    'notes' => 'Delegasi 6 peserta SDN 1 Tanjung.',
+                    'review_notes' => 'Disetujui sesuai kuota server.',
+                    'reviewed_by' => $admin->id,
+                    'reviewed_at' => now(),
+                ]
+            );
+        }
+        if ($minUser) {
+            TestScheduleRequest::updateOrCreate(
+                ['test_session_id' => $session1->id, 'requester_user_id' => $minUser->id],
+                [
+                    'requester_role' => 'school',
+                    'school_name' => $minUser->name,
+                    'requested_seats' => 6,
+                    'status' => 'pending',
+                    'notes' => 'Mohon approval jadwal sesi pagi untuk 6 peserta MIN 1 Tabalong.',
+                ]
+            );
+        }
+        if ($students['Alya Putri']->user_id) {
+            TestScheduleRequest::updateOrCreate(
+                ['test_session_id' => $session3->id, 'requester_user_id' => $students['Alya Putri']->user_id],
+                [
+                    'requester_role' => 'siswa',
+                    'student_id' => $students['Alya Putri']->id,
+                    'school_name' => 'Speaking Kids & Junior',
+                    'requested_seats' => 1,
+                    'status' => 'pending',
+                    'notes' => 'Request jadwal tes placement kelas Ms Hana.',
+                ]
+            );
+        }
+
+        // Seed 2 external student attempts & evaluations so Eksternal hierarchy shows live data
+        $extSample = Student::where('student_type', 'external')->take(2)->get();
+        foreach ($extSample as $idx => $extSt) {
+            CbtAttempt::updateOrCreate(
+                ['cbt_exam_id' => $cbtReal->id, 'student_id' => $extSt->id, 'attempt_number' => 1],
+                [
+                    'start_time' => Carbon::now()->subHours(3),
+                    'end_time' => Carbon::now()->subHours(2),
+                    'status' => 'finished',
+                    'score' => 85 + ($idx * 10),
+                    'is_completed' => true,
+                    'violation_count' => $idx,
+                    'max_violations' => 3,
+                    'is_force_submitted' => false,
+                ]
+            );
+            Evaluation::updateOrCreate(
+                ['student_id' => $extSt->id, 'subject_id' => $subSurvival->id, 'date' => Carbon::today()->toDateString()],
+                ['score' => 88 + ($idx * 5), 'notes' => 'Peserta Brain Champion — hasil tryout sangat baik.']
+            );
+        }
+
+        // 14. Settings
         $settings = [
             ['key' => 'app_name', 'value' => 'G-English', 'group' => 'general'],
             ['key' => 'app_description', 'value' => 'Sistem Administrasi G-English & Brain Champion', 'group' => 'general'],

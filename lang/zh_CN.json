@@ -418,5 +418,18 @@
     "School Code / Username": "学校代码 / 用户名",
     "Period": "期间",
     "Category": "类别",
-    "Value": "值"
+    "Value": "值",
+    "Manage Tests": "测验管理",
+    "Test": "测验",
+    "Add Test": "添加测验",
+    "Test Data": "测验资料",
+    "Test Name": "测验名称",
+    "Test Type": "测验类型",
+    "Test Sessions & Server": "考试场次与服务器",
+    "Test Session": "考试场次",
+    "Add Test Session": "添加考试场次",
+    "Server Capacity & Session Schedule": "服务器容量与场次安排",
+    "Test Schedule Requests": "考试日程申请",
+    "Test Schedule Request": "考试日程申请",
+    "Test Schedule Request Data": "考试日程申请资料"
 }

@@ -418,5 +418,18 @@
     "School Code / Username": "学校コード / ユーザー名",
     "Period": "期間",
     "Category": "カテゴリー",
-    "Value": "値"
+    "Value": "値",
+    "Manage Tests": "テスト管理",
+    "Test": "テスト",
+    "Add Test": "テスト追加",
+    "Test Data": "テストデータ",
+    "Test Name": "テスト名",
+    "Test Type": "テスト種別",
+    "Test Sessions & Server": "試験セッション・サーバー",
+    "Test Session": "試験セッション",
+    "Add Test Session": "セッション追加",
+    "Server Capacity & Session Schedule": "サーバー容量とスケジュール",
+    "Test Schedule Requests": "試験日程リクエスト",
+    "Test Schedule Request": "試験日程リクエスト",
+    "Test Schedule Request Data": "試験日程リクエスト情報"
 }

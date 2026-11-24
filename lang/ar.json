@@ -418,5 +418,18 @@
     "School Code / Username": "رمز المدرسة / اسم المستخدم",
     "Period": "الفترة",
     "Category": "الفئة",
-    "Value": "القيمة"
+    "Value": "القيمة",
+    "Manage Tests": "إدارة الاختبارات",
+    "Test": "اختبار",
+    "Add Test": "إضافة اختبار",
+    "Test Data": "بيانات الاختبار",
+    "Test Name": "اسم الاختبار",
+    "Test Type": "نوع الاختبار",
+    "Test Sessions & Server": "جلسات الاختبار والخادم",
+    "Test Session": "جلسة اختبار",
+    "Add Test Session": "إضافة جلسة",
+    "Server Capacity & Session Schedule": "سعة الخادم وجدول الجلسة",
+    "Test Schedule Requests": "طلبات جدول الاختبار",
+    "Test Schedule Request": "طلب جدول اختبار",
+    "Test Schedule Request Data": "بيانات طلب جدول الاختبار"
 }

@@ -418,5 +418,18 @@
     "School Code / Username": "Ramz Al-Madrasa / Ism Al-Mustakhdim",
     "Period": "Al-Fatra",
     "Category": "Al-Fia",
-    "Value": "Al-Qima"
+    "Value": "Al-Qima",
+    "Manage Tests": "Idarat Al-Ikhtibarat",
+    "Test": "Ikhtibar",
+    "Add Test": "Idafat Ikhtibar",
+    "Test Data": "Bayanat Al-Ikhtibar",
+    "Test Name": "Ism Al-Ikhtibar",
+    "Test Type": "Naw Al-Ikhtibar",
+    "Test Sessions & Server": "Jalasat Al-Ikhtibar wal-Khadim",
+    "Test Session": "Jalsat Ikhtibar",
+    "Add Test Session": "Idafat Jalsa",
+    "Server Capacity & Session Schedule": "Siat Al-Khadim wal-Jadwal",
+    "Test Schedule Requests": "Talabat Jadwal Al-Ikhtibar",
+    "Test Schedule Request": "Talab Jadwal Ikhtibar",
+    "Test Schedule Request Data": "Bayanat Talab Al-Jadwal"
 }

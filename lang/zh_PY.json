@@ -418,5 +418,18 @@
     "School Code / Username": "Xuéxiào Dàimǎ / Yònghùmíng",
     "Period": "Qījiān",
     "Category": "Lèibié",
-    "Value": "Zhí"
+    "Value": "Zhí",
+    "Manage Tests": "Cèyàn Guǎnlǐ",
+    "Test": "Cèyàn",
+    "Add Test": "Tiānjiā Cèyàn",
+    "Test Data": "Cèyàn Zīliào",
+    "Test Name": "Cèyàn Míngchēng",
+    "Test Type": "Cèyàn Lèixíng",
+    "Test Sessions & Server": "Kǎoshì Chǎngcì yǔ Fúwùqì",
+    "Test Session": "Kǎoshì Chǎngcì",
+    "Add Test Session": "Tiānjiā Chǎngcì",
+    "Server Capacity & Session Schedule": "Fúwùqì Róngliàng yǔ Ānpái",
+    "Test Schedule Requests": "Kǎoshì Rìchéng Shēnqǐng",
+    "Test Schedule Request": "Kǎoshì Rìchéng Shēnqǐng",
+    "Test Schedule Request Data": "Kǎoshì Shēnqǐng Zīliào"
 }
