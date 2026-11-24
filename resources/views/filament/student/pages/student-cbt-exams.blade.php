@@ -239,10 +239,17 @@
 
                             @if($isCompleted)
                                 <div style="margin-top: 1.1rem; padding-top: 0.9rem; border-top: 1px dashed rgba(148, 163, 184, 0.3);">
-                                    <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(16, 185, 129, 0.1); padding: 0.6rem 0.9rem; border-radius: 0.75rem; border: 1px solid rgba(16, 185, 129, 0.25);">
-                                        <span style="font-size: 0.8rem; color: #059669; font-weight: 700; text-transform: uppercase;">Skor Akhir</span>
-                                        <span style="font-size: 1.45rem; font-weight: 900; color: #10b981;">{{ $attempt->score ?? '-' }}</span>
-                                    </div>
+                                    @if($exam->isDeferredScoring() && $attempt->score === null)
+                                        <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; background: rgba(251, 185, 0, 0.14); padding: 0.6rem 0.9rem; border-radius: 0.75rem; border: 1px solid rgba(251, 185, 0, 0.45);">
+                                            <span style="font-size: 0.78rem; color: #92400e; font-weight: 800; text-transform: uppercase;" class="dark:text-amber-300">Status Nilai</span>
+                                            <span style="font-size: 0.82rem; font-weight: 800; color: #b45309;" class="dark:text-amber-200">Menunggu Penilaian Admin</span>
+                                        </div>
+                                    @else
+                                        <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(16, 185, 129, 0.1); padding: 0.6rem 0.9rem; border-radius: 0.75rem; border: 1px solid rgba(16, 185, 129, 0.25);">
+                                            <span style="font-size: 0.8rem; color: #059669; font-weight: 700; text-transform: uppercase;">Skor Akhir</span>
+                                            <span style="font-size: 1.45rem; font-weight: 900; color: #10b981;">{{ $attempt->score ?? '-' }}</span>
+                                        </div>
+                                    @endif
                                 </div>
                             @endif
                         </div>

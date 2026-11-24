@@ -14,6 +14,7 @@ class CbtAttempt extends Model
         'end_time',
         'status',
         'score',
+        'scoring_status',
         'is_completed',
         'violation_count',
         'max_violations',

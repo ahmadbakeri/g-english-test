@@ -75,6 +75,25 @@ class AttemptsRelationManager extends RelationManager
                         'finished' => 'success',
                         default => 'gray',
                     }),
+                Tables\Columns\TextColumn::make('score')
+                    ->label('Skor')
+                    ->placeholder('Menunggu Admin')
+                    ->badge()
+                    ->color(fn ($state): string => $state !== null ? 'success' : 'warning')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('scoring_status')
+                    ->label('Status Nilai')
+                    ->badge()
+                    ->formatStateUsing(fn (?string $state): string => match ($state) {
+                        'pending_admin' => 'Menunggu Proses Admin',
+                        'manual_uploaded' => 'Dinilai Admin / IRT',
+                        default => 'Otomatis',
+                    })
+                    ->color(fn (?string $state): string => match ($state) {
+                        'pending_admin' => 'warning',
+                        'manual_uploaded' => 'info',
+                        default => 'success',
+                    }),
                 Tables\Columns\TextColumn::make('violation_count')
                     ->label('Violations')
                     ->sortable()
@@ -95,6 +114,46 @@ class AttemptsRelationManager extends RelationManager
                 //
             ])
             ->headerActions([
+                \Filament\Actions\Action::make('export_raw_irt')
+                    ->label('Export Jawaban Mentah (IRT .xlsx)')
+                    ->icon('heroicon-o-table-cells')
+                    ->color('primary')
+                    ->action(function ($livewire) {
+                        $exam = $livewire->getOwnerRecord();
+
+                        return \Maatwebsite\Excel\Facades\Excel::download(
+                            new \App\Exports\CbtRawResponsesExport($exam),
+                            'jawaban_mentah_' . \Illuminate\Support\Str::slug($exam->title) . '.xlsx'
+                        );
+                    }),
+                \Filament\Actions\Action::make('upload_admin_scores')
+                    ->label('Upload Nilai Admin (.xlsx)')
+                    ->icon('heroicon-o-arrow-up-on-square-stack')
+                    ->color('warning')
+                    ->form([
+                        \Filament\Forms\Components\FileUpload::make('scores_file')
+                            ->label('File Nilai Admin (.xlsx / .csv)')
+                            ->helperText('Isi kolom "skor" di file hasil export jawaban mentah, lalu upload di sini.')
+                            ->disk('local')
+                            ->directory('cbt_score_imports')
+                            ->acceptedFileTypes([
+                                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                                'application/vnd.ms-excel',
+                                'text/csv',
+                            ])
+                            ->required(),
+                    ])
+                    ->action(function (array $data, $livewire) {
+                        $exam = $livewire->getOwnerRecord();
+                        $filePath = \Illuminate\Support\Facades\Storage::disk('local')->path($data['scores_file']);
+                        $importer = new \App\Imports\CbtAdminScoresImport($exam->id);
+                        \Maatwebsite\Excel\Facades\Excel::import($importer, $filePath);
+
+                        \Filament\Notifications\Notification::make()
+                            ->title("Nilai berhasil diupload untuk {$importer->updatedCount} peserta!")
+                            ->success()
+                            ->send();
+                    }),
                 \Filament\Actions\Action::make('export_excel')
                     ->label('Export Hasil (.xlsx)')
                     ->icon('heroicon-o-arrow-down-tray')

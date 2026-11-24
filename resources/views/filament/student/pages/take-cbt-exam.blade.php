@@ -420,296 +420,17 @@
 
     @php
         $mode = $exam->cbt_mode ?? 'google_form';
+        $isDeferred = $exam->isDeferredScoring();
         $student = auth()->user()->student;
         $endTimeIso = $attempt && $attempt->start_time
             ? $attempt->start_time->copy()->addMinutes($exam->duration_minutes)->toIso8601String()
             : now()->addMinutes($exam->duration_minutes)->toIso8601String();
     @endphp
 
-    <script>
-        window.cbtGformApp = function (configId, wire) {
-            let cfg = {};
-            try {
-                cfg = JSON.parse(document.getElementById(configId)?.textContent || '{}');
-            } catch (e) {}
-            return {
-                endTime: new Date(cfg.endTimeIso || Date.now()).getTime(),
-                timeLeft: '00:00:00',
-                isTimeUp: false,
-                submitting: false,
-                timerId: null,
-                inFullscreen: false,
-                hasEnteredFullscreen: false,
-                violationCount: Number(cfg.violationCount || 0),
-                maxViolations: Number(cfg.maxViolations || 3),
-                lastViolationAt: 0,
-                violationWarning: '',
-                gformLoadCount: 0,
-                gformSubmitted: false,
-                init() {
-                    this.inFullscreen = (document.fullscreenElement === this.$refs.examShell);
-                    this.tick();
-                    this.timerId = setInterval(() => this.tick(), 1000);
-                    this.bindAntiCheat();
-                },
-                onGformLoad() {
-                    this.gformLoadCount++;
-                    if (this.gformLoadCount >= 2) {
-                        this.gformSubmitted = true;
-                    }
-                },
-                enterFullscreen() {
-                    const el = this.$refs.examShell;
-                    if (el && el.requestFullscreen) {
-                        el.requestFullscreen().then(() => {
-                            this.inFullscreen = true;
-                            this.hasEnteredFullscreen = true;
-                        }).catch(() => {
-                            this.inFullscreen = true;
-                            this.hasEnteredFullscreen = true;
-                        });
-                    } else {
-                        this.inFullscreen = true;
-                        this.hasEnteredFullscreen = true;
-                    }
-                },
-                bindAntiCheat() {
-                    document.addEventListener('fullscreenchange', () => {
-                        this.inFullscreen = (document.fullscreenElement === this.$refs.examShell);
-                        if (this.hasEnteredFullscreen && !this.inFullscreen && !this.isTimeUp && !this.submitting) {
-                            this.triggerViolation('Keluar dari mode layar penuh');
-                        }
-                    });
-                    document.addEventListener('visibilitychange', () => {
-                        if (document.hidden && this.hasEnteredFullscreen && !this.isTimeUp && !this.submitting) {
-                            this.triggerViolation('Pindah tab atau meminimalkan browser');
-                        }
-                    });
-                    window.addEventListener('blur', () => {
-                        if (this.hasEnteredFullscreen && !this.isTimeUp && !this.submitting && document.activeElement?.tagName !== 'IFRAME') {
-                            this.triggerViolation('Keluar dari jendela ujian');
-                        }
-                    });
-                },
-                triggerViolation(reason) {
-                    if (this.submitting || this.isTimeUp) return;
-                    const now = Date.now();
-                    if (now - this.lastViolationAt < 1500) return;
-                    this.lastViolationAt = now;
-                    wire.recordViolation(reason).then((res) => {
-                        if (res) {
-                            this.violationCount = res.violation_count;
-                            this.maxViolations = res.max_violations;
-                            this.violationWarning = `Peringatan (${res.violation_count}/${res.max_violations}): ${reason}. Jika mencapai ${res.max_violations}x, ujian otomatis terkunci!`;
-                            if (res.locked && document.fullscreenElement) {
-                                document.exitFullscreen().catch(() => {});
-                            }
-                        }
-                    });
-                },
-                finishExam() {
-                    if (this.submitting) return;
-                    this.submitting = true;
-                    if (document.fullscreenElement) {
-                        document.exitFullscreen().catch(() => {});
-                    }
-                    wire.submitExam();
-                },
-                tick() {
-                    const distance = this.endTime - Date.now();
-                    if (distance <= 0) {
-                        this.timeLeft = '00:00:00';
-                        this.isTimeUp = true;
-                        if (this.timerId) clearInterval(this.timerId);
-                    } else {
-                        const h = Math.floor(distance / (1000 * 60 * 60));
-                        const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                        const s = Math.floor((distance % (1000 * 60)) / 1000);
-                        this.timeLeft = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
-                    }
-                }
-            };
-        };
-
-        window.cbtExamApp = function (configId, wire) {
-            let cfg = {};
-            try {
-                cfg = JSON.parse(document.getElementById(configId)?.textContent || '{}');
-            } catch (e) {}
-            return {
-                storageKey: cfg.storageKey || 'g_english_cbt_attempt',
-                doubtKey: cfg.doubtKey || 'g_english_cbt_doubt',
-                questions: Array.isArray(cfg.questions) ? cfg.questions : [],
-                answers: cfg.answers || {},
-                doubts: {},
-                currentIndex: 0,
-                endTime: new Date(cfg.endTimeIso || Date.now()).getTime(),
-                timeLeft: '00:00:00',
-                submitting: false,
-                timerId: null,
-                inFullscreen: false,
-                hasEnteredFullscreen: false,
-                violationCount: Number(cfg.violationCount || 0),
-                maxViolations: Number(cfg.maxViolations || 3),
-                lastViolationAt: 0,
-                violationWarning: '',
-                showSubmitModal: false,
-
-                init() {
-                    try {
-                        const saved = localStorage.getItem(this.storageKey);
-                        if (saved) {
-                            const parsed = JSON.parse(saved);
-                            this.answers = { ...this.answers, ...parsed };
-                        }
-                        const savedDoubts = localStorage.getItem(this.doubtKey);
-                        if (savedDoubts) {
-                            this.doubts = JSON.parse(savedDoubts);
-                        }
-                    } catch (e) {}
-
-                    this.inFullscreen = (document.fullscreenElement === this.$refs.examShell);
-                    this.tick();
-                    this.timerId = setInterval(() => this.tick(), 1000);
-                    this.bindAntiCheat();
-                },
-
-                enterFullscreen() {
-                    const el = this.$refs.examShell;
-                    if (el && el.requestFullscreen) {
-                        el.requestFullscreen().then(() => {
-                            this.inFullscreen = true;
-                            this.hasEnteredFullscreen = true;
-                        }).catch(() => {
-                            this.inFullscreen = true;
-                            this.hasEnteredFullscreen = true;
-                        });
-                    } else {
-                        this.inFullscreen = true;
-                        this.hasEnteredFullscreen = true;
-                    }
-                },
-
-                bindAntiCheat() {
-                    document.addEventListener('fullscreenchange', () => {
-                        this.inFullscreen = (document.fullscreenElement === this.$refs.examShell);
-                        if (this.hasEnteredFullscreen && !this.inFullscreen && !this.submitting) {
-                            this.triggerViolation('Keluar dari mode layar penuh');
-                        }
-                    });
-                    document.addEventListener('visibilitychange', () => {
-                        if (document.hidden && this.hasEnteredFullscreen && !this.submitting) {
-                            this.triggerViolation('Pindah tab atau meminimalkan browser');
-                        }
-                    });
-                    window.addEventListener('blur', () => {
-                        if (this.hasEnteredFullscreen && !this.submitting) {
-                            this.triggerViolation('Keluar dari jendela ujian');
-                        }
-                    });
-                    window.addEventListener('keydown', (e) => {
-                        if (!this.inFullscreen || this.submitting || !this.currentQuestion) return;
-                        if (e.key === 'ArrowRight' && this.currentIndex < this.questions.length - 1) {
-                            this.currentIndex++;
-                        } else if (e.key === 'ArrowLeft' && this.currentIndex > 0) {
-                            this.currentIndex--;
-                        }
-                    });
-                },
-
-                triggerViolation(reason) {
-                    if (this.submitting) return;
-                    const now = Date.now();
-                    if (now - this.lastViolationAt < 1500) return;
-                    this.lastViolationAt = now;
-                    wire.recordViolation(reason).then((res) => {
-                        if (res) {
-                            this.violationCount = res.violation_count;
-                            this.maxViolations = res.max_violations;
-                            this.violationWarning = `Peringatan (${res.violation_count}/${res.max_violations}): ${reason}. Jika mencapai ${res.max_violations}x, ujian otomatis terkunci!`;
-                            if (res.locked && document.fullscreenElement) {
-                                document.exitFullscreen().catch(() => {});
-                            }
-                        }
-                    });
-                },
-
-                get currentQuestion() {
-                    return this.questions[this.currentIndex] || null;
-                },
-
-                selectOption(questionId, key) {
-                    this.answers[questionId] = key;
-                    try {
-                        localStorage.setItem(this.storageKey, JSON.stringify(this.answers));
-                    } catch (e) {}
-                },
-
-                toggleDoubt(questionId) {
-                    this.doubts[questionId] = !this.doubts[questionId];
-                    try {
-                        localStorage.setItem(this.doubtKey, JSON.stringify(this.doubts));
-                    } catch (e) {}
-                },
-
-                answeredCount() {
-                    return this.questions.filter(q => Boolean(this.answers[q.id])).length;
-                },
-
-                doubtCount() {
-                    return this.questions.filter(q => Boolean(this.doubts[q.id])).length;
-                },
-
-                unansweredCount() {
-                    return this.questions.filter(q => !this.answers[q.id]).length;
-                },
-
-                progressPercent() {
-                    if (!this.questions.length) return 0;
-                    return Math.min(100, Math.round((this.answeredCount() / this.questions.length) * 100));
-                },
-
-                tick() {
-                    const distance = this.endTime - Date.now();
-                    if (distance <= 0) {
-                        this.timeLeft = '00:00:00';
-                        if (this.timerId) clearInterval(this.timerId);
-                        this.submitAll(true);
-                    } else {
-                        const h = Math.floor(distance / (1000 * 60 * 60));
-                        const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                        const s = Math.floor((distance % (1000 * 60)) / 1000);
-                        this.timeLeft = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
-                    }
-                },
-
-                submitAll(force = false) {
-                    if (this.submitting) return;
-                    if (!force) {
-                        this.showSubmitModal = true;
-                        return;
-                    }
-                    this.showSubmitModal = false;
-                    this.submitting = true;
-                    if (document.fullscreenElement) {
-                        document.exitFullscreen().catch(() => {});
-                    }
-                    wire.submitExam(this.answers).then(() => {
-                        try {
-                            localStorage.removeItem(this.storageKey);
-                            localStorage.removeItem(this.doubtKey);
-                        } catch (e) {}
-                    });
-                }
-            };
-        };
-    </script>
-
     <div class="cbt-container"
          @contextmenu.prevent
          @copy.prevent
-         @cut.prevent
-         @paste.prevent>
+         @cut.prevent>
 
         {{-- ========================================================= --}}
         {{-- LOCKED STATE (3 VIOLATIONS)                               --}}
@@ -743,7 +464,16 @@
                 <h2 class="cbt-title" style="margin-bottom: 0.4rem;">Ujian Selesai!</h2>
                 <p class="cbt-subtitle">Jawaban ujian Anda telah berhasil disimpan ke sistem.</p>
 
-                @if($exam->show_result_immediately && $attempt && $attempt->score !== null)
+                @if($isDeferred && $attempt && $attempt->score === null)
+                    <div style="background: rgba(251, 185, 0, 0.14); border: 1.5px solid rgba(251, 185, 0, 0.55); border-radius: 1rem; padding: 1.35rem 1.5rem; margin: 1.5rem 0;">
+                        <p style="margin: 0 0 0.35rem 0; font-weight: 800; font-size: 1rem; color: #92400e;" class="dark:text-amber-300">
+                            Menunggu Penilaian Admin
+                        </p>
+                        <p style="margin: 0; font-size: 0.9rem; font-weight: 500; color: #78350f; line-height: 1.55;" class="dark:text-amber-100">
+                            Seluruh jawaban Anda telah terekam aman di server. Nilai resmi tryout akan diproses dan diumumkan oleh Admin setelah proses penilaian selesai.
+                        </p>
+                    </div>
+                @elseif(($exam->show_result_immediately || ($attempt && $attempt->scoring_status === 'manual_uploaded')) && $attempt && $attempt->score !== null)
                     <div style="background: rgba(10, 66, 130, 0.08); border: 2px solid #0a4282; border-radius: 1.25rem; padding: 1.75rem 2.25rem; margin: 1.5rem 0; display: inline-block; min-width: 220px;">
                         <p style="font-size: 0.8rem; color: #0284c7; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 800; margin-bottom: 0.4rem;">Skor Akhir</p>
                         <p style="font-size: 3.75rem; font-weight: 900; color: #0a4282; line-height: 1; margin: 0;" class="dark:text-amber-400">{{ $attempt->score }}</p>
@@ -1080,6 +810,16 @@
                             this.tick();
                             this.timerId = setInterval(() => this.tick(), 1000);
                             this.bindAntiCheat();
+                            this.$watch('currentIndex', () => this.renderMath());
+                            this.renderMath();
+                        },
+
+                        renderMath() {
+                            this.$nextTick(() => {
+                                if (typeof window.renderCbtMath === 'function') {
+                                    window.renderCbtMath(this.$refs.questionStage || this.$refs.examShell);
+                                }
+                            });
                         },
 
                         enterFullscreen() {
@@ -1117,6 +857,8 @@
                             });
                             window.addEventListener('keydown', (e) => {
                                 if (!this.inFullscreen || this.submitting || !this.currentQuestion) return;
+                                const tag = (document.activeElement?.tagName || '').toLowerCase();
+                                if (tag === 'input' || tag === 'textarea') return;
                                 if (e.key === 'ArrowRight' && this.currentIndex < this.questions.length - 1) {
                                     this.currentIndex++;
                                 } else if (e.key === 'ArrowLeft' && this.currentIndex > 0) {
@@ -1149,9 +891,64 @@
                         selectOption(questionId, key) {
                             if (this.isTimeUp || this.submitting) return;
                             this.answers[questionId] = key;
+                            this.persistAnswers();
+                        },
+
+                        selectComplexTf(questionId, stmtNo, val) {
+                            if (this.isTimeUp || this.submitting) return;
+                            const cur = (this.answers[questionId] && typeof this.answers[questionId] === 'object')
+                                ? { ...this.answers[questionId] }
+                                : {};
+                            cur[String(stmtNo)] = val;
+                            this.answers[questionId] = cur;
+                            this.persistAnswers();
+                        },
+
+                        getComplexTfVal(questionId, stmtNo) {
+                            const cur = this.answers[questionId];
+                            if (!cur || typeof cur !== 'object') return '';
+                            return cur[String(stmtNo)] || '';
+                        },
+
+                        setShortAnswer(questionId, val) {
+                            if (this.isTimeUp || this.submitting) return;
+                            this.answers[questionId] = val;
+                            this.persistAnswers();
+                        },
+
+                        persistAnswers() {
                             try {
                                 localStorage.setItem(this.storageKey, JSON.stringify(this.answers));
                             } catch (e) {}
+                        },
+
+                        isQuestionAnswered(q) {
+                            if (!q) return false;
+                            const ans = this.answers[q.id];
+                            if (q.question_type === 'complex_tf') {
+                                if (!ans || typeof ans !== 'object') return false;
+                                const total = Array.isArray(q.statements) ? q.statements.length : 0;
+                                if (total === 0) return false;
+                                const filled = Object.values(ans).filter(v => v === 'B' || v === 'S').length;
+                                return filled >= total;
+                            }
+                            return typeof ans === 'string' && ans.trim() !== '';
+                        },
+
+                        navBadgeText(q) {
+                            if (!q) return '';
+                            const ans = this.answers[q.id];
+                            if (q.question_type === 'complex_tf') {
+                                const total = Array.isArray(q.statements) ? q.statements.length : 0;
+                                const filled = (ans && typeof ans === 'object')
+                                    ? Object.values(ans).filter(v => v === 'B' || v === 'S').length
+                                    : 0;
+                                return filled > 0 ? `${filled}/${total}` : '';
+                            }
+                            if (q.question_type === 'short_answer') {
+                                return (typeof ans === 'string' && ans.trim() !== '') ? '✓' : '';
+                            }
+                            return typeof ans === 'string' ? ans : '';
                         },
 
                         toggleDoubt(questionId) {
@@ -1162,11 +959,11 @@
                         },
 
                         answeredCount() {
-                            return Object.keys(this.answers).filter(k => this.answers[k]).length;
+                            return this.questions.filter(q => this.isQuestionAnswered(q)).length;
                         },
 
                         doubtCount() {
-                            return Object.keys(this.doubts).filter(k => this.doubts[k]).length;
+                            return this.questions.filter(q => Boolean(this.doubts[q.id])).length;
                         },
 
                         unansweredCount() {
@@ -1346,22 +1143,31 @@
                     <!-- Left Panel: Question -->
                     <div>
                         <template x-if="currentQuestion">
-                            <div class="glass-panel" style="padding: 1.85rem;">
+                            <div x-ref="questionStage" class="glass-panel" style="padding: 1.85rem;">
                                 <div class="cbt-flex-between" style="border-bottom: 1px solid rgba(148, 163, 184, 0.22); padding-bottom: 0.85rem;">
-                                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
                                         <span class="cbt-question-badge">
                                             Soal #<span x-text="currentIndex + 1"></span>
+                                        </span>
+                                        <span style="padding: 0.22rem 0.65rem; border-radius: 9999px; background: rgba(14, 165, 233, 0.14); color: #0284c7; font-size: 0.72rem; font-weight: 800;"
+                                              x-text="currentQuestion.question_type === 'complex_tf' ? 'Benar / Salah' : (currentQuestion.question_type === 'short_answer' ? 'Isian Singkat' : 'Pilihan Ganda')">
                                         </span>
                                         <span x-show="doubts[currentQuestion.id]" style="padding: 0.25rem 0.7rem; border-radius: 9999px; background: #fbb900; color: #0a4282; font-size: 0.72rem; font-weight: 800;">
                                             Ragu-Ragu
                                         </span>
                                     </div>
-                                    <span style="font-size: 0.82rem; font-weight: 700; color: #64748b;" class="dark:text-slate-300">
-                                        Bobot: <strong x-text="currentQuestion.points || 1"></strong> Poin
-                                    </span>
+                                    @if(!$isDeferred)
+                                        <span style="font-size: 0.82rem; font-weight: 700; color: #64748b;" class="dark:text-slate-300">
+                                            Bobot: <strong x-text="currentQuestion.points || 1"></strong> Poin
+                                        </span>
+                                    @else
+                                        <span style="font-size: 0.78rem; font-weight: 700; color: #b45309;" class="dark:text-amber-300">
+                                            Penilaian Tryout (Proses Admin)
+                                        </span>
+                                    @endif
                                 </div>
 
-                                <div class="cbt-question-text" x-html="currentQuestion.question_text"></div>
+                                <div class="cbt-question-text cbt-rich-content" x-html="currentQuestion.question_text"></div>
 
                                 <template x-if="currentQuestion.attachment_url">
                                     <div style="margin: 1rem 0 1.5rem 0; text-align: center;">
@@ -1374,16 +1180,77 @@
                                     </div>
                                 </template>
 
-                                <div class="cbt-options-list">
-                                    <template x-for="(optText, optKey) in currentQuestion.options" :key="optKey">
-                                        <div @click="selectOption(currentQuestion.id, optKey)"
-                                             class="cbt-option-label"
-                                             :class="{ 'selected': answers[currentQuestion.id] === optKey }">
-                                            <span class="cbt-option-badge" x-text="optKey"></span>
-                                            <span style="font-size: 1rem; font-weight: 600;" x-text="optText"></span>
-                                        </div>
-                                    </template>
-                                </div>
+                                {{-- TYPE 1: MCQ A-E (HTML + KaTeX supported!) --}}
+                                <template x-if="(currentQuestion.question_type || 'mcq') === 'mcq'">
+                                    <div class="cbt-options-list">
+                                        <template x-for="(optText, optKey) in currentQuestion.options" :key="currentQuestion.id + '_' + optKey">
+                                            <div @click="selectOption(currentQuestion.id, optKey)"
+                                                 class="cbt-option-label"
+                                                 :class="{ 'selected': answers[currentQuestion.id] === optKey }">
+                                                <span class="cbt-option-badge" x-text="optKey"></span>
+                                                <div class="cbt-rich-content" style="font-size: 1rem; font-weight: 600; flex: 1;" x-html="optText"></div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </template>
+
+                                {{-- TYPE 2: COMPLEX TRUE/FALSE TABLE (UTBK-SNBT Pernyataan Benar/Salah) --}}
+                                <template x-if="currentQuestion.question_type === 'complex_tf'">
+                                    <div class="cbt-rich-content" style="margin-top: 0.75rem; overflow-x: auto;">
+                                        <table style="width: 100%; border-collapse: collapse;">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 52px;">No</th>
+                                                    <th style="text-align: left;">Pernyataan</th>
+                                                    <th style="width: 96px;">Benar</th>
+                                                    <th style="width: 96px;">Salah</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <template x-for="(stmt, sIdx) in (currentQuestion.statements || [])" :key="currentQuestion.id + '_st_' + (stmt.no || sIdx)">
+                                                    <tr>
+                                                        <td style="text-align: center; font-weight: 800;" x-text="stmt.no || (sIdx + 1)"></td>
+                                                        <td style="font-size: 0.96rem; line-height: 1.55;" x-html="stmt.text"></td>
+                                                        <td style="text-align: center;">
+                                                            <button type="button"
+                                                                    @click="selectComplexTf(currentQuestion.id, stmt.no || (sIdx + 1), 'B')"
+                                                                    style="padding: 0.42rem 0.9rem; border-radius: 9999px; font-size: 0.8rem; font-weight: 800; cursor: pointer; transition: all 0.15s;"
+                                                                    :style="getComplexTfVal(currentQuestion.id, stmt.no || (sIdx + 1)) === 'B'
+                                                                        ? 'background:#10b981;color:#ffffff;border:2px solid #059669;'
+                                                                        : 'background:transparent;color:#475569;border:2px solid #cbd5e1;'">
+                                                                Benar
+                                                            </button>
+                                                        </td>
+                                                        <td style="text-align: center;">
+                                                            <button type="button"
+                                                                    @click="selectComplexTf(currentQuestion.id, stmt.no || (sIdx + 1), 'S')"
+                                                                    style="padding: 0.42rem 0.9rem; border-radius: 9999px; font-size: 0.8rem; font-weight: 800; cursor: pointer; transition: all 0.15s;"
+                                                                    :style="getComplexTfVal(currentQuestion.id, stmt.no || (sIdx + 1)) === 'S'
+                                                                        ? 'background:#e11d48;color:#ffffff;border:2px solid #be123c;'
+                                                                        : 'background:transparent;color:#475569;border:2px solid #cbd5e1;'">
+                                                                Salah
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                </template>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </template>
+
+                                {{-- TYPE 3: SHORT ANSWER (UTBK Isian Singkat Numerik/Teks) --}}
+                                <template x-if="currentQuestion.question_type === 'short_answer'">
+                                    <div style="margin-top: 1rem;">
+                                        <label style="display: block; font-size: 0.85rem; font-weight: 800; color: #0a4282; margin-bottom: 0.45rem;" class="dark:text-amber-400">
+                                            Ketik Jawaban Singkat Anda:
+                                        </label>
+                                        <input type="text"
+                                               :value="typeof answers[currentQuestion.id] === 'string' ? answers[currentQuestion.id] : ''"
+                                               @input="setShortAnswer(currentQuestion.id, $event.target.value)"
+                                               placeholder="Masukkan angka atau jawaban singkat..."
+                                               style="width: 100%; max-width: 380px; padding: 0.85rem 1.1rem; border-radius: 0.85rem; border: 2px solid #0a4282; font-size: 1.05rem; font-weight: 700; background: #ffffff; color: #0f172a; user-select: text; -webkit-user-select: text;">
+                                    </div>
+                                </template>
                             </div>
                         </template>
 
@@ -1464,10 +1331,10 @@
                                             :class="{
                                                 'active': currentIndex === idx,
                                                 'doubt': doubts[q.id],
-                                                'answered': !doubts[q.id] && answers[q.id]
+                                                'answered': !doubts[q.id] && isQuestionAnswered(q)
                                             }">
                                         <span x-text="idx + 1"></span>
-                                        <span class="cbt-nav-sub" x-show="answers[q.id]" x-text="answers[q.id]"></span>
+                                        <span class="cbt-nav-sub" x-show="navBadgeText(q)" x-text="navBadgeText(q)"></span>
                                     </button>
                                 </template>
                             </div>

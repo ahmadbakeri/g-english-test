@@ -18,11 +18,11 @@ class CbtExamForm
                             ->label('Mode Ujian CBT')
                             ->options([
                                 'google_form' => 'Mode A: Google Form (Ringan & Bebas Beban Server)',
-                                'internal_excel' => 'Mode B: Real CBT + Upload Excel',
+                                'internal_excel' => 'Mode B: Real CBT (Excel / Word .docx UTBK)',
                             ])
                             ->icons([
                                 'google_form' => 'heroicon-o-globe-alt',
-                                'internal_excel' => 'heroicon-o-table-cells',
+                                'internal_excel' => 'heroicon-o-document-text',
                             ])
                             ->colors([
                                 'google_form' => 'info',
@@ -32,6 +32,27 @@ class CbtExamForm
                             ->default('google_form')
                             ->required()
                             ->live()
+                            ->columnSpanFull(),
+                        \Filament\Forms\Components\ToggleButtons::make('scoring_mode')
+                            ->label('Sistem Penilaian Ujian')
+                            ->options([
+                                'standard' => 'Penilaian Otomatis (Skor langsung dari kunci & poin)',
+                                'deferred' => 'Penilaian Ditunda / Proses Admin (IRT / Manual — Tanpa Nilai Dulu)',
+                            ])
+                            ->icons([
+                                'standard' => 'heroicon-o-calculator',
+                                'deferred' => 'heroicon-o-clock',
+                            ])
+                            ->colors([
+                                'standard' => 'success',
+                                'deferred' => 'warning',
+                            ])
+                            ->inline()
+                            ->default('standard')
+                            ->required()
+                            ->live()
+                            ->visible(fn ($get) => $get('cbt_mode') === 'internal_excel')
+                            ->helperText('Pilih "Penilaian Ditunda / Proses Admin" untuk tryout UTBK/IRT agar jawaban mentah siswa disimpan tanpa menampilkan nilai dulu.')
                             ->columnSpanFull(),
                         \Filament\Forms\Components\TextInput::make('title')
                             ->label('Judul Ujian')

@@ -43,10 +43,8 @@ class TakeCbtExam extends Page
         $mode = $this->exam->cbt_mode ?? 'google_form';
 
         if ($mode === 'google_form') {
-            // Mode A: Do NOT query cbt_questions
             $this->prefilledGformUrl = $this->buildPrefilledGformUrl($this->exam, $student);
 
-            // Upsert cbt_attempts once on open
             $this->attempt = CbtAttempt::firstOrCreate(
                 [
                     'cbt_exam_id' => $this->exam->id,
@@ -72,7 +70,7 @@ class TakeCbtExam extends Page
             return;
         }
 
-        // Mode B: internal_excel (200-User Low-RAM Optimization via Cache::remember)
+        // Mode B: Real CBT (Excel / Word .docx UTBK)
         $this->questionsData = $this->getCachedQuestions($this->exam);
 
         $latestAttempt = CbtAttempt::where('cbt_exam_id', $this->exam->id)
@@ -96,7 +94,9 @@ class TakeCbtExam extends Page
 
             $existingAnswers = CbtAnswer::where('cbt_attempt_id', $this->attempt->id)->get();
             foreach ($existingAnswers as $ans) {
-                if ($ans->selected_answer) {
+                if (is_array($ans->answer_payload) && !empty($ans->answer_payload)) {
+                    $this->answers[$ans->cbt_question_id] = $ans->answer_payload;
+                } elseif ($ans->selected_answer !== null && $ans->selected_answer !== '') {
                     $this->answers[$ans->cbt_question_id] = $ans->selected_answer;
                 }
             }
@@ -146,6 +146,8 @@ class TakeCbtExam extends Page
                 ->select([
                     'id',
                     'cbt_exam_id',
+                    'order_number',
+                    'question_type',
                     'question_text',
                     'attachment',
                     'option_a',
@@ -153,14 +155,30 @@ class TakeCbtExam extends Page
                     'option_c',
                     'option_d',
                     'option_e',
-                    'correct_answer',
+                    'statements',
                     'points',
                 ])
+                ->orderBy('order_number')
+                ->orderBy('id')
                 ->get()
                 ->map(function ($q) {
                     $ext = $q->attachment ? strtolower(pathinfo($q->attachment, PATHINFO_EXTENSION)) : null;
+                    $type = $q->question_type ?: 'mcq';
+
+                    // Strip answer keys from statements sent to student browser
+                    $publicStatements = [];
+                    if ($type === 'complex_tf' && is_array($q->statements)) {
+                        foreach ($q->statements as $idx => $st) {
+                            $publicStatements[] = [
+                                'no' => (int) ($st['no'] ?? ($idx + 1)),
+                                'text' => (string) ($st['text'] ?? ''),
+                            ];
+                        }
+                    }
+
                     return [
                         'id' => $q->id,
+                        'question_type' => $type,
                         'question_text' => $q->question_text,
                         'attachment_url' => $q->attachment ? Storage::url($q->attachment) : null,
                         'attachment_type' => $ext
@@ -169,14 +187,16 @@ class TakeCbtExam extends Page
                                 : (in_array($ext, ['mp3', 'wav', 'ogg', 'm4a'], true) ? 'audio' : 'file'))
                             : null,
                         'attachment_ext' => $ext,
-                        'options' => array_filter([
-                            'A' => $q->option_a,
-                            'B' => $q->option_b,
-                            'C' => $q->option_c,
-                            'D' => $q->option_d,
-                            'E' => $q->option_e,
-                        ], fn ($v) => $v !== null && $v !== ''),
-                        'correct_answer' => strtoupper((string) $q->correct_answer),
+                        'options' => $type === 'mcq'
+                            ? array_filter([
+                                'A' => $q->option_a,
+                                'B' => $q->option_b,
+                                'C' => $q->option_c,
+                                'D' => $q->option_d,
+                                'E' => $q->option_e,
+                            ], fn ($v) => $v !== null && $v !== '')
+                            : [],
+                        'statements' => $publicStatements,
                         'points' => (int) ($q->points ?? 1),
                     ];
                 })
@@ -214,13 +234,14 @@ class TakeCbtExam extends Page
             'attempt_number' => $attemptsCount + 1,
             'start_time' => now(),
             'status' => 'in_progress',
+            'scoring_status' => $this->exam->isDeferredScoring() ? 'pending_admin' : 'graded',
             'is_completed' => false,
             'violation_count' => 0,
             'max_violations' => 3,
             'sync_status' => 'internal',
         ]);
 
-        $this->redirect(static::getUrl(['record' => $this->record]), navigate: false);
+        $this->redirect(static::getUrl(['record' => $this->record], panel: 'student'), navigate: false);
     }
 
     public function recordViolation(string $reason = 'tab_switch'): array
@@ -246,7 +267,7 @@ class TakeCbtExam extends Page
             ]);
             $this->isLocked = true;
             $this->isFinished = true;
-            $this->redirect(static::getUrl(['record' => $this->record]), navigate: false);
+            $this->redirect(static::getUrl(['record' => $this->record], panel: 'student'), navigate: false);
         } else {
             $this->attempt->update([
                 'violation_count' => $newCount,
@@ -269,13 +290,14 @@ class TakeCbtExam extends Page
 
         $this->attempt->update([
             'end_time' => now(),
-            'score' => 0,
+            'score' => $this->exam->isDeferredScoring() ? null : 0,
+            'scoring_status' => $this->exam->isDeferredScoring() ? 'pending_admin' : 'graded',
             'status' => 'locked',
             'is_force_submitted' => true,
         ]);
 
         $this->isFinished = true;
-        $this->redirect(static::getUrl(['record' => $this->record]), navigate: false);
+        $this->redirect(static::getUrl(['record' => $this->record], panel: 'student'), navigate: false);
     }
 
     public function submitExam(array $submittedAnswers = []): void
@@ -295,37 +317,105 @@ class TakeCbtExam extends Page
                 'is_completed' => true,
             ]);
             $this->isFinished = true;
-            $this->redirect(static::getUrl(['record' => $this->record]), navigate: false);
+            $this->redirect(static::getUrl(['record' => $this->record], panel: 'student'), navigate: false);
             return;
         }
 
-        $cachedQuestions = Cache::remember("exam_q_{$this->exam->id}", 3600, function () {
-            return $this->exam->questions()->get()->toArray();
-        });
+        $isDeferred = $this->exam->isDeferredScoring();
+        $examQuestions = $this->exam->questions()->orderBy('order_number')->orderBy('id')->get();
 
         $earnedPoints = 0;
         $totalPoints = 0;
         $now = now();
-        $rowsToUpsert = [];
+        $rowsToInsert = [];
 
-        foreach ($cachedQuestions as $question) {
-            $qId = $question['id'];
-            $points = (int) ($question['points'] ?? 1);
-            $correct = strtoupper(trim((string) ($question['correct_answer'] ?? 'A')));
-            $selected = isset($this->answers[$qId]) ? strtoupper(trim((string) $this->answers[$qId])) : null;
+        foreach ($examQuestions as $question) {
+            $qId = $question->id;
+            $type = $question->question_type ?: 'mcq';
+            $points = (int) ($question->points ?? 1);
+            $rawAnswer = $this->answers[$qId] ?? null;
 
-            $totalPoints += $points;
-            $isCorrect = ($selected !== null && $selected === $correct);
+            $selectedSummary = null;
+            $payloadJson = null;
+            $isCorrect = null;
 
-            if ($isCorrect) {
-                $earnedPoints += $points;
+            if ($type === 'complex_tf') {
+                $cleanMap = [];
+                if (is_array($rawAnswer)) {
+                    foreach ($rawAnswer as $k => $v) {
+                        $val = strtoupper(trim((string) $v));
+                        if (in_array($val, ['B', 'S'], true)) {
+                            $cleanMap[(string) $k] = $val;
+                        }
+                    }
+                }
+                if (!empty($cleanMap)) {
+                    ksort($cleanMap);
+                    $parts = [];
+                    foreach ($cleanMap as $k => $v) {
+                        $parts[] = "{$k}:{$v}";
+                    }
+                    $selectedSummary = implode(' | ', $parts);
+                    $payloadJson = json_encode($cleanMap);
+                }
+
+                if (!$isDeferred && is_array($question->statements) && !empty($question->statements)) {
+                    $hasKeys = collect($question->statements)->every(fn ($st) => in_array(strtoupper((string) ($st['answer'] ?? '')), ['B', 'S'], true));
+                    if ($hasKeys) {
+                        $totalPoints += $points;
+                        $allMatch = true;
+                        foreach ($question->statements as $idx => $st) {
+                            $no = (string) ($st['no'] ?? ($idx + 1));
+                            $expected = strtoupper((string) $st['answer']);
+                            if (($cleanMap[$no] ?? null) !== $expected) {
+                                $allMatch = false;
+                                break;
+                            }
+                        }
+                        $isCorrect = $allMatch;
+                        if ($allMatch) {
+                            $earnedPoints += $points;
+                        }
+                    }
+                }
+            } elseif ($type === 'short_answer') {
+                $val = is_scalar($rawAnswer) ? trim((string) $rawAnswer) : '';
+                if ($val !== '') {
+                    $selectedSummary = $val;
+                }
+
+                if (!$isDeferred && filled($question->correct_answer)) {
+                    $totalPoints += $points;
+                    $normExpected = mb_strtolower(str_replace(',', '.', trim((string) $question->correct_answer)));
+                    $normGiven = mb_strtolower(str_replace(',', '.', $val));
+                    $isCorrect = ($val !== '' && $normGiven === $normExpected);
+                    if ($isCorrect) {
+                        $earnedPoints += $points;
+                    }
+                }
+            } else {
+                // MCQ (A-E)
+                $selected = is_scalar($rawAnswer) ? strtoupper(trim((string) $rawAnswer)) : '';
+                if ($selected !== '') {
+                    $selectedSummary = $selected;
+                }
+
+                if (!$isDeferred && filled($question->correct_answer)) {
+                    $totalPoints += $points;
+                    $expected = strtoupper(trim((string) $question->correct_answer));
+                    $isCorrect = ($selected !== '' && $selected === $expected);
+                    if ($isCorrect) {
+                        $earnedPoints += $points;
+                    }
+                }
             }
 
-            if ($selected !== null && $selected !== '') {
-                $rowsToUpsert[] = [
+            if ($selectedSummary !== null || $payloadJson !== null) {
+                $rowsToInsert[] = [
                     'cbt_attempt_id' => $this->attempt->id,
                     'cbt_question_id' => $qId,
-                    'selected_answer' => $selected,
+                    'selected_answer' => $selectedSummary,
+                    'answer_payload' => $payloadJson,
                     'is_correct' => $isCorrect,
                     'created_at' => $now,
                     'updated_at' => $now,
@@ -333,24 +423,35 @@ class TakeCbtExam extends Page
             }
         }
 
-        if (!empty($rowsToUpsert)) {
-            if (CbtAnswer::where('cbt_attempt_id', $this->attempt->id)->exists()) {
-                CbtAnswer::where('cbt_attempt_id', $this->attempt->id)->delete();
-            }
-            CbtAnswer::insert($rowsToUpsert);
+        if (CbtAnswer::where('cbt_attempt_id', $this->attempt->id)->exists()) {
+            CbtAnswer::where('cbt_attempt_id', $this->attempt->id)->delete();
+        }
+        if (!empty($rowsToInsert)) {
+            CbtAnswer::insert($rowsToInsert);
         }
 
-        $finalScore = $totalPoints > 0 ? round(($earnedPoints / $totalPoints) * 100, 2) : 0;
-
-        $this->attempt->update([
-            'end_time' => $now,
-            'score' => $finalScore,
-            'status' => 'finished',
-            'is_completed' => true,
-            'sync_status' => 'internal',
-        ]);
+        if ($isDeferred) {
+            $this->attempt->update([
+                'end_time' => $now,
+                'score' => null,
+                'scoring_status' => 'pending_admin',
+                'status' => 'finished',
+                'is_completed' => true,
+                'sync_status' => 'internal',
+            ]);
+        } else {
+            $finalScore = $totalPoints > 0 ? round(($earnedPoints / $totalPoints) * 100, 2) : 0;
+            $this->attempt->update([
+                'end_time' => $now,
+                'score' => $finalScore,
+                'scoring_status' => 'graded',
+                'status' => 'finished',
+                'is_completed' => true,
+                'sync_status' => 'internal',
+            ]);
+        }
 
         $this->isFinished = true;
-        $this->redirect(static::getUrl(['record' => $this->record]), navigate: false);
+        $this->redirect(static::getUrl(['record' => $this->record], panel: 'student'), navigate: false);
     }
 }

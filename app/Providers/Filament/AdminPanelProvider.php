@@ -46,7 +46,7 @@ class AdminPanelProvider extends PanelProvider
             )
             ->renderHook(
                 PanelsRenderHook::HEAD_END,
-                fn (): string => Blade::render('@include("filament.components.animations")')
+                fn (): string => Blade::render('@include("filament.components.animations")@include("filament.components.katex")')
             )
             ->spa()
             ->globalSearch(false)

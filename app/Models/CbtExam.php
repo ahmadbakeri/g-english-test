@@ -12,6 +12,7 @@ class CbtExam extends Model
         'class_id',
         'subject_id',
         'cbt_mode',
+        'scoring_mode',
         'gform_embed_url',
         'gform_sheet_csv_url',
         'gform_nis_entry_id',
@@ -57,7 +58,17 @@ class CbtExam extends Model
 
     public function questions()
     {
-        return $this->hasMany(CbtQuestion::class, 'cbt_exam_id');
+        return $this->hasMany(CbtQuestion::class, 'cbt_exam_id')->orderBy('order_number')->orderBy('id');
+    }
+
+    public function importBatches()
+    {
+        return $this->hasMany(CbtImportBatch::class, 'cbt_exam_id');
+    }
+
+    public function isDeferredScoring(): bool
+    {
+        return ($this->scoring_mode ?? 'standard') === 'deferred';
     }
 
     public function attempts()

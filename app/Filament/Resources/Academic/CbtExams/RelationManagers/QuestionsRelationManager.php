@@ -39,7 +39,22 @@ class QuestionsRelationManager extends RelationManager
     {
         return $schema
             ->components([
+                Select::make('question_type')
+                    ->label('Tipe Soal')
+                    ->options([
+                        'mcq' => 'Pilihan Ganda (A–E)',
+                        'complex_tf' => 'PG Kompleks (Tabel Benar/Salah)',
+                        'short_answer' => 'Isian Singkat (Numerik/Teks)',
+                    ])
+                    ->default('mcq')
+                    ->required()
+                    ->live(),
+                TextInput::make('order_number')
+                    ->label('Nomor Urut')
+                    ->numeric()
+                    ->default(0),
                 RichEditor::make('question_text')
+                    ->label('Isi Soal (Mendukung HTML & LaTeX \(...\))')
                     ->required()
                     ->toolbarButtons([
                         'attachFiles',
@@ -59,37 +74,58 @@ class QuestionsRelationManager extends RelationManager
                     ])
                     ->columnSpanFull(),
                 FileUpload::make('attachment')
-                    ->label('Lampiran (Gambar/Audio)')
+                    ->label('Lampiran Tambahan (Gambar/Audio)')
                     ->acceptedFileTypes(['image/*', 'audio/*'])
                     ->directory('cbt_questions')
                     ->columnSpanFull(),
                 Textarea::make('option_a')
-                    ->required()
+                    ->label('Opsi A')
+                    ->visible(fn ($get) => ($get('question_type') ?? 'mcq') === 'mcq')
+                    ->required(fn ($get) => ($get('question_type') ?? 'mcq') === 'mcq')
                     ->columnSpanFull(),
                 Textarea::make('option_b')
-                    ->required()
+                    ->label('Opsi B')
+                    ->visible(fn ($get) => ($get('question_type') ?? 'mcq') === 'mcq')
+                    ->required(fn ($get) => ($get('question_type') ?? 'mcq') === 'mcq')
                     ->columnSpanFull(),
                 Textarea::make('option_c')
-                    ->required()
+                    ->label('Opsi C')
+                    ->visible(fn ($get) => ($get('question_type') ?? 'mcq') === 'mcq')
                     ->columnSpanFull(),
                 Textarea::make('option_d')
-                    ->required()
+                    ->label('Opsi D')
+                    ->visible(fn ($get) => ($get('question_type') ?? 'mcq') === 'mcq')
                     ->columnSpanFull(),
                 Textarea::make('option_e')
+                    ->label('Opsi E')
+                    ->visible(fn ($get) => ($get('question_type') ?? 'mcq') === 'mcq')
                     ->columnSpanFull(),
-                Select::make('correct_answer')
-                    ->options([
-                        'A' => 'A',
-                        'B' => 'B',
-                        'C' => 'C',
-                        'D' => 'D',
-                        'E' => 'E',
+                \Filament\Forms\Components\Repeater::make('statements')
+                    ->label('Daftar Pernyataan (Tabel Benar / Salah)')
+                    ->visible(fn ($get) => $get('question_type') === 'complex_tf')
+                    ->schema([
+                        TextInput::make('no')->label('No')->numeric()->default(1)->required(),
+                        Textarea::make('text')->label('Pernyataan')->rows(2)->required()->columnSpan(2),
+                        Select::make('answer')
+                            ->label('Kunci (Opsional)')
+                            ->options(['B' => 'Benar', 'S' => 'Salah'])
+                            ->placeholder('Kosongkan jika proses Admin/IRT'),
                     ])
-                    ->required(),
+                    ->columns(4)
+                    ->columnSpanFull(),
+                TextInput::make('correct_answer')
+                    ->label('Kunci Jawaban (Opsional — kosongkan jika penilaian IRT/Admin)')
+                    ->placeholder('A/B/C/D/E atau angka untuk Isian Singkat')
+                    ->maxLength(255),
                 TextInput::make('points')
+                    ->label('Poin')
                     ->required()
                     ->numeric()
                     ->default(1),
+                Textarea::make('explanation')
+                    ->label('Pembahasan (Opsional)')
+                    ->rows(3)
+                    ->columnSpanFull(),
             ]);
     }
 
@@ -131,13 +167,32 @@ class QuestionsRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('question_text')
             ->columns([
+                TextColumn::make('order_number')
+                    ->label('#')
+                    ->sortable(),
+                TextColumn::make('question_type')
+                    ->label('Tipe')
+                    ->badge()
+                    ->color(fn (?string $state): string => match ($state) {
+                        'complex_tf' => 'warning',
+                        'short_answer' => 'info',
+                        default => 'primary',
+                    })
+                    ->formatStateUsing(fn (?string $state): string => match ($state) {
+                        'complex_tf' => 'Benar/Salah',
+                        'short_answer' => 'Isian',
+                        default => 'PG A–E',
+                    }),
                 TextColumn::make('question_text')
+                    ->label('Soal')
                     ->html()
                     ->limit(60)
                     ->searchable(),
                 TextColumn::make('correct_answer')
+                    ->label('Kunci')
                     ->badge()
-                    ->color('success')
+                    ->placeholder('Proses Admin')
+                    ->color(fn (?string $state): string => filled($state) ? 'success' : 'gray')
                     ->searchable(),
                 TextColumn::make('points')
                     ->numeric()
@@ -155,6 +210,50 @@ class QuestionsRelationManager extends RelationManager
                 //
             ])
             ->headerActions([
+                \Filament\Actions\Action::make('download_docx_template')
+                    ->label('Template Word (.docx)')
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->color('info')
+                    ->action(function () {
+                        $path = (new \App\Services\CbtDocx\DocxTemplateGenerator())->generateTempFile();
+
+                        return response()->download($path, 'template_soal_utbk_cbt.docx')->deleteFileAfterSend(true);
+                    }),
+                \Filament\Actions\Action::make('import_docx')
+                    ->label('Import Word (.docx) [Staging]')
+                    ->icon('heroicon-o-document-plus')
+                    ->color('warning')
+                    ->form([
+                        \Filament\Forms\Components\FileUpload::make('docx_file')
+                            ->label('Upload File Soal Word (.docx)')
+                            ->helperText('Masuk ke Staging & Visual Preview dulu agar rumus KaTeX, tabel, dan gambar bisa dicek sebelum publish.')
+                            ->disk('local')
+                            ->directory('cbt_docx_imports')
+                            ->acceptedFileTypes([
+                                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                            ])
+                            ->maxSize(20480)
+                            ->required(),
+                    ])
+                    ->action(function (array $data, RelationManager $livewire) {
+                        $exam = $livewire->getOwnerRecord();
+                        $stored = $data['docx_file'];
+
+                        $batch = (new \App\Services\CbtDocx\DocxImportService())->import(
+                            storedLocalPath: $stored,
+                            originalFilename: basename($stored),
+                            cbtExamId: $exam->id,
+                            uploadedBy: auth()->id(),
+                        );
+
+                        \Filament\Notifications\Notification::make()
+                            ->title("Draft berhasil diparse: {$batch->total_questions} soal")
+                            ->body("Valid: {$batch->valid_count}, Warning: {$batch->warning_count}, Error: {$batch->error_count}.")
+                            ->success()
+                            ->send();
+
+                        return redirect(\App\Filament\Resources\Academic\CbtImportBatches\CbtImportBatchResource::getUrl('review', ['record' => $batch]));
+                    }),
                 \Filament\Actions\Action::make('download_template')
                     ->label('Download Template Excel (.xlsx)')
                     ->icon('heroicon-o-arrow-down-tray')
