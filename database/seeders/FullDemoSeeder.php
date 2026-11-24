@@ -141,16 +141,16 @@ class FullDemoSeeder extends Seeder
             StudyMaterial::updateOrCreate(['title' => $ms['title']], $ms);
         }
 
-        // 5. Internal Students + Parents + Payments
+        // 5. Internal Students + Parents + Payments (Program tunggal: Survival English jenjang SD/MI, SMP/MTs, SMA/MA)
         $internalSeeds = [
-            ['name' => 'Carmen', 'username' => 'GES481101', 'email' => 'carmen@g-english.com', 'gender' => 'P', 'class' => 'Survival English SMA', 'paid' => 2200000, 'father' => 'Budi Santoso', 'father_phone' => '081222333001', 'mother' => 'Siti Aminah', 'mother_phone' => '081333444001'],
-            ['name' => 'Kyuhyun', 'username' => 'GES481102', 'email' => 'kyuhyun@g-english.com', 'gender' => 'L', 'class' => 'Survival English SD', 'paid' => 2000000, 'father' => 'Hendra Wijaya', 'father_phone' => '081222333002', 'mother' => 'Dewi Lestari', 'mother_phone' => '081333444002'],
-            ['name' => 'IU', 'username' => 'GES481103', 'email' => 'iu@g-english.com', 'gender' => 'P', 'class' => 'Survival English SMP', 'paid' => 2500000, 'father' => 'Agus Salim', 'father_phone' => '081222333003', 'mother' => 'Rina Kartika', 'mother_phone' => '081333444003'],
-            ['name' => 'Sang Il', 'username' => 'GES481104', 'email' => 'sangil@g-english.com', 'gender' => 'L', 'class' => 'Survival English SD', 'paid' => 2000000, 'father' => 'Kim San', 'father_phone' => '08111222333', 'mother' => 'Yoona', 'mother_phone' => '08111222444'],
-            ['name' => 'Sunyg Il', 'username' => 'GES481105', 'email' => 'sunygil@g-english.com', 'gender' => 'P', 'class' => 'Survival English SMP', 'paid' => 1500000, 'father' => 'Kim San', 'father_phone' => '08111222333', 'mother' => 'Yoona', 'mother_phone' => '08111222444'],
-            ['name' => 'Yoon Il', 'username' => 'GES481106', 'email' => 'yoonil@g-english.com', 'gender' => 'L', 'class' => 'Survival English SMA', 'paid' => 1000000, 'father' => 'Kim San', 'father_phone' => '08111222333', 'mother' => 'Yoona', 'mother_phone' => '08111222444'],
-            ['name' => 'Alya Putri', 'username' => 'GES481107', 'email' => 'alya@g-english.com', 'gender' => 'P', 'class' => 'Speaking Kids & Junior', 'paid' => 3100000, 'father' => 'Rahmat Hidayat', 'father_phone' => '081222333007', 'mother' => 'Nadia Sari', 'mother_phone' => '081333444007'],
-            ['name' => 'Rafka Pratama', 'username' => 'GES481108', 'email' => 'rafka@g-english.com', 'gender' => 'L', 'class' => 'Speaking Kids & Junior', 'paid' => 1800000, 'father' => 'Dedi Kurniawan', 'father_phone' => '081222333008', 'mother' => 'Lina Marlina', 'mother_phone' => '081333444008'],
+            ['name' => 'Carmen', 'username' => 'GES481101', 'email' => 'carmen@g-english.com', 'gender' => 'P', 'class' => 'Survival English SMA/MA', 'paid' => 2200000, 'father' => 'Budi Santoso', 'father_phone' => '081222333001', 'mother' => 'Siti Aminah', 'mother_phone' => '081333444001'],
+            ['name' => 'Kyuhyun', 'username' => 'GES481102', 'email' => 'kyuhyun@g-english.com', 'gender' => 'L', 'class' => 'Survival English SD/MI', 'paid' => 2000000, 'father' => 'Hendra Wijaya', 'father_phone' => '081222333002', 'mother' => 'Dewi Lestari', 'mother_phone' => '081333444002'],
+            ['name' => 'IU', 'username' => 'GES481103', 'email' => 'iu@g-english.com', 'gender' => 'P', 'class' => 'Survival English SMP/MTs', 'paid' => 2500000, 'father' => 'Agus Salim', 'father_phone' => '081222333003', 'mother' => 'Rina Kartika', 'mother_phone' => '081333444003'],
+            ['name' => 'Sang Il', 'username' => 'GES481104', 'email' => 'sangil@g-english.com', 'gender' => 'L', 'class' => 'Survival English SD/MI', 'paid' => 2000000, 'father' => 'Kim San', 'father_phone' => '08111222333', 'mother' => 'Yoona', 'mother_phone' => '08111222444'],
+            ['name' => 'Sunyg Il', 'username' => 'GES481105', 'email' => 'sunygil@g-english.com', 'gender' => 'P', 'class' => 'Survival English SMP/MTs', 'paid' => 1500000, 'father' => 'Kim San', 'father_phone' => '08111222333', 'mother' => 'Yoona', 'mother_phone' => '08111222444'],
+            ['name' => 'Yoon Il', 'username' => 'GES481106', 'email' => 'yoonil@g-english.com', 'gender' => 'L', 'class' => 'Survival English SMA/MA', 'paid' => 1000000, 'father' => 'Kim San', 'father_phone' => '08111222333', 'mother' => 'Yoona', 'mother_phone' => '08111222444'],
+            ['name' => 'Alya Putri', 'username' => 'GES481107', 'email' => 'alya@g-english.com', 'gender' => 'P', 'class' => 'Survival English SD/MI', 'paid' => 3100000, 'father' => 'Rahmat Hidayat', 'father_phone' => '081222333007', 'mother' => 'Nadia Sari', 'mother_phone' => '081333444007'],
+            ['name' => 'Rafka Pratama', 'username' => 'GES481108', 'email' => 'rafka@g-english.com', 'gender' => 'L', 'class' => 'Survival English SMP/MTs', 'paid' => 1800000, 'father' => 'Dedi Kurniawan', 'father_phone' => '081222333008', 'mother' => 'Lina Marlina', 'mother_phone' => '081333444008'],
         ];
 
         $students = [];
@@ -215,12 +215,19 @@ class FullDemoSeeder extends Seeder
             }
         }
 
-        // 6. Classes, ClassSchedules & Schedules (termasuk kelas Ms Hana!)
+        // 6. Classes (1 program tunggal: Survival English jenjang SD/MI, SMP/MTs, SMA/MA)
+        // Migrasi nama kelas lama agar tidak dobel
+        foreach (['Survival English SD' => 'Survival English SD/MI', 'Survival English SMP' => 'Survival English SMP/MTs', 'Survival English SMA' => 'Survival English SMA/MA'] as $oldName => $newName) {
+            if (ClassRoom::where('name', $oldName)->exists() && !ClassRoom::where('name', $newName)->exists()) {
+                ClassRoom::where('name', $oldName)->update(['name' => $newName]);
+            }
+        }
+        ClassRoom::where('name', 'Speaking Kids & Junior')->delete();
+
         $classDefs = [
-            ['name' => 'Survival English SD', 'subject_id' => $subSurvival->id, 'tutor' => 'Mr Bakeri', 'students' => ['Kyuhyun', 'Sang Il'], 'days' => ['Monday', 'Wednesday'], 'time' => ['14:00', '15:30']],
-            ['name' => 'Survival English SMP', 'subject_id' => $subGrammar->id, 'tutor' => 'Mr Ichsan', 'students' => ['IU', 'Sunyg Il'], 'days' => ['Tuesday', 'Thursday'], 'time' => ['15:30', '17:00']],
-            ['name' => 'Survival English SMA', 'subject_id' => $subGrammar->id, 'tutor' => 'Mr Rizhan', 'students' => ['Carmen', 'Yoon Il'], 'days' => ['Monday', 'Thursday'], 'time' => ['16:00', '17:30']],
-            ['name' => 'Speaking Kids & Junior', 'subject_id' => $subSpeaking->id, 'tutor' => 'Ms Hana', 'students' => ['Alya Putri', 'Rafka Pratama'], 'days' => ['Tuesday', 'Friday'], 'time' => ['14:30', '16:00']],
+            ['name' => 'Survival English SD/MI', 'subject_id' => $subSurvival->id, 'tutor' => 'Ms Hana', 'students' => ['Kyuhyun', 'Sang Il', 'Alya Putri'], 'days' => ['Monday', 'Wednesday'], 'time' => ['14:00', '15:30']],
+            ['name' => 'Survival English SMP/MTs', 'subject_id' => $subSurvival->id, 'tutor' => 'Mr Ichsan', 'students' => ['IU', 'Sunyg Il', 'Rafka Pratama'], 'days' => ['Tuesday', 'Thursday'], 'time' => ['15:30', '17:00']],
+            ['name' => 'Survival English SMA/MA', 'subject_id' => $subSurvival->id, 'tutor' => 'Mr Rizhan', 'students' => ['Carmen', 'Yoon Il'], 'days' => ['Monday', 'Thursday'], 'time' => ['16:00', '17:30']],
         ];
 
         $classes = [];
@@ -232,7 +239,7 @@ class FullDemoSeeder extends Seeder
                     'subject_id' => $cd['subject_id'],
                     'tutor_id' => $tutors[$cd['tutor']]->id,
                     'schedule' => implode(' & ', $cd['days']) . ', ' . $cd['time'][0] . '-' . $cd['time'][1],
-                    'capacity' => 12,
+                    'capacity' => 15,
                     'is_active' => true,
                 ]
             );
@@ -242,7 +249,7 @@ class FullDemoSeeder extends Seeder
             foreach ($cd['students'] as $sName) {
                 $sync[$students[$sName]->id] = ['enrolled_at' => '2026-07-14'];
             }
-            $cls->students()->syncWithoutDetaching($sync);
+            $cls->students()->sync($sync);
 
             ClassSchedule::updateOrCreate(
                 ['class_id' => $cls->id, 'tutor_id' => $tutors[$cd['tutor']]->id],
@@ -345,7 +352,7 @@ class FullDemoSeeder extends Seeder
                 'phone' => '081299990001',
                 'level' => 'SMP',
                 'school_name' => 'SMPN 2 Tanjung',
-                'class_name' => 'Survival English SMP',
+                'class_name' => 'Survival English SMP/MTs',
                 'status' => 'pending',
                 'tuition_fee' => 3000000,
                 'registration_fee' => 100000,
@@ -365,7 +372,7 @@ class FullDemoSeeder extends Seeder
                 'phone' => '081299990002',
                 'level' => 'SD',
                 'school_name' => 'SDN 3 Tanjung',
-                'class_name' => 'Speaking Kids & Junior',
+                'class_name' => 'Survival English SD/MI',
                 'status' => 'rejected',
                 'tuition_fee' => 4000000,
                 'registration_fee' => 100000,
@@ -381,8 +388,8 @@ class FullDemoSeeder extends Seeder
         $statuses = ['present', 'present', 'late', 'excused'];
         $sIdx = 0;
         foreach ($students as $st) {
-            $clsId = $classes[$st->class_name]->id ?? $classes['Survival English SD']->id;
-            $tutId = $classes[$st->class_name]->tutor_id ?? $tutors['Mr Bakeri']->id;
+            $clsId = $classes[$st->class_name]->id ?? $classes['Survival English SD/MI']->id;
+            $tutId = $classes[$st->class_name]->tutor_id ?? $tutors['Ms Hana']->id;
             Attendance::updateOrCreate(
                 ['role_type' => 'student', 'student_id' => $st->id, 'date' => Carbon::today()->toDateString()],
                 [
@@ -411,11 +418,11 @@ class FullDemoSeeder extends Seeder
 
         // 9. Journals & Journal Validations (termasuk jurnal Ms Hana!)
         $journalSeeds = [
-            ['class' => 'Survival English SD', 'tutor' => 'Mr Bakeri', 'topic' => 'Basic Vocabulary & Daily Routines', 'jp' => 2, 'status' => 'validated', 'daysAgo' => 3],
-            ['class' => 'Survival English SMP', 'tutor' => 'Mr Ichsan', 'topic' => 'Simple Past vs Present Perfect', 'jp' => 2, 'status' => 'submitted', 'daysAgo' => 1],
-            ['class' => 'Survival English SMA', 'tutor' => 'Mr Rizhan', 'topic' => 'Academic Reading Comprehension', 'jp' => 2, 'status' => 'validated', 'daysAgo' => 2],
-            ['class' => 'Speaking Kids & Junior', 'tutor' => 'Ms Hana', 'topic' => 'Fun Storytelling & Pronunciation Drill', 'jp' => 2, 'status' => 'validated', 'daysAgo' => 2],
-            ['class' => 'Speaking Kids & Junior', 'tutor' => 'Ms Hana', 'topic' => 'Roleplay: At The Restaurant', 'jp' => 2, 'status' => 'submitted', 'daysAgo' => 0],
+            ['class' => 'Survival English SD/MI', 'tutor' => 'Mr Bakeri', 'topic' => 'Basic Vocabulary & Daily Routines', 'jp' => 2, 'status' => 'validated', 'daysAgo' => 3],
+            ['class' => 'Survival English SMP/MTs', 'tutor' => 'Mr Ichsan', 'topic' => 'Simple Past vs Present Perfect', 'jp' => 2, 'status' => 'submitted', 'daysAgo' => 1],
+            ['class' => 'Survival English SMA/MA', 'tutor' => 'Mr Rizhan', 'topic' => 'Academic Reading Comprehension', 'jp' => 2, 'status' => 'validated', 'daysAgo' => 2],
+            ['class' => 'Survival English SD/MI', 'tutor' => 'Ms Hana', 'topic' => 'Fun Storytelling & Pronunciation Drill', 'jp' => 2, 'status' => 'validated', 'daysAgo' => 2],
+            ['class' => 'Survival English SD/MI', 'tutor' => 'Ms Hana', 'topic' => 'Roleplay: At The Restaurant', 'jp' => 2, 'status' => 'submitted', 'daysAgo' => 0],
         ];
 
         $firstJournal = null;
@@ -448,9 +455,8 @@ class FullDemoSeeder extends Seeder
 
         // 10. Evaluations & Honors
         foreach ($students as $st) {
-            $subId = $st->class_name === 'Speaking Kids & Junior' ? $subSpeaking->id : $subSurvival->id;
             Evaluation::updateOrCreate(
-                ['student_id' => $st->id, 'subject_id' => $subId, 'date' => Carbon::today()->subDays(1)->toDateString()],
+                ['student_id' => $st->id, 'subject_id' => $subSurvival->id, 'date' => Carbon::today()->subDays(1)->toDateString()],
                 ['score' => rand(82, 98), 'notes' => 'Perkembangan sangat baik dan aktif di kelas.']
             );
         }
@@ -507,11 +513,11 @@ class FullDemoSeeder extends Seeder
 
         // 12. CBT Exams, Questions & Attempts (termasuk 1 locked attempt untuk tes Buka Kunci)
         $cbtReal = CbtExam::updateOrCreate(
-            ['title' => 'English Quiz CBT — Speaking & Grammar'],
+            ['title' => 'English Quiz CBT — Survival English'],
             [
                 'description' => 'Ujian evaluasi real CBT berbasis soal pilihan ganda.',
-                'class_id' => $classes['Speaking Kids & Junior']->id,
-                'subject_id' => $subSpeaking->id,
+                'class_id' => $classes['Survival English SD/MI']->id,
+                'subject_id' => $subSurvival->id,
                 'cbt_mode' => 'internal_excel',
                 'duration_minutes' => 45,
                 'max_attempts' => 1,
@@ -541,10 +547,10 @@ class FullDemoSeeder extends Seeder
         }
 
         CbtExam::updateOrCreate(
-            ['title' => 'English Listening / Form — Survival English SD'],
+            ['title' => 'English Listening / Form — Survival English SD/MI'],
             [
                 'description' => 'Ujian listening menggunakan Google Form.',
-                'class_id' => $classes['Survival English SD']->id,
+                'class_id' => $classes['Survival English SD/MI']->id,
                 'subject_id' => $subSurvival->id,
                 'cbt_mode' => 'google_form',
                 'duration_minutes' => 30,
@@ -582,10 +588,10 @@ class FullDemoSeeder extends Seeder
 
         // 13. Tests, Server Sessions & Test Schedule Requests
         $testPlacement = Test::updateOrCreate(
-            ['name' => 'Placement Test Speaking — Ms Hana'],
+            ['name' => 'Placement Test Survival English — Ms Hana'],
             [
-                'class_id' => $classes['Speaking Kids & Junior']->id,
-                'subject_id' => $subSpeaking->id,
+                'class_id' => $classes['Survival English SD/MI']->id,
+                'subject_id' => $subSurvival->id,
                 'type' => 'placement',
                 'date' => Carbon::today()->addDays(2)->toDateString(),
                 'max_score' => 100,
@@ -594,7 +600,7 @@ class FullDemoSeeder extends Seeder
         $testCompetition = Test::updateOrCreate(
             ['name' => 'Tryout Brain Champion SD/MI'],
             [
-                'class_id' => $classes['Survival English SD']->id,
+                'class_id' => $classes['Survival English SD/MI']->id,
                 'subject_id' => $subSurvival->id,
                 'type' => 'competition',
                 'date' => Carbon::today()->addDays(5)->toDateString(),
@@ -680,7 +686,7 @@ class FullDemoSeeder extends Seeder
                 [
                     'requester_role' => 'siswa',
                     'student_id' => $students['Alya Putri']->id,
-                    'school_name' => 'Speaking Kids & Junior',
+                    'school_name' => 'Survival English SD/MI',
                     'requested_seats' => 1,
                     'status' => 'pending',
                     'notes' => 'Request jadwal tes placement kelas Ms Hana.',

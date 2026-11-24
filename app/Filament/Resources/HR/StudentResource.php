@@ -108,15 +108,21 @@ class StudentResource extends Resource
                             Forms\Components\Select::make('education_level')
                                 ->label(__('Education Level'))
                                 ->options([
-                                    'SD' => 'SD',
-                                    'MI' => 'MI',
-                                    'SMP' => 'SMP',
-                                    'MTs' => 'MTs',
-                                    'SMA' => 'SMA',
-                                    'Umum' => 'Umum',
-                                ]),
-                            Forms\Components\TextInput::make('course_level')
-                                ->label(__('Course Level')),
+                                    'SD/MI' => 'SD / MI',
+                                    'SMP/MTs' => 'SMP / MTs',
+                                    'SMA/MA' => 'SMA / MA',
+                                ])
+                                ->default('SD/MI'),
+                            Forms\Components\Select::make('class_name')
+                                ->label('Kelas (Survival English)')
+                                ->options([
+                                    'Survival English SD/MI' => 'Survival English SD/MI',
+                                    'Survival English SMP/MTs' => 'Survival English SMP/MTs',
+                                    'Survival English SMA/MA' => 'Survival English SMA/MA',
+                                ])
+                                ->default('Survival English SD/MI'),
+                            Forms\Components\Hidden::make('course_level')
+                                ->default('Survival English'),
                             Forms\Components\TextInput::make('school_name')
                                 ->label('Sekolah Asal (School Name)'),
                             Forms\Components\TextInput::make('class_name')
