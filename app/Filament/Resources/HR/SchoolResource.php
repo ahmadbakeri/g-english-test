@@ -194,15 +194,16 @@ class SchoolResource extends Resource
                                 ->map(fn (Student $s): array => [
                                     'name' => $s->name,
                                     'nisn' => $s->nisn,
-                                    'grade' => $s->class_name,
-                                    'code' => $s->competition_code ?: $s->nis,
+                                    'class_name' => $s->class_name,
+                                    'gender' => $s->gender ?: 'L',
+                                    'competition_code' => $s->competition_code ?: $s->nis,
                                 ])
                                 ->all();
 
                             Mail::to($record->email)->send(new SchoolAccountCredentialsMail(
                                 schoolName: $record->name,
                                 coordinatorName: $record->name,
-                                loginUrl: url('/school/login'),
+                                loginUrl: url('/login'),
                                 username: (string) $record->username,
                                 plainPassword: $plainPassword,
                                 participants: $participants,
