@@ -24,7 +24,7 @@
 
         <!-- Question Body -->
         <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 mb-6 flex-1 overflow-y-auto exam-scroll">
-            <div class="prose max-w-none text-slate-700 text-lg leading-relaxed question-content">
+            <div class="prose max-w-none text-slate-700 text-lg leading-relaxed question-content cbt-rich-content" style="text-align: justify; text-justify: inter-word; text-align-last: left;">
                 {!! $q->question_text !!}
             </div>
             

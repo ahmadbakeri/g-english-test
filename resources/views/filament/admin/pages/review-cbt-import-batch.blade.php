@@ -412,16 +412,16 @@
                     @endif
 
                     {{-- Visual Question Body (Matches Student CBT) --}}
-                    <div class="cbt-rich-content" data-cbt-math style="font-size:1rem;line-height:1.68;margin-bottom:1rem;">
+                    <div class="cbt-rich-content" data-cbt-math style="margin-bottom:1.1rem;max-width:82ch;">
                         {!! $draft->question_html !!}
                     </div>
 
                     {{-- MCQ Options --}}
                     @if($draft->question_type === 'mcq')
-                        <div data-cbt-math>
+                        <div data-cbt-math style="max-width:82ch;">
                             @foreach(['A' => $draft->option_a, 'B' => $draft->option_b, 'C' => $draft->option_c, 'D' => $draft->option_d, 'E' => $draft->option_e] as $letter => $optHtml)
                                 @if($optHtml !== null && trim($optHtml) !== '')
-                                    <div class="stg-opt-row {{ strtoupper((string) $draft->correct_answer) === $letter ? 'is-key' : '' }}">
+                                    <div class="stg-opt-row {{ strtoupper((string) $draft->correct_answer) === $letter ? 'is-key' : '' }}" style="align-items:center;">
                                         <button type="button"
                                                 title="Klik untuk tandai/batal kunci {{ $letter }} (opsional)"
                                                 wire:click="setQuickKey({{ $draft->id }}, '{{ strtoupper((string) $draft->correct_answer) === $letter ? '' : $letter }}')"
@@ -429,7 +429,7 @@
                                                 style="border:none;cursor:pointer;">
                                             {{ $letter }}
                                         </button>
-                                        <div class="cbt-rich-content" style="flex:1;font-size:0.95rem;">
+                                        <div class="cbt-rich-content cbt-option-content" style="flex:1;">
                                             {!! $optHtml !!}
                                         </div>
                                     </div>
@@ -439,7 +439,7 @@
 
                     {{-- Complex True/False Statements Table --}}
                     @elseif($draft->question_type === 'complex_tf')
-                        <div class="cbt-rich-content" data-cbt-math>
+                        <div class="cbt-rich-content" data-cbt-math style="max-width:82ch;">
                             <table>
                                 <thead>
                                     <tr>
@@ -453,7 +453,7 @@
                                     @foreach(($draft->statements ?? []) as $stmt)
                                         <tr>
                                             <td style="text-align:center;font-weight:700;">{{ $stmt['no'] ?? $loop->iteration }}</td>
-                                            <td>{!! $stmt['text'] ?? '' !!}</td>
+                                            <td class="cbt-tf-stmt">{!! $stmt['text'] ?? '' !!}</td>
                                             <td style="text-align:center;">
                                                 <span style="display:inline-block;width:18px;height:18px;border-radius:9999px;border:2px solid {{ ($stmt['answer'] ?? '') === 'B' ? '#10b981' : '#94a3b8' }};background:{{ ($stmt['answer'] ?? '') === 'B' ? '#10b981' : 'transparent' }};"></span>
                                             </td>

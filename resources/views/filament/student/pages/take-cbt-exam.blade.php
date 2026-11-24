@@ -202,26 +202,31 @@
         }
 
         .cbt-question-text {
-            font-size: 1.18rem;
-            font-weight: 600;
-            margin: 1rem 0 1.6rem 0;
-            color: #0f172a;
-            line-height: 1.7;
+            font-size: 1.05rem;
+            font-weight: 400;
+            margin: 1.15rem 0 1.65rem 0;
+            color: #1e293b;
+            line-height: 1.85;
+            text-align: justify;
+            text-justify: inter-word;
+            text-align-last: left;
+            max-width: 78ch;
         }
-        .dark .cbt-question-text { color: #f1f5f9; }
+        .dark .cbt-question-text { color: #e2e8f0; }
 
         /* Options */
         .cbt-options-list {
             display: flex;
             flex-direction: column;
-            gap: 0.8rem;
+            gap: 0.72rem;
+            max-width: 78ch;
         }
         .cbt-option-label {
             display: flex;
             align-items: center;
-            padding: 1rem 1.2rem;
-            border-radius: 1rem;
-            border: 2px solid #e2e8f0;
+            padding: 0.88rem 1.15rem;
+            border-radius: 0.95rem;
+            border: 1.5px solid #cbd5e1;
             background: #ffffff;
             cursor: pointer;
             transition: all 0.16s ease;
@@ -1188,7 +1193,7 @@
                                                  class="cbt-option-label"
                                                  :class="{ 'selected': answers[currentQuestion.id] === optKey }">
                                                 <span class="cbt-option-badge" x-text="optKey"></span>
-                                                <div class="cbt-rich-content" style="font-size: 1rem; font-weight: 600; flex: 1;" x-html="optText"></div>
+                                                <div class="cbt-rich-content cbt-option-content" style="flex: 1;" x-html="optText"></div>
                                             </div>
                                         </template>
                                     </div>
@@ -1210,7 +1215,7 @@
                                                 <template x-for="(stmt, sIdx) in (currentQuestion.statements || [])" :key="currentQuestion.id + '_st_' + (stmt.no || sIdx)">
                                                     <tr>
                                                         <td style="text-align: center; font-weight: 800;" x-text="stmt.no || (sIdx + 1)"></td>
-                                                        <td style="font-size: 0.96rem; line-height: 1.55;" x-html="stmt.text"></td>
+                                                        <td class="cbt-tf-stmt" style="font-size: 0.96rem; line-height: 1.65;" x-html="stmt.text"></td>
                                                         <td style="text-align: center;">
                                                             <button type="button"
                                                                     @click="selectComplexTf(currentQuestion.id, stmt.no || (sIdx + 1), 'B')"
