@@ -16,9 +16,9 @@ use Filament\Tables\Table;
 
 class ScheduleResource extends Resource
 {
-public static function getNavigationSort(): ?int
+    public static function getNavigationSort(): ?int
     {
-        return 3;
+        return 1;
     }
 
     protected static ?string $model = Schedule::class;
@@ -26,10 +26,12 @@ public static function getNavigationSort(): ?int
     {
         return __('Academic');
     }
-    
+
+    public static function getNavigationLabel(): string { return __('Daily Schedules'); }
+
     public static function getPluralModelLabel(): string { return __('Daily Schedules'); }
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-clock';
 
     protected static ?string $recordTitleAttribute = 'day';
 

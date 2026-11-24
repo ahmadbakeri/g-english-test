@@ -40,10 +40,10 @@ class ExpenseResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('Accounting');
+        return __('Finance');
     }
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-receipt-percent';
 
     public static function form(Schema $schema): Schema
     {

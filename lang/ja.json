@@ -431,5 +431,19 @@
     "Server Capacity & Session Schedule": "サーバー容量とスケジュール",
     "Test Schedule Requests": "試験日程リクエスト",
     "Test Schedule Request": "試験日程リクエスト",
-    "Test Schedule Request Data": "試験日程リクエスト情報"
+    "Test Schedule Request Data": "試験日程リクエスト情報",
+    "Exams & Evaluation": "試験・評価",
+    "Finance": "財務・会計",
+    "Finance & Reports": "財務・レポート",
+    "Master Data & System": "マスタデータ・システム",
+    "Roles & Permissions": "権限とロール",
+    "User Access Logs": "ユーザーアクセスログ",
+    "User Access Activity": "ユーザーアクセス履歴",
+    "CBT Exams": "CBT試験",
+    "CBT Exam": "CBT試験",
+    "Active of :total registered": "登録 :total 名中アクティブ",
+    ":count partner schools": "提携校 :count 校",
+    "Test Sessions & Schedule": "試験セッション・日程",
+    "Admin shortcuts ready for 1-click access": "件の管理ショートカットにワンクリックアクセス",
+    "Filter shortcuts...": "ショートカットを検索..."
 }

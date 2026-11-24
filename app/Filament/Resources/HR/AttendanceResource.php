@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Builder;
 class AttendanceResource extends Resource
 {
     protected static ?string $model = Attendance::class;
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-clipboard-document-list';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-clipboard-document-check';
     public static function getNavigationLabel(): string { return __('Attendances'); }
     public static function getModelLabel(): string { return __('Absensi'); }
     public static function getPluralModelLabel(): string { return __('Attendances'); }
@@ -26,7 +26,7 @@ class AttendanceResource extends Resource
     }
     public static function getNavigationSort(): ?int
     {
-        return 4;
+        return 3;
     }
 
     public static function getEloquentQuery(): Builder

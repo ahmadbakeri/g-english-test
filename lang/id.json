@@ -433,5 +433,19 @@
     "Server Capacity & Session Schedule": "Kapasitas Server & Jadwal Sesi",
     "Test Schedule Requests": "Kelola Jadwal Tes",
     "Test Schedule Request": "Request Jadwal Tes",
-    "Test Schedule Request Data": "Data Request Jadwal Tes"
+    "Test Schedule Request Data": "Data Request Jadwal Tes",
+    "Exams & Evaluation": "Ujian & Evaluasi",
+    "Finance": "Keuangan",
+    "Finance & Reports": "Keuangan & Laporan",
+    "Master Data & System": "Data Master & Sistem",
+    "Roles & Permissions": "Peran & Akses",
+    "User Access Logs": "Log Akses Pengguna",
+    "User Access Activity": "Aktivitas Akses Pengguna",
+    "CBT Exams": "Ujian CBT",
+    "CBT Exam": "Ujian CBT",
+    "Active of :total registered": "Aktif dari :total terdaftar",
+    ":count partner schools": ":count sekolah mitra",
+    "Test Sessions & Schedule": "Sesi & Jadwal Tes",
+    "Admin shortcuts ready for 1-click access": "pintasan menu admin siap akses 1 klik",
+    "Filter shortcuts...": "Cari pintasan menu..."
 }

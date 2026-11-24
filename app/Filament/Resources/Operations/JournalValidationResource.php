@@ -22,7 +22,7 @@ class JournalValidationResource extends Resource
 
     protected static ?string $model = Journal::class;
     protected static ?string $slug = 'journal-validations';
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-shield-check';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-check-badge';
     public static function getNavigationLabel(): string { return __('Journal Validations'); }
     public static function getModelLabel(): string { return __('Journal Validations'); }
     public static function getPluralModelLabel(): string { return __('Journal Validations'); }
@@ -33,6 +33,12 @@ class JournalValidationResource extends Resource
     public static function getNavigationSort(): ?int
     {
         return 6;
+    }
+
+    public static function getNavigationBadge(): ?string
+    {
+        $pending = Journal::where('status', 'submitted')->count();
+        return $pending > 0 ? (string) $pending : null;
     }
 
     public static function table(Table $table): Table

@@ -33,16 +33,16 @@ class EvaluationResource extends Resource
 
     public static function getNavigationSort(): ?int
     {
-        return 1;
+        return 6;
     }
 
     protected static ?string $model = Evaluation::class;
     public static function getNavigationGroup(): ?string
     {
-        return __('Evaluation');
+        return __('Exams & Evaluation');
     }
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-chart-bar-square';
 
     protected static ?string $recordTitleAttribute = 'date';
 

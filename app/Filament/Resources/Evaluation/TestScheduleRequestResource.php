@@ -28,8 +28,8 @@ class TestScheduleRequestResource extends Resource
     public static function getNavigationLabel(): string { return __('Test Schedule Requests'); }
     public static function getModelLabel(): string { return __('Test Schedule Request'); }
     public static function getPluralModelLabel(): string { return __('Test Schedule Requests'); }
-    public static function getNavigationGroup(): ?string { return __('Evaluation'); }
-    public static function getNavigationSort(): ?int { return 7; }
+    public static function getNavigationGroup(): ?string { return __('Exams & Evaluation'); }
+    public static function getNavigationSort(): ?int { return 4; }
 
     public static function getNavigationBadge(): ?string
     {

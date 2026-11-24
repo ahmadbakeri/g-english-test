@@ -19,7 +19,7 @@ class TutorSalaryResource extends Resource
     public static function getPluralModelLabel(): string { return __('Salary'); }
     public static function getNavigationGroup(): ?string
     {
-        return __('Accounting');
+        return __('Finance');
     }
     public static function getNavigationSort(): ?int
     {

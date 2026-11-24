@@ -23,7 +23,7 @@ public static function getNavigationLabel(): string
 
     public static function getNavigationSort(): ?int
     {
-        return 5;
+        return 4;
     }
 
     protected static ?string $model = ClassSchedule::class;
@@ -35,7 +35,7 @@ public static function getNavigationLabel(): string
     
     public static function getPluralModelLabel(): string { return __('Jadwal'); }
     
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-calendar-days';
 
     public static function form(Schema $schema): Schema
     {

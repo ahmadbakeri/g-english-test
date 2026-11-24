@@ -20,17 +20,17 @@ class HonorResource extends Resource
     }
 
     protected static ?string $model = Honor::class;
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-trophy';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-sparkles';
     public static function getNavigationLabel(): string { return __('Honors'); }
     public static function getModelLabel(): string { return __('Honors'); }
     public static function getPluralModelLabel(): string { return __('Honors'); }
     public static function getNavigationGroup(): ?string
     {
-        return __('Evaluation');
+        return __('Exams & Evaluation');
     }
     public static function getNavigationSort(): ?int
     {
-        return 2;
+        return 7;
     }
 
     public static function form(Schema $schema): Schema

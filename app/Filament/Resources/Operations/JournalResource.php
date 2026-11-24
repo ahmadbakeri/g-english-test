@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Builder;
 class JournalResource extends Resource
 {
     protected static ?string $model = Journal::class;
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-book-open';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-document-text';
     public static function getNavigationLabel(): string { return __('Learning Journal'); }
     public static function getModelLabel(): string { return __('Journal'); }
     public static function getPluralModelLabel(): string { return __('Journal'); }

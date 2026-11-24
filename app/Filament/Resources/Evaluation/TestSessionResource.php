@@ -25,8 +25,8 @@ class TestSessionResource extends Resource
     public static function getNavigationLabel(): string { return __('Test Sessions & Server'); }
     public static function getModelLabel(): string { return __('Test Session'); }
     public static function getPluralModelLabel(): string { return __('Test Sessions & Server'); }
-    public static function getNavigationGroup(): ?string { return __('Evaluation'); }
-    public static function getNavigationSort(): ?int { return 6; }
+    public static function getNavigationGroup(): ?string { return __('Exams & Evaluation'); }
+    public static function getNavigationSort(): ?int { return 3; }
 
     public static function form(Schema $schema): Schema
     {

@@ -39,7 +39,7 @@ class UserResource extends Resource
 
     public static function getNavigationSort(): ?int
     {
-        return 4;
+        return 2;
     }
 
     public static function canCreate(): bool

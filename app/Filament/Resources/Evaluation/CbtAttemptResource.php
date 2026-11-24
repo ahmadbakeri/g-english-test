@@ -35,7 +35,12 @@ class CbtAttemptResource extends Resource
     
     public static function getNavigationGroup(): ?string
     {
-        return __('Evaluation');
+        return __('Exams & Evaluation');
+    }
+
+    public static function getNavigationSort(): ?int
+    {
+        return 5;
     }
 
     protected static ?string $recordTitleAttribute = 'id';

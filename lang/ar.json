@@ -431,5 +431,19 @@
     "Server Capacity & Session Schedule": "سعة الخادم وجدول الجلسة",
     "Test Schedule Requests": "طلبات جدول الاختبار",
     "Test Schedule Request": "طلب جدول اختبار",
-    "Test Schedule Request Data": "بيانات طلب جدول الاختبار"
+    "Test Schedule Request Data": "بيانات طلب جدول الاختبار",
+    "Exams & Evaluation": "الاختبارات والتقييم",
+    "Finance": "المالية",
+    "Finance & Reports": "المالية والتقارير",
+    "Master Data & System": "البيانات الأساسية والنظام",
+    "Roles & Permissions": "الأدوار والصلاحيات",
+    "User Access Logs": "سجل دخول المستخدمين",
+    "User Access Activity": "نشاط دخول المستخدمين",
+    "CBT Exams": "اختبارات CBT",
+    "CBT Exam": "اختبار CBT",
+    "Active of :total registered": "نشط من أصل :total مسجل",
+    ":count partner schools": ":count مدرسة شريكة",
+    "Test Sessions & Schedule": "جلسات وجدول الاختبارات",
+    "Admin shortcuts ready for 1-click access": "اختصارات لوحة الإدارة جاهزة بنقرة واحدة",
+    "Filter shortcuts...": "ابحث في الاختصارات..."
 }

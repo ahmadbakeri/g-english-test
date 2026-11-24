@@ -12,7 +12,7 @@ class AccessLogsPage extends Page
 {
     protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-finger-print';
     protected static ?string $slug = 'access-logs';
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 3;
     protected string $view = 'filament.admin.pages.access-logs-page';
 
     public string $search = '';
@@ -22,12 +22,12 @@ class AccessLogsPage extends Page
 
     public static function getNavigationLabel(): string
     {
-        return 'Log Akses Pengguna';
+        return __('User Access Logs');
     }
 
     public function getTitle(): string
     {
-        return 'Aktivitas Akses Pengguna';
+        return __('User Access Activity');
     }
 
     public static function getNavigationGroup(): ?string

@@ -41,17 +41,23 @@ class AdmissionResource extends Resource
 
     public static function getNavigationSort(): ?int
     {
-        return 1;
+        return 4;
     }
 
     protected static ?string $model = Admission::class;
 
     public static function getNavigationGroup(): ?string
     {
-        return __('Administration');
+        return __('Student Management');
     }
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    public static function getNavigationBadge(): ?string
+    {
+        $pending = Admission::where('status', 'pending')->count();
+        return $pending > 0 ? (string) $pending : null;
+    }
+
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-user-plus';
 
     protected static ?string $recordTitleAttribute = 'name';
 

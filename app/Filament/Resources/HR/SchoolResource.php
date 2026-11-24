@@ -48,12 +48,12 @@ class SchoolResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('Master Data');
+        return __('Student Management');
     }
 
     public static function getNavigationSort(): ?int
     {
-        return 5;
+        return 3;
     }
 
     public static function canCreate(): bool

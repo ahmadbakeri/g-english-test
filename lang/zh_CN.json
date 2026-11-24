@@ -431,5 +431,19 @@
     "Server Capacity & Session Schedule": "服务器容量与场次安排",
     "Test Schedule Requests": "考试日程申请",
     "Test Schedule Request": "考试日程申请",
-    "Test Schedule Request Data": "考试日程申请资料"
+    "Test Schedule Request Data": "考试日程申请资料",
+    "Exams & Evaluation": "考试与评估",
+    "Finance": "财务管理",
+    "Finance & Reports": "财务与报表",
+    "Master Data & System": "基础数据与系统",
+    "Roles & Permissions": "角色与权限",
+    "User Access Logs": "用户访问日志",
+    "User Access Activity": "用户访问记录",
+    "CBT Exams": "CBT 考试",
+    "CBT Exam": "CBT 考试",
+    "Active of :total registered": "在读（共注册 :total 人）",
+    ":count partner schools": ":count 所合作学校",
+    "Test Sessions & Schedule": "考试场次与日程",
+    "Admin shortcuts ready for 1-click access": "项管理快捷入口一键直达",
+    "Filter shortcuts...": "搜索快捷菜单..."
 }

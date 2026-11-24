@@ -19,7 +19,7 @@ class SemesterResource extends Resource
     }
 
     protected static ?string $model = Semester::class;
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-calendar-days';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-squares-2x2';
     public static function getNavigationLabel(): string { return __('Semesters'); }
     public static function getModelLabel(): string { return __('Semesters'); }
     public static function getPluralModelLabel(): string { return __('Semesters'); }
@@ -29,7 +29,7 @@ class SemesterResource extends Resource
     }
     public static function getNavigationSort(): ?int
     {
-        return 2;
+        return 7;
     }
 
     public static function form(Schema $schema): Schema

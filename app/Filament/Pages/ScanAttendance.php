@@ -12,8 +12,8 @@ use Illuminate\Support\Carbon;
 
 class ScanAttendance extends Page
 {
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-camera';
-    protected static ?int $navigationSort = 0;
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-qr-code';
+    protected static ?int $navigationSort = 2;
     protected string $view = 'filament.pages.scan-attendance';
 
     public function getTitle(): string

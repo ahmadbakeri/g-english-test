@@ -24,11 +24,11 @@ class TutorResource extends Resource
     public static function getPluralModelLabel(): string { return __('Tutors'); }
     public static function getNavigationGroup(): ?string
     {
-        return __('Academic');
+        return __('Master Data');
     }
     public static function getNavigationSort(): ?int
     {
-        return 3;
+        return 1;
     }
 
     public static function form(Schema $schema): Schema

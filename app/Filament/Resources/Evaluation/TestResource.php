@@ -25,8 +25,8 @@ class TestResource extends Resource
     public static function getNavigationLabel(): string { return __('Manage Tests'); }
     public static function getModelLabel(): string { return __('Test'); }
     public static function getPluralModelLabel(): string { return __('Manage Tests'); }
-    public static function getNavigationGroup(): ?string { return __('Evaluation'); }
-    public static function getNavigationSort(): ?int { return 5; }
+    public static function getNavigationGroup(): ?string { return __('Exams & Evaluation'); }
+    public static function getNavigationSort(): ?int { return 1; }
 
     public static function form(Schema $schema): Schema
     {

@@ -51,16 +51,14 @@ class AdminPanelProvider extends PanelProvider
             ->spa()
             ->globalSearch(false)
             ->navigationGroups([
-                NavigationGroup::make('Administration')
-                    ->label(fn (): string => __('Administration')),
                 NavigationGroup::make('Student Management')
                     ->label(fn (): string => __('Student Management')),
                 NavigationGroup::make('Academic')
                     ->label(fn (): string => __('Academic')),
-                NavigationGroup::make('Evaluation')
-                    ->label(fn (): string => __('Evaluation')),
-                NavigationGroup::make('Accounting')
-                    ->label(fn (): string => __('Accounting')),
+                NavigationGroup::make('Exams & Evaluation')
+                    ->label(fn (): string => __('Exams & Evaluation')),
+                NavigationGroup::make('Finance')
+                    ->label(fn (): string => __('Finance')),
                 NavigationGroup::make('Reports')
                     ->label(fn (): string => __('Reports')),
                 NavigationGroup::make('Master Data')
@@ -85,7 +83,11 @@ class AdminPanelProvider extends PanelProvider
                 DispatchServingFilamentEvent::class,
             ])
             ->plugins([
-                \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make(),
+                \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make()
+                    ->navigationGroup(fn (): string => __('System'))
+                    ->navigationLabel(fn (): string => __('Roles & Permissions'))
+                    ->navigationIcon('heroicon-o-shield-check')
+                    ->navigationSort(2),
             ])
             ->authMiddleware([
                 'auth',

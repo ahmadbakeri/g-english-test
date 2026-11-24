@@ -47,10 +47,10 @@ class StudentPaymentResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('Accounting');
+        return __('Finance');
     }
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-credit-card';
 
     protected static ?string $recordTitleAttribute = 'id';
 

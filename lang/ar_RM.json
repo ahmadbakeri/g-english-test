@@ -431,5 +431,19 @@
     "Server Capacity & Session Schedule": "Siat Al-Khadim wal-Jadwal",
     "Test Schedule Requests": "Talabat Jadwal Al-Ikhtibar",
     "Test Schedule Request": "Talab Jadwal Ikhtibar",
-    "Test Schedule Request Data": "Bayanat Talab Al-Jadwal"
+    "Test Schedule Request Data": "Bayanat Talab Al-Jadwal",
+    "Exams & Evaluation": "Al-Ikhtibarat wal-Taqyim",
+    "Finance": "Al-Maliyyah",
+    "Finance & Reports": "Al-Maliyyah wal-Taqarir",
+    "Master Data & System": "Al-Bayanat al-Asasiyyah wal-Nizam",
+    "Roles & Permissions": "Al-Adwar wal-Salahiyyat",
+    "User Access Logs": "Sijil Dukhul al-Mustakhdimin",
+    "User Access Activity": "Nashat Dukhul al-Mustakhdimin",
+    "CBT Exams": "Ikhtibarat CBT",
+    "CBT Exam": "Ikhtibar CBT",
+    "Active of :total registered": "Nashit min :total musajjal",
+    ":count partner schools": ":count madrasah sharikah",
+    "Test Sessions & Schedule": "Jalasat wa Jadwal al-Ikhtibarat",
+    "Admin shortcuts ready for 1-click access": "Ikhtisarat al-Idarah jahizah",
+    "Filter shortcuts...": "Ibhas fi al-ikhtisarat..."
 }

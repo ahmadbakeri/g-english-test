@@ -20,17 +20,22 @@ class CbtExamResource extends Resource
 {
     protected static ?string $model = CbtExam::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-pencil-square';
 
     protected static ?string $recordTitleAttribute = 'title';
 
-    public static function getNavigationLabel(): string { return __('Exam'); }
-    public static function getModelLabel(): string { return __('Exam'); }
-    public static function getPluralModelLabel(): string { return __('Exams'); }
+    public static function getNavigationLabel(): string { return __('CBT Exams'); }
+    public static function getModelLabel(): string { return __('CBT Exam'); }
+    public static function getPluralModelLabel(): string { return __('CBT Exams'); }
     
     public static function getNavigationGroup(): ?string
     {
-        return __('Evaluation');
+        return __('Exams & Evaluation');
+    }
+
+    public static function getNavigationSort(): ?int
+    {
+        return 2;
     }
 
     public static function form(Schema $schema): Schema
