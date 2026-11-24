@@ -39,7 +39,8 @@ class TutorResource extends Resource
                 ->icon('heroicon-o-academic-cap')
                 ->schema([
                     Forms\Components\TextInput::make('nip')
-                        ->label(__('NIP'))
+                        ->label('ID Buatan / NIP')
+                        ->helperText('ID unik tutor — bisa langsung dipakai untuk login.')
                         ->prefixIcon('heroicon-o-identification')
                         ->unique(ignoreRecord: true),
                     Forms\Components\TextInput::make('name')
@@ -65,6 +66,30 @@ class TutorResource extends Resource
                         ->label(__('Active'))
                         ->default(true),
                 ])->columns(2),
+
+            \Filament\Schemas\Components\Section::make('Akun Login Tutor')
+                ->description('Tutor dapat login menggunakan Username, ID Buatan (NIP), atau Email.')
+                ->icon('heroicon-o-key')
+                ->schema([
+                    Forms\Components\TextInput::make('login_username')
+                        ->label('Username Login')
+                        ->placeholder('Kosongkan untuk otomatis mengikuti ID/NIP')
+                        ->prefixIcon('heroicon-o-at-symbol')
+                        ->dehydrated(false),
+                    Forms\Components\TextInput::make('login_email')
+                        ->label('Email Login')
+                        ->email()
+                        ->placeholder('contoh: nama@g-english.com')
+                        ->prefixIcon('heroicon-o-envelope')
+                        ->dehydrated(false),
+                    Forms\Components\TextInput::make('login_password')
+                        ->label('Password Login')
+                        ->password()
+                        ->revealable()
+                        ->placeholder('Default: ganzajaya')
+                        ->prefixIcon('heroicon-o-lock-closed')
+                        ->dehydrated(false),
+                ])->columns(3),
 
             \Filament\Schemas\Components\Section::make('Foto Profil Pengajar')
                 ->description('Unggah foto resmi tutor untuk ditampilkan pada kartu pengajar dan laporan.')

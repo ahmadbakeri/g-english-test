@@ -57,29 +57,35 @@ class Tutor extends Model
         static::created(function (Tutor $tutor) {
             // Create user account automatically if not set
             if (!$tutor->user_id) {
-                $maxNum = User::where('role', 'tutor')
-                    ->whereNotNull('username')
-                    ->pluck('username')
-                    ->filter(fn ($u) => ctype_digit((string) $u))
-                    ->map(fn ($u) => (int) $u)
-                    ->max();
+                $preferredUsername = trim((string) ($tutor->nip ?? ''));
+                if ($preferredUsername !== '' && !User::where('username', $preferredUsername)->exists()) {
+                    $resolvedUsername = $preferredUsername;
+                } else {
+                    $maxNum = User::where('role', 'tutor')
+                        ->whereNotNull('username')
+                        ->pluck('username')
+                        ->filter(fn ($u) => ctype_digit((string) $u))
+                        ->map(fn ($u) => (int) $u)
+                        ->max();
 
-                $nextNum = $maxNum && $maxNum >= 48000 ? $maxNum + 1 : 48001;
-                while (User::where('username', (string) $nextNum)->exists()) {
-                    $nextNum++;
+                    $nextNum = $maxNum && $maxNum >= 48000 ? $maxNum + 1 : 48001;
+                    while (User::where('username', (string) $nextNum)->exists()) {
+                        $nextNum++;
+                    }
+                    $resolvedUsername = (string) $nextNum;
                 }
 
                 $slug = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $tutor->name)) ?: 'tutor';
                 $baseEmail = $slug . '@g-english.com';
                 if (User::where('email', $baseEmail)->exists()) {
-                    $baseEmail = $slug . '_' . $nextNum . '@g-english.com';
+                    $baseEmail = $slug . '_' . $resolvedUsername . '@g-english.com';
                 }
 
                 $user = User::create([
-                    'username' => (string) $nextNum,
+                    'username' => $resolvedUsername,
                     'name' => $tutor->name,
                     'email' => $baseEmail,
-                    'password' => \Illuminate\Support\Facades\Hash::make('password'),
+                    'password' => \Illuminate\Support\Facades\Hash::make('ganzajaya'),
                     'role' => 'tutor',
                 ]);
                 $tutor->user_id = $user->id;

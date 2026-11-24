@@ -30,19 +30,47 @@ Route::get('/cbt-gform-demo/submitted', function () {
 
 Route::post('/login-action', function (\Illuminate\Http\Request $request) {
     $credentials = $request->validate([
-        'username' => 'required',
-        'password' => 'required',
+        'username' => 'required|string',
+        'password' => 'required|string',
     ]);
 
-    if (\Illuminate\Support\Facades\Auth::attempt($credentials)) {
+    $loginId = trim((string) $credentials['username']);
+    $plainPassword = (string) $credentials['password'];
+
+    // Fast indexed lookups: username -> email -> tutor custom ID (NIP) -> student NIS/NISN
+    $authUser = \App\Models\User::where('username', $loginId)->first();
+
+    if (!$authUser && str_contains($loginId, '@')) {
+        $authUser = \App\Models\User::where('email', $loginId)->first()
+            ?: \App\Models\User::whereRaw('LOWER(email) = ?', [mb_strtolower($loginId)])->first();
+    }
+
+    if (!$authUser) {
+        $tutor = \App\Models\Tutor::where('nip', $loginId)->with('user')->first();
+        if ($tutor?->user) {
+            $authUser = $tutor->user;
+        }
+    }
+
+    if (!$authUser) {
+        $student = \App\Models\Student::where('nis', $loginId)
+            ->orWhere('nisn', $loginId)
+            ->with('user')
+            ->first();
+        if ($student?->user) {
+            $authUser = $student->user;
+        }
+    }
+
+    if ($authUser && \Illuminate\Support\Facades\Hash::check($plainPassword, $authUser->password)) {
+        \Illuminate\Support\Facades\Auth::login($authUser);
         $request->session()->regenerate();
-        $authUser = \Illuminate\Support\Facades\Auth::user();
 
         // Auto-rehash legacy high-cost bcrypt hashes down to configured BCRYPT_ROUNDS (10) for 4x faster future logins
         try {
             if (\Illuminate\Support\Facades\Hash::needsRehash($authUser->password)) {
                 $authUser->forceFill([
-                    'password' => \Illuminate\Support\Facades\Hash::make($credentials['password']),
+                    'password' => \Illuminate\Support\Facades\Hash::make($plainPassword),
                 ])->saveQuietly();
             }
         } catch (\Throwable) {
@@ -77,7 +105,7 @@ Route::post('/login-action', function (\Illuminate\Http\Request $request) {
     }
 
     return back()->withErrors([
-        'username' => 'Username atau Password salah.',
+        'username' => 'Username / ID / Email atau Password salah.',
     ]);
 })->name('login.action');
 

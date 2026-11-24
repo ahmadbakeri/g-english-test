@@ -114,18 +114,58 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
             : 'public';
     }
 
-    public function getFilamentAvatarUrl(): ?string
+    public function getPhotoUrlAttribute(): ?string
     {
         if ($this->avatar_url) {
-            return \Illuminate\Support\Facades\Storage::disk(self::avatarDisk())->url($this->avatar_url);
+            $disk = self::avatarDisk();
+            if ($disk === 'r2') {
+                return route('avatar.proxy', ['path' => $this->avatar_url]);
+            }
+            return \Illuminate\Support\Facades\Storage::disk('public')->url($this->avatar_url);
+        }
+
+        if ($this->role === 'tutor' && $this->tutor?->photo) {
+            return \Illuminate\Support\Facades\Storage::disk('public')->url($this->tutor->photo);
+        }
+
+        if ($this->role === 'siswa' && $this->student?->photo) {
+            return \Illuminate\Support\Facades\Storage::disk('public')->url($this->student->photo);
+        }
+
+        return null;
+    }
+
+    public function getInitialsAttribute(): string
+    {
+        $parts = collect(explode(' ', trim((string) $this->name)))->filter();
+        $letters = $parts->map(fn ($s) => mb_substr($s, 0, 1))->join('');
+        return mb_strtoupper(mb_substr($letters ?: 'G', 0, 2));
+    }
+
+    public function getRoleLabelAttribute(): string
+    {
+        return match ($this->role) {
+            'admin' => 'Administrator',
+            'tutor' => 'Tutor Pengajar',
+            'siswa' => 'Siswa',
+            'parent' => 'Orang Tua / Wali',
+            'school' => 'Koordinator Sekolah',
+            'kemenag' => 'Kementerian Agama',
+            'kemendikdasmen' => 'Kemendikdasmen',
+            default => ucfirst((string) $this->role),
+        };
+    }
+
+    public function getFilamentAvatarUrl(): ?string
+    {
+        if ($this->photo_url) {
+            return $this->photo_url;
         }
 
         // Fast local SVG generation (no external API calls to ui-avatars.com which is slow)
-        $name = trim(collect(explode(' ', $this->name))->map(fn ($s) => mb_substr($s, 0, 1))->join(''));
-        $initials = strtoupper(mb_substr($name, 0, 2));
-        
-        $svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#1e3a8a"/><text x="50%" y="50%" dominant-baseline="central" text-anchor="middle" fill="#ffffff" font-family="sans-serif" font-size="40" font-weight="600">'.$initials.'</text></svg>';
-        
-        return 'data:image/svg+xml;base64,'.base64_encode($svg);
+        $initials = $this->initials;
+        $svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#0a4282"/><text x="50%" y="50%" dominant-baseline="central" text-anchor="middle" fill="#fbb900" font-family="sans-serif" font-size="40" font-weight="800">' . $initials . '</text></svg>';
+
+        return 'data:image/svg+xml;base64,' . base64_encode($svg);
     }
 }

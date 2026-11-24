@@ -1,7 +1,7 @@
 <x-filament-panels::page>
     <div class="gx-wrap">
         <div class="gx-toolbar">
-            <input type="search" wire:model.live.debounce.300ms="search" placeholder="Cari nama tutor / NIP / spesialisasi / HP..." class="gx-search" />
+            <input type="search" wire:model.live.debounce.300ms="search" placeholder="Cari nama tutor / username / ID buatan (NIP) / email / HP..." class="gx-search" />
             <div class="gx-badges">
                 <span class="gx-pill gx-pill-primary">Total Tutor: {{ $this->groupedTutors['total'] }}</span>
                 <span class="gx-pill gx-pill-gold">Aktif: {{ $this->groupedTutors['active'] }}</span>
@@ -27,9 +27,10 @@
                         <table class="gx-table">
                             <thead>
                                 <tr>
-                                    <th>No</th>
-                                    <th>NIP</th>
-                                    <th>Nama Tutor</th>
+                                    <th style="width:2.8rem;">No</th>
+                                    <th>Tutor</th>
+                                    <th>ID Buatan / NIP</th>
+                                    <th>Username &amp; Email Login</th>
                                     <th>Spesialisasi</th>
                                     <th>No. HP</th>
                                     <th>Status</th>
@@ -38,12 +39,28 @@
                             </thead>
                             <tbody>
                                 @foreach ($tutors as $i => $tutor)
-                                    <tr wire:click="startInlineEdit({{ $tutor->id }})" class="gx-row-click" title="Klik baris untuk edit tutor">
+                                    @php
+                                        $tutorPhoto = $tutor->photo
+                                            ? \Illuminate\Support\Facades\Storage::disk('public')->url($tutor->photo)
+                                            : $tutor->user?->photo_url;
+                                        $tutorInitials = mb_strtoupper(mb_substr(trim($tutor->name), 0, 2));
+                                    @endphp
+                                    <tr wire:click="startInlineEdit({{ $tutor->id }})" class="gx-row-click" title="Klik baris untuk edit tutor &amp; akun login">
                                         <td class="gx-mono">{{ $i + 1 }}</td>
-                                        <td class="gx-mono">{{ $tutor->nip ?: '-' }}</td>
-                                        <td style="font-weight:700;color:#0a4282;" class="dark:!text-sky-300">
-                                            <div>{{ $tutor->name }}</div>
-                                            <div style="font-size:0.74rem;color:#64748b;font-weight:500;">{{ $tutor->user?->email ?? '-' }}</div>
+                                        <td>
+                                            <div style="display:flex;align-items:center;gap:0.65rem;">
+                                                @if ($tutorPhoto)
+                                                    <img src="{{ $tutorPhoto }}" alt="{{ $tutor->name }}" class="gx-avatar" />
+                                                @else
+                                                    <span class="gx-avatar">{{ $tutorInitials }}</span>
+                                                @endif
+                                                <div style="font-weight:700;color:#0a4282;" class="dark:!text-sky-300">{{ $tutor->name }}</div>
+                                            </div>
+                                        </td>
+                                        <td class="gx-mono" style="font-weight:700;">{{ $tutor->nip ?: '-' }}</td>
+                                        <td>
+                                            <div class="gx-mono" style="font-weight:700;color:#0a4282;" class="dark:!text-amber-300">{{ $tutor->user?->username ? '@' . $tutor->user->username : '-' }}</div>
+                                            <div style="font-size:0.74rem;color:#64748b;">{{ $tutor->user?->email ?? '-' }}</div>
                                         </td>
                                         <td><span class="gx-pill gx-pill-primary" style="padding:0.12rem 0.55rem;">{{ $tutor->specialization ?: '-' }}</span></td>
                                         <td class="gx-mono">{{ $tutor->phone ?: '-' }}</td>
@@ -58,32 +75,8 @@
                                     </tr>
                                     @if ($editingId === $tutor->id)
                                         <tr>
-                                            <td colspan="7">
-                                                <div class="gx-edit-box">
-                                                    <div class="gx-edit-grid">
-                                                        <div><label class="gx-edit-label">Nama Tutor</label><input type="text" wire:model="editForm.name" class="gx-edit-input" /></div>
-                                                        <div><label class="gx-edit-label">NIP</label><input type="text" wire:model="editForm.nip" class="gx-edit-input" /></div>
-                                                        <div><label class="gx-edit-label">Spesialisasi</label><input type="text" wire:model="editForm.specialization" class="gx-edit-input" /></div>
-                                                        <div>
-                                                            <label class="gx-edit-label">Grade</label>
-                                                            <select wire:model="editForm.grade" class="gx-edit-input">
-                                                                <option value="A">Grade A (Rp 50.000/JP)</option>
-                                                                <option value="B">Grade B (Rp 35.000/JP)</option>
-                                                                <option value="C">Grade C (Rp 25.000/JP)</option>
-                                                            </select>
-                                                        </div>
-                                                        <div><label class="gx-edit-label">No. HP</label><input type="text" wire:model="editForm.phone" class="gx-edit-input" /></div>
-                                                        <div style="display:flex;align-items:flex-end;">
-                                                            <label style="display:inline-flex;align-items:center;gap:0.4rem;cursor:pointer;padding:0.4rem 0;font-weight:700;font-size:0.82rem;">
-                                                                <input type="checkbox" wire:model="editForm.is_active" /><span>Aktif</span>
-                                                            </label>
-                                                        </div>
-                                                    </div>
-                                                    <div style="display:flex;justify-content:flex-end;gap:0.5rem;margin-top:0.75rem;">
-                                                        <button type="button" wire:click="cancelInlineEdit" class="gx-btn gx-btn-cancel">Batal</button>
-                                                        <button type="button" wire:click="saveInlineEdit" class="gx-btn gx-btn-save">Simpan Perubahan</button>
-                                                    </div>
-                                                </div>
+                                            <td colspan="8">
+                                                @include('filament.admin.pages.partials.tutor-inline-edit', ['tutor' => $tutor])
                                             </td>
                                         </tr>
                                     @endif
@@ -96,8 +89,10 @@
                         @foreach ($tutors as $i => $tutor)
                             <div class="gx-m-card">
                                 <div wire:click="startInlineEdit({{ $tutor->id }})" class="gx-row-click">
-                                    <div class="gx-kv"><span class="gx-kv-k">NIP</span><span class="gx-kv-v gx-mono">{{ $tutor->nip ?: '-' }}</span></div>
                                     <div class="gx-kv"><span class="gx-kv-k">Nama</span><span class="gx-kv-v" style="color:#0a4282;font-weight:700;">{{ $tutor->name }}</span></div>
+                                    <div class="gx-kv"><span class="gx-kv-k">ID Buatan / NIP</span><span class="gx-kv-v gx-mono">{{ $tutor->nip ?: '-' }}</span></div>
+                                    <div class="gx-kv"><span class="gx-kv-k">Username</span><span class="gx-kv-v gx-mono">{{ $tutor->user?->username ?: '-' }}</span></div>
+                                    <div class="gx-kv"><span class="gx-kv-k">Email</span><span class="gx-kv-v">{{ $tutor->user?->email ?: '-' }}</span></div>
                                     <div class="gx-kv"><span class="gx-kv-k">Spesialisasi</span><span class="gx-kv-v">{{ $tutor->specialization ?: '-' }}</span></div>
                                     <div class="gx-kv" style="border-bottom:none;"><span class="gx-kv-k">No. HP</span><span class="gx-kv-v gx-mono">{{ $tutor->phone ?: '-' }}</span></div>
                                 </div>
@@ -105,25 +100,7 @@
                                     <button type="button" wire:click.stop="deleteRecord({{ $tutor->id }})" wire:confirm="Hapus tutor {{ $tutor->name }}?" class="gx-btn gx-btn-del">Hapus</button>
                                 </div>
                                 @if ($editingId === $tutor->id)
-                                    <div class="gx-edit-box">
-                                        <div class="gx-edit-grid">
-                                            <div><label class="gx-edit-label">Nama Tutor</label><input type="text" wire:model="editForm.name" class="gx-edit-input" /></div>
-                                            <div><label class="gx-edit-label">NIP</label><input type="text" wire:model="editForm.nip" class="gx-edit-input" /></div>
-                                            <div><label class="gx-edit-label">Spesialisasi</label><input type="text" wire:model="editForm.specialization" class="gx-edit-input" /></div>
-                                            <div>
-                                                <label class="gx-edit-label">Grade</label>
-                                                <select wire:model="editForm.grade" class="gx-edit-input">
-                                                    <option value="A">Grade A</option><option value="B">Grade B</option><option value="C">Grade C</option>
-                                                </select>
-                                            </div>
-                                            <div><label class="gx-edit-label">No. HP</label><input type="text" wire:model="editForm.phone" class="gx-edit-input" /></div>
-                                            <label style="display:inline-flex;align-items:center;gap:0.4rem;font-weight:700;font-size:0.82rem;"><input type="checkbox" wire:model="editForm.is_active" /><span>Aktif</span></label>
-                                        </div>
-                                        <div style="display:flex;justify-content:flex-end;gap:0.5rem;margin-top:0.75rem;">
-                                            <button type="button" wire:click="cancelInlineEdit" class="gx-btn gx-btn-cancel">Batal</button>
-                                            <button type="button" wire:click="saveInlineEdit" class="gx-btn gx-btn-save">Simpan</button>
-                                        </div>
-                                    </div>
+                                    @include('filament.admin.pages.partials.tutor-inline-edit', ['tutor' => $tutor])
                                 @endif
                             </div>
                         @endforeach

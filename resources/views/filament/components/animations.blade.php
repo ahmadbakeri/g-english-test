@@ -326,62 +326,117 @@
     .ql-blue { background: linear-gradient(to bottom right, #1d5fa8, #0a4282); box-shadow: 0 4px 14px 0 rgba(10, 66, 130, 0.35); }
     .ql-card:hover .ql-blue { box-shadow: 0 6px 20px rgba(10, 66, 130, 0.55); }
 
-    /* Admin Dashboard Welcome Bar & Categorized Shortcut Hub */
+    /* Unified Genza Welcome Hero Banner (with User Photo Avatar) */
     [x-cloak] { display: none !important; }
-    .gx-welcome-bar {
-        display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem;
-        padding: 1.15rem 1.35rem; border-radius: 1.1rem;
-        background: #ffffff; border: 1px solid rgba(10, 66, 130, 0.12);
-        box-shadow: 0 6px 20px -8px rgba(10, 66, 130, 0.1);
+    .gx-welcome-hero {
+        position: relative; overflow: hidden;
+        display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.15rem;
+        padding: 1.35rem 1.55rem; border-radius: 1.2rem;
+        background: linear-gradient(135deg, #0a4282 0%, #0d3266 60%, #09244d 100%);
+        border: 1px solid rgba(251, 185, 0, 0.28);
+        border-bottom: 3.5px solid #fbb900;
+        box-shadow: 0 14px 32px -12px rgba(10, 66, 130, 0.36);
+        color: #ffffff;
     }
-    .dark .gx-welcome-bar {
-        background: #1e293b; border-color: rgba(255, 255, 255, 0.09);
-        box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.35);
+    .dark .gx-welcome-hero {
+        background: linear-gradient(135deg, #0f2952 0%, #132347 60%, #0c172e 100%);
+        border-color: rgba(251, 185, 0, 0.35);
+        box-shadow: 0 16px 36px -12px rgba(0, 0, 0, 0.55);
     }
-    .gx-welcome-main { display: flex; flex-direction: column; gap: 0.25rem; min-width: 0; }
-    .gx-welcome-title {
-        margin: 0; font-size: 1.45rem; font-weight: 800; letter-spacing: -0.025em; line-height: 1.2;
-        color: #0a4282;
+    .gx-welcome-hero::after {
+        content: ''; position: absolute; right: -45px; top: -55px; width: 220px; height: 220px;
+        border-radius: 9999px; pointer-events: none;
+        background: radial-gradient(circle, rgba(251, 185, 0, 0.16) 0%, rgba(251, 185, 0, 0) 70%);
     }
-    .dark .gx-welcome-title { color: #f8fafc; }
-    .gx-welcome-sub {
-        margin: 0; font-size: 0.86rem; font-weight: 500; color: #475569;
+    .gx-welcome-identity {
+        position: relative; z-index: 1;
+        display: flex; align-items: center; gap: 1rem; min-width: 0; flex: 1 1 300px;
+    }
+    .gx-welcome-avatar-link {
+        position: relative; display: inline-flex; flex-shrink: 0; text-decoration: none !important;
+        transition: transform 0.22s ease;
+    }
+    .gx-welcome-avatar-link:hover { transform: scale(1.04); }
+    .gx-welcome-avatar-img,
+    .gx-welcome-avatar-fallback {
+        width: 4.15rem; height: 4.15rem; border-radius: 9999px;
+        border: 2.5px solid #fbb900;
+        box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.35);
+        object-fit: cover; flex-shrink: 0;
+    }
+    .gx-welcome-avatar-fallback {
+        display: flex; align-items: center; justify-content: center;
+        background: rgba(255, 255, 255, 0.12); color: #fbb900;
+        font-size: 1.35rem; font-weight: 800; letter-spacing: 0.02em;
+    }
+    .gx-welcome-avatar-dot {
+        position: absolute; right: 2px; bottom: 2px; width: 0.8rem; height: 0.8rem;
+        border-radius: 9999px; background: #10b981; border: 2px solid #0a4282;
+    }
+    .gx-welcome-main { display: flex; flex-direction: column; gap: 0.3rem; min-width: 0; }
+    .gx-welcome-meta-row {
         display: flex; flex-wrap: wrap; align-items: center; gap: 0.45rem;
     }
-    .dark .gx-welcome-sub { color: #94a3b8; }
-    .gx-welcome-dot { color: #cbd5e1; }
-    .dark .gx-welcome-dot { color: #475569; }
-    .gx-welcome-date { font-weight: 700; color: #0a4282; }
-    .dark .gx-welcome-date { color: #fbb900; }
-    .gx-welcome-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.55rem; }
+    .gx-welcome-role-pill {
+        display: inline-flex; align-items: center; padding: 0.16rem 0.65rem; border-radius: 9999px;
+        background: #fbb900; color: #0a4282; font-size: 0.7rem; font-weight: 800;
+        letter-spacing: 0.04em; text-transform: uppercase;
+    }
+    .gx-welcome-id-pill {
+        display: inline-flex; align-items: center; padding: 0.16rem 0.62rem; border-radius: 9999px;
+        background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.18);
+        color: #dbeafe; font-size: 0.72rem; font-weight: 700;
+        font-family: ui-monospace, monospace; font-variant-numeric: tabular-nums;
+    }
+    .gx-welcome-title {
+        margin: 0; font-size: 1.48rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.2;
+        color: #ffffff;
+    }
+    .gx-welcome-sub {
+        margin: 0; font-size: 0.85rem; font-weight: 500; color: #dbeafe;
+        display: flex; flex-wrap: wrap; align-items: center; gap: 0.45rem;
+    }
+    .gx-welcome-dot { color: rgba(219, 234, 254, 0.45); }
+    .gx-welcome-date { font-weight: 700; color: #fde68a; }
+    .gx-welcome-actions {
+        position: relative; z-index: 1;
+        display: flex; flex-wrap: wrap; align-items: center; gap: 0.55rem;
+    }
     .gx-wbtn {
         display: inline-flex; align-items: center; gap: 0.42rem;
-        padding: 0.52rem 0.95rem; border-radius: 9999px; font-size: 0.8rem; font-weight: 700;
+        padding: 0.54rem 1rem; border-radius: 9999px; font-size: 0.8rem; font-weight: 700;
         text-decoration: none !important; transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
     }
     .gx-wbtn:hover { transform: translateY(-1px); }
-    .gx-wbtn-primary {
-        background: #0a4282; color: #ffffff !important; border: 1px solid #0a4282;
-        box-shadow: 0 4px 12px -3px rgba(10, 66, 130, 0.35);
-    }
-    .gx-wbtn-primary:hover { background: #0d52a0; }
     .gx-wbtn-gold {
-        background: #fbb900; color: #0a4282 !important; border: 1px solid #eab308;
-        box-shadow: 0 4px 12px -3px rgba(251, 185, 0, 0.4);
+        background: #fbb900; color: #0a4282 !important; border: 1px solid #f59e0b;
+        box-shadow: 0 6px 16px -4px rgba(251, 185, 0, 0.45);
     }
-    .gx-wbtn-gold:hover { background: #f59e0b; }
+    .gx-wbtn-gold:hover { background: #facc15; }
+    .gx-wbtn-primary {
+        background: #ffffff; color: #0a4282 !important; border: 1px solid rgba(255, 255, 255, 0.9);
+        box-shadow: 0 6px 16px -6px rgba(0, 0, 0, 0.28);
+    }
+    .gx-wbtn-primary:hover { background: #eff6ff; }
     .gx-wbtn-ghost {
-        background: #f8fafc; color: #0a4282 !important; border: 1px solid rgba(10, 66, 130, 0.16);
+        background: rgba(255, 255, 255, 0.11); color: #ffffff !important; border: 1px solid rgba(255, 255, 255, 0.22);
     }
-    .gx-wbtn-ghost:hover { background: #eff6ff; border-color: rgba(10, 66, 130, 0.32); }
-    .dark .gx-wbtn-ghost {
-        background: rgba(15, 23, 42, 0.65); color: #e2e8f0 !important; border-color: rgba(255, 255, 255, 0.14);
-    }
-    .dark .gx-wbtn-ghost:hover { background: rgba(255, 255, 255, 0.08); }
+    .gx-wbtn-ghost:hover { background: rgba(255, 255, 255, 0.2); border-color: rgba(251, 185, 0, 0.55); }
     .gx-wbtn-badge {
         display: inline-flex; align-items: center; justify-content: center;
         min-width: 1.25rem; height: 1.25rem; padding: 0 0.35rem; border-radius: 9999px;
         background: #0a4282; color: #ffffff; font-size: 0.7rem; font-weight: 800; font-variant-numeric: tabular-nums;
+    }
+    .gx-welcome-date-pill {
+        display: inline-flex; align-items: center; gap: 0.45rem;
+        padding: 0.52rem 0.95rem; border-radius: 9999px;
+        background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.22);
+        color: #ffffff; font-size: 0.8rem; font-weight: 700;
+    }
+    @media (max-width: 640px) {
+        .gx-welcome-hero { padding: 1.1rem 1.05rem; }
+        .gx-welcome-avatar-img, .gx-welcome-avatar-fallback { width: 3.4rem; height: 3.4rem; font-size: 1.1rem; }
+        .gx-welcome-title { font-size: 1.2rem; }
     }
 
     .gx-ql-shell {

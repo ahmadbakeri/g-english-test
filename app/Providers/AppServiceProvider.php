@@ -48,10 +48,11 @@ class AppServiceProvider extends ServiceProvider
 
         \BezhanSalleh\LanguageSwitch\LanguageSwitch::configureUsing(function (\BezhanSalleh\LanguageSwitch\LanguageSwitch $switch) {
             $switch
-                ->locales(['en', 'id', 'zh_CN', 'zh_PY', 'ja', 'ja_RM', 'ar', 'ar_RM'])
+                ->locales(['id', 'en', 'zh_CN', 'zh_PY', 'ja', 'ja_RM', 'ar', 'ar_RM'])
+                ->userPreferredLocale(fn (): string => request()->cookie('filament_language_switch_locale') ?: 'id')
                 ->labels([
-                    'en' => 'English',
                     'id' => 'Indonesia',
+                    'en' => 'English',
                     'zh_CN' => 'Mandarin Simplified (Hanzi)',
                     'zh_PY' => 'Mandarin Simplified (Pinyin)',
                     'ja' => 'Japanese (Kanji)',

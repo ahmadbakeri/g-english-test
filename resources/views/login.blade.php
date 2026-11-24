@@ -75,7 +75,7 @@
                         Portal Akademik
                     </span>
                     <h1 class="text-2xl sm:text-[1.65rem] font-extrabold text-slate-900 dark:text-white tracking-tight">Selamat Datang</h1>
-                    <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Silakan masuk menggunakan Username / ID Anda.</p>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Masuk dengan Username, ID Buatan (NIP/NIS), atau Email Anda.</p>
                 </div>
 
                 @if($errors->any())
@@ -92,12 +92,12 @@
                 <form id="login-form" action="{{ route('login.action') }}" method="POST" class="space-y-5">
                     @csrf
                     <div>
-                        <label for="username" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Username / ID</label>
+                        <label for="username" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Username / ID / Email</label>
                         <div class="relative">
                             <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 pointer-events-none">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
                             </span>
-                            <input id="username" type="text" name="username" value="{{ old('username') }}" class="login-input w-full bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700 rounded-xl pl-11 pr-4 py-3 text-sm sm:text-base text-slate-800 dark:text-slate-100 placeholder-slate-400 transition-all" placeholder="Masukkan Username / NIS / NIP" required autofocus>
+                            <input id="username" type="text" name="username" value="{{ old('username') }}" class="login-input w-full bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700 rounded-xl pl-11 pr-4 py-3 text-sm sm:text-base text-slate-800 dark:text-slate-100 placeholder-slate-400 transition-all" placeholder="Masukkan Username, ID Buatan (NIP/NIS), atau Email" required autofocus>
                         </div>
                     </div>
 

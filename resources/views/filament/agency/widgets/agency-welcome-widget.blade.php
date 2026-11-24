@@ -1,30 +1,38 @@
 <x-filament-widgets::widget>
-    <x-filament::section class="g-welcome-section">
-        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; padding: 0.5rem 0;">
-            <div style="display: flex; flex-direction: column; gap: 0.3rem;">
-                <span class="g-welcome-greeting" style="font-size: 0.825rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">
-                    &#x1F3C6; G-ENGLISH BRAIN CHAMPION &bull; "ONE MIND, ONE CHAMPION"
-                </span>
-                <h2 class="g-welcome-title dark:text-white" style="font-size: 1.875rem; font-weight: 800; color: #0a4282; margin: 0; letter-spacing: -0.025em;">
-                    {{ $agencyLabel }}
-                </h2>
-                <div style="margin-top: 0.15rem; display: flex; flex-wrap: wrap; gap: 0.5rem;">
-                    <span style="display: inline-block; padding: 0.2rem 0.75rem; border-radius: 9999px; background: rgba(251, 185, 0, 0.18); color: #0a4282; font-size: 0.75rem; font-weight: 800;" class="dark:text-amber-300">
-                        {{ $totalSchools }} {{ __('Participating Schools') }} &bull; {{ $totalParticipants }} {{ __('Registered Participants') }}
-                    </span>
+    @php
+        $user = auth()->user();
+        $photoUrl = $user?->photo_url;
+        $initials = $user?->initials ?: 'DN';
+    @endphp
+
+    <div class="gx-welcome-hero">
+        <div class="gx-welcome-identity">
+            <div class="gx-welcome-avatar-link">
+                @if ($photoUrl)
+                    <img src="{{ $photoUrl }}" alt="{{ $user?->name }}" class="gx-welcome-avatar-img" />
+                @else
+                    <div class="gx-welcome-avatar-fallback">{{ $initials }}</div>
+                @endif
+                <span class="gx-welcome-avatar-dot" aria-hidden="true"></span>
+            </div>
+
+            <div class="gx-welcome-main">
+                <div class="gx-welcome-meta-row">
+                    <span class="gx-welcome-role-pill">Portal Monitoring Dinas</span>
+                    <span class="gx-welcome-id-pill">{{ $totalSchools }} Sekolah • {{ $totalParticipants }} Peserta</span>
                 </div>
-                <p class="g-welcome-subtitle" style="font-size: 0.925rem; color: #475569; margin: 0.25rem 0 0 0;" class="dark:text-slate-300">
-                    {{ __('Official monitoring portal for participating schools and students in your jurisdiction.') }}
+                <h2 class="gx-welcome-title">Selamat Datang, {{ $agencyLabel }}</h2>
+                <p class="gx-welcome-sub">
+                    <span>{{ __('Official monitoring portal for participating schools and students in your jurisdiction.') }}</span>
                 </p>
             </div>
-            <div style="display: flex; align-items: center; gap: 0.75rem;">
-                <div class="g-welcome-date-badge" style="display: inline-flex; align-items: center; gap: 0.5rem; background: linear-gradient(135deg, #eff6ff, #dbeafe); border: 1px solid #bfdbfe; padding: 0.65rem 1.15rem; border-radius: 9999px;">
-                    <x-heroicon-o-calendar style="color: #0a4282; width: 1.2rem; height: 1.2rem; flex-shrink: 0;" />
-                    <span style="font-size: 0.85rem; font-weight: 700; color: #0a4282;">
-                        {{ now()->translatedFormat('l, d F Y') }}
-                    </span>
-                </div>
+        </div>
+
+        <div class="gx-welcome-actions">
+            <div class="gx-welcome-date-pill">
+                <x-heroicon-o-calendar style="width: 1.05rem; height: 1.05rem; color: #fbb900;" />
+                <span>{{ now('Asia/Makassar')->locale('id')->translatedFormat('l, d F Y') }}</span>
             </div>
         </div>
-    </x-filament::section>
+    </div>
 </x-filament-widgets::widget>
