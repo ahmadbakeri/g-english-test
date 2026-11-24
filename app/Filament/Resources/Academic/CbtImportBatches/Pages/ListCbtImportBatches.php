@@ -52,7 +52,10 @@ class ListCbtImportBatches extends ListRecords
                         ->directory('cbt_docx_imports')
                         ->acceptedFileTypes([
                             'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                            'application/zip',
+                            'application/octet-stream',
                         ])
+                        ->rules(['extensions:docx'])
                         ->maxSize(20480)
                         ->required(),
                 ])
