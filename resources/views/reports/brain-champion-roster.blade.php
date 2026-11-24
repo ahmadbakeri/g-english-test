@@ -117,7 +117,7 @@
                         <td>
                             <div class="title">G-ENGLISH BRAIN CHAMPION — "ONE MIND, ONE CHAMPION"</div>
                             <div class="subtitle">DAFTAR HADIR &amp; LEMBAR ELIMINASI ARENA (KUOTA MAKS. 35 PESERTA)</div>
-                            <div class="format-note">Kompetisi Offline di Gedung &bull; Sistem Gugur (Whiteboard &amp; Kertas — Soal Dibacakan Langsung)</div>
+                            <div class="format-note">Kompetisi Offline di Gedung &bull; Sistem Gugur (Whiteboard atau Kertas — Soal Dibacakan Langsung)</div>
                         </td>
                         <td style="text-align: right; vertical-align: middle;">
                             <span class="grade-badge">KELAS {{ $gradeNum }} ({{ $gradeNum <= 6 ? 'SD/MI' : 'SMP/MTs' }})</span>
@@ -183,7 +183,7 @@
                     <td style="width: 60%;">
                         <strong>Petunjuk Juri &amp; Panitia Arena:</strong><br>
                         1. Pastikan Kode Peserta di meja/dada sesuai dengan lembar ini.<br>
-                        2. Beri tanda ceklis pada kolom <em>Lolos / Gugur</em> di akhir babak eliminasi whiteboard/kertas.
+                        2. Beri tanda ceklis pada kolom <em>Lolos / Gugur</em> di akhir babak eliminasi whiteboard atau kertas.
                     </td>
                     <td style="width: 40%; text-align: center;">
                         Tanjung, {{ now()->translatedFormat('d F Y') }}<br>

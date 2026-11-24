@@ -157,7 +157,7 @@
                         <span class="event-badge">Official Participant Pass &amp; Table Card</span>
                         <div class="event-title">G-ENGLISH BRAIN CHAMPION</div>
                         <div class="event-tagline">"ONE MIND, ONE CHAMPION"</div>
-                        <div class="event-format">Kompetisi Offline di Gedung &bull; Sistem Gugur (Whiteboard &amp; Kertas — Soal Dibacakan Langsung)</div>
+                        <div class="event-format">Kompetisi Offline di Gedung &bull; Sistem Gugur (Whiteboard atau Kertas — Soal Dibacakan Langsung)</div>
                     </td>
                     <td style="text-align: right; vertical-align: top;">
                         <div style="font-size: 11px; font-weight: bold; color: #fbb900;">GENZA ENGLISH CENTER</div>
@@ -215,7 +215,7 @@
         </div>
 
         <div class="card-footer">
-            <strong>Catatan Arena:</strong> Peserta wajib hadir 30 menit sebelum babak dimulai. Kompetisi dilaksanakan secara <strong>OFFLINE</strong> menggunakan sistem gugur di gedung (jawaban ditulis pada Whiteboard / Kertas saat soal dibacakan langsung).
+            <strong>Catatan Arena:</strong> Peserta wajib hadir 30 menit sebelum babak dimulai. Kompetisi dilaksanakan secara <strong>OFFLINE</strong> menggunakan sistem gugur di gedung (jawaban ditulis pada Whiteboard atau Kertas saat soal dibacakan langsung).
         </div>
     </div>
 </body>

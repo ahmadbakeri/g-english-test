@@ -337,7 +337,7 @@
                                 </div>
                                 <div class="p-3.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700">
                                     <div class="text-slate-500 dark:text-slate-400 font-semibold">Total Pertemuan</div>
-                                    <div class="font-extrabold text-genza-blue dark:text-white mt-0.5">60x Sesi + Evaluasi CBT</div>
+                                    <div class="font-extrabold text-genza-blue dark:text-white mt-0.5">30x Sesi + Evaluasi CBT</div>
                                 </div>
                                 <div class="p-3.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700">
                                     <div class="text-slate-500 dark:text-slate-400 font-semibold">Fasilitas Termasuk</div>

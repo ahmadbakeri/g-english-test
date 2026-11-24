@@ -157,7 +157,7 @@
                                 G-English Brain Champion &bull; &ldquo;One Mind, One Champion&rdquo;
                             </p>
                             <p style="margin: 6px 0 0 0; color: #d5e5f9; font-size: 12px; font-weight: 400; line-height: 1.5;">
-                                Kompetisi Offline di Gedung &middot; Sistem Gugur (Whiteboard &amp; Kertas &mdash; Soal Dibacakan Langsung)
+                                Kompetisi Offline di Gedung &middot; Sistem Gugur (Whiteboard atau Kertas &mdash; Soal Dibacakan Langsung)
                             </p>
                         </td>
                     </tr>

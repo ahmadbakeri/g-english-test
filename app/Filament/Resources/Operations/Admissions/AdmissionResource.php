@@ -158,7 +158,7 @@ class AdmissionResource extends Resource
                     ]),
 
                 \Filament\Schemas\Components\Section::make(__('Financial & Admission Status'))
-                    ->description(__('Tutoring Fee (60x meetings, 3x/week). Includes Uniform and Books.'))
+                    ->description(__('Tutoring Fee (30x meetings, 3x/week). Includes Uniform and Books.'))
                     ->icon('heroicon-o-banknotes')
                     ->schema([
                         TextInput::make('tuition_fee')
