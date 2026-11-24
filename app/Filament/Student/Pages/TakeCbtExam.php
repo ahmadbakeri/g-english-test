@@ -29,11 +29,22 @@ class TakeCbtExam extends Page
     public function mount($record): void
     {
         $this->record = $record;
-        $this->exam = Cache::remember("cbt_exam_meta_{$record}", 300, function () use ($record) {
-            return CbtExam::with('subject:id,name')->find($record);
+        $meta = Cache::remember("cbt_exam_meta_{$record}", 300, function () use ($record) {
+            $e = CbtExam::with('subject:id,name')->find($record);
+            if (!$e) {
+                return null;
+            }
+            return [
+                'attributes' => $e->getAttributes(),
+                'subject' => $e->subject ? $e->subject->getAttributes() : null,
+            ];
         });
-        if (!$this->exam) {
+        if (!$meta) {
             abort(404);
+        }
+        $this->exam = (new CbtExam())->newFromBuilder($meta['attributes']);
+        if (!empty($meta['subject'])) {
+            $this->exam->setRelation('subject', (new \App\Models\Subject())->newFromBuilder($meta['subject']));
         }
 
         $user = auth()->user();
@@ -332,7 +343,15 @@ class TakeCbtExam extends Page
                 ->select(['id', 'question_type', 'statements', 'correct_answer', 'points', 'order_number'])
                 ->orderBy('order_number')
                 ->orderBy('id')
-                ->get();
+                ->get()
+                ->map(fn ($q) => [
+                    'id' => $q->id,
+                    'question_type' => $q->question_type ?: 'mcq',
+                    'statements' => $q->statements,
+                    'correct_answer' => $q->correct_answer,
+                    'points' => (int) ($q->points ?? 1),
+                ])
+                ->all();
         });
 
         $earnedPoints = 0;
@@ -341,9 +360,9 @@ class TakeCbtExam extends Page
         $rowsToInsert = [];
 
         foreach ($examQuestions as $question) {
-            $qId = $question->id;
-            $type = $question->question_type ?: 'mcq';
-            $points = (int) ($question->points ?? 1);
+            $qId = $question['id'];
+            $type = $question['question_type'] ?: 'mcq';
+            $points = (int) ($question['points'] ?? 1);
             $rawAnswer = $this->answers[$qId] ?? null;
 
             $selectedSummary = null;
@@ -370,12 +389,12 @@ class TakeCbtExam extends Page
                     $payloadJson = json_encode($cleanMap);
                 }
 
-                if (!$isDeferred && is_array($question->statements) && !empty($question->statements)) {
-                    $hasKeys = collect($question->statements)->every(fn ($st) => in_array(strtoupper((string) ($st['answer'] ?? '')), ['B', 'S'], true));
+                if (!$isDeferred && is_array($question['statements']) && !empty($question['statements'])) {
+                    $hasKeys = collect($question['statements'])->every(fn ($st) => in_array(strtoupper((string) ($st['answer'] ?? '')), ['B', 'S'], true));
                     if ($hasKeys) {
                         $totalPoints += $points;
                         $allMatch = true;
-                        foreach ($question->statements as $idx => $st) {
+                        foreach ($question['statements'] as $idx => $st) {
                             $no = (string) ($st['no'] ?? ($idx + 1));
                             $expected = strtoupper((string) $st['answer']);
                             if (($cleanMap[$no] ?? null) !== $expected) {
@@ -395,9 +414,9 @@ class TakeCbtExam extends Page
                     $selectedSummary = $val;
                 }
 
-                if (!$isDeferred && filled($question->correct_answer)) {
+                if (!$isDeferred && filled($question['correct_answer'])) {
                     $totalPoints += $points;
-                    $normExpected = mb_strtolower(str_replace(',', '.', trim((string) $question->correct_answer)));
+                    $normExpected = mb_strtolower(str_replace(',', '.', trim((string) $question['correct_answer'])));
                     $normGiven = mb_strtolower(str_replace(',', '.', $val));
                     $isCorrect = ($val !== '' && $normGiven === $normExpected);
                     if ($isCorrect) {
@@ -411,9 +430,9 @@ class TakeCbtExam extends Page
                     $selectedSummary = $selected;
                 }
 
-                if (!$isDeferred && filled($question->correct_answer)) {
+                if (!$isDeferred && filled($question['correct_answer'])) {
                     $totalPoints += $points;
-                    $expected = strtoupper(trim((string) $question->correct_answer));
+                    $expected = strtoupper(trim((string) $question['correct_answer']));
                     $isCorrect = ($selected !== '' && $selected === $expected);
                     if ($isCorrect) {
                         $earnedPoints += $points;
