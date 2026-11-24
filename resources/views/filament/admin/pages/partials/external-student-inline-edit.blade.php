@@ -9,9 +9,20 @@
             <input type="text" wire:model="editForm.nisn" class="gx-edit-input" />
         </div>
         <div>
+            <label class="gx-edit-label">Program / Event</label>
+            <select wire:model="editForm.course_level" class="gx-edit-input">
+                <option value="{{ \App\Livewire\BrainChampionRegistration::EVENT_TAG }}">G-English Brain Champion</option>
+                <option value="Try Out Bahasa Inggris">Try Out Bahasa Inggris</option>
+                <option value="Placement Test Sekolah">Placement Test Sekolah</option>
+                <option value="Kemitraan Sekolah">Kemitraan Sekolah</option>
+                <option value="English Proficiency Test">English Proficiency Test</option>
+                <option value="Eksternal Umum">Eksternal Umum</option>
+            </select>
+        </div>
+        <div>
             <label class="gx-edit-label">Kelas</label>
             <select wire:model="editForm.class_name" class="gx-edit-input">
-                @foreach (['Kelas 4', 'Kelas 5', 'Kelas 6', 'Kelas 7', 'Kelas 8', 'Kelas 9'] as $cls)
+                @foreach (['Kelas 1', 'Kelas 2', 'Kelas 3', 'Kelas 4', 'Kelas 5', 'Kelas 6', 'Kelas 7', 'Kelas 8', 'Kelas 9'] as $cls)
                     <option value="{{ $cls }}">{{ $cls }}</option>
                 @endforeach
             </select>

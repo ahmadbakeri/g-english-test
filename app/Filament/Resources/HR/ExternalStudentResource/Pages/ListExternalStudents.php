@@ -5,10 +5,14 @@ namespace App\Filament\Resources\HR\ExternalStudentResource\Pages;
 use App\Filament\Resources\HR\ExternalStudentResource;
 use App\Livewire\BrainChampionRegistration;
 use App\Models\Student;
+use App\Models\User;
 use App\Support\SchoolAgencyClassifier;
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Cache;
+use Livewire\Attributes\Computed;
 
 class ListExternalStudents extends ListRecords
 {
@@ -16,7 +20,12 @@ class ListExternalStudents extends ListRecords
 
     protected string $view = 'filament.admin.pages.external-students-hierarchy';
 
+    public const PER_CLASS_STEP = 25;
+
     public string $search = '';
+
+    /** 'all' | 'brain_champion' | 'non_bc' */
+    public string $programFilter = 'all';
 
     /** @var array<int, string> */
     public array $openLevels = [];
@@ -27,10 +36,37 @@ class ListExternalStudents extends ListRecords
     /** @var array<int, string> */
     public array $openClasses = [];
 
+    /** @var array<string, int> */
+    public array $classLimits = [];
+
     public ?int $editingStudentId = null;
 
     /** @var array<string, mixed> */
     public array $editForm = [];
+
+    /** Per-request memoization for lazy class queries */
+    protected array $schoolClassesMemo = [];
+
+    /** Per-request memoization for lazy student slices */
+    protected array $classStudentsMemo = [];
+
+    public function updatedSearch(): void
+    {
+        $this->openClasses = [];
+        $this->classLimits = [];
+        $this->editingStudentId = null;
+    }
+
+    public function setProgramFilter(string $filter): void
+    {
+        if (!in_array($filter, ['all', 'brain_champion', 'non_bc'], true)) {
+            $filter = 'all';
+        }
+        $this->programFilter = $filter;
+        $this->openClasses = [];
+        $this->classLimits = [];
+        $this->editingStudentId = null;
+    }
 
     public function toggleLevel(string $level): void
     {
@@ -54,9 +90,17 @@ class ListExternalStudents extends ListRecords
     {
         if (in_array($classKey, $this->openClasses, true)) {
             $this->openClasses = array_values(array_diff($this->openClasses, [$classKey]));
+            unset($this->classLimits[$classKey]);
         } else {
             $this->openClasses[] = $classKey;
+            $this->classLimits[$classKey] = self::PER_CLASS_STEP;
         }
+    }
+
+    public function loadMoreClass(string $classKey): void
+    {
+        $current = (int) ($this->classLimits[$classKey] ?? self::PER_CLASS_STEP);
+        $this->classLimits[$classKey] = $current + self::PER_CLASS_STEP;
     }
 
     public function startInlineEdit(int $studentId): void
@@ -77,6 +121,7 @@ class ListExternalStudents extends ListRecords
             'nisn' => (string) ($student->nisn ?? ''),
             'class_name' => (string) ($student->class_name ?: 'Kelas 4'),
             'school_name' => (string) ($student->school_name ?? ''),
+            'course_level' => (string) ($student->course_level ?: 'Eksternal Umum'),
             'gender' => (string) ($student->gender ?: 'L'),
             'phone' => (string) ($student->phone ?? ''),
             'parent_name' => (string) ($student->parent_name ?? ''),
@@ -108,12 +153,15 @@ class ListExternalStudents extends ListRecords
             'nisn' => trim((string) ($this->editForm['nisn'] ?? '')) ?: null,
             'class_name' => trim((string) ($this->editForm['class_name'] ?? $student->class_name)),
             'school_name' => trim((string) ($this->editForm['school_name'] ?? '')) ?: null,
+            'course_level' => trim((string) ($this->editForm['course_level'] ?? '')) ?: null,
             'gender' => (string) ($this->editForm['gender'] ?? 'L'),
             'phone' => trim((string) ($this->editForm['phone'] ?? '')) ?: null,
             'parent_name' => trim((string) ($this->editForm['parent_name'] ?? '')) ?: null,
             'parent_phone' => trim((string) ($this->editForm['parent_phone'] ?? '')) ?: null,
             'is_active' => (bool) ($this->editForm['is_active'] ?? true),
         ]);
+
+        self::flushSummaryCache();
 
         Notification::make()
             ->title('Data siswa diperbarui')
@@ -128,6 +176,7 @@ class ListExternalStudents extends ListRecords
         $student = Student::where('student_type', 'external')->find($studentId);
         if ($student) {
             $student->delete();
+            self::flushSummaryCache();
             Notification::make()
                 ->title('Siswa dihapus')
                 ->success()
@@ -138,81 +187,298 @@ class ListExternalStudents extends ListRecords
         }
     }
 
-    public function getHierarchyProperty(): array
+    public static function flushSummaryCache(): void
     {
-        $needle = mb_strtolower(trim($this->search));
+        foreach (['all', 'brain_champion', 'non_bc', 'global'] as $k) {
+            Cache::forget("ext_students:summary:v1:{$k}");
+        }
+    }
 
-        $students = Student::query()
-            ->with(['user:id,username', 'schoolUser:id,username,name'])
-            ->where('student_type', 'external')
-            ->orderBy('school_name')
-            ->orderBy('class_name')
-            ->orderBy('name')
-            ->get();
+    /**
+     * Scoped SQL query for external students respecting programFilter + search.
+     */
+    protected function baseQuery(bool $applyProgramFilter = true): Builder
+    {
+        $query = Student::query()->where('student_type', 'external');
 
+        if ($applyProgramFilter) {
+            if ($this->programFilter === 'brain_champion') {
+                $query->where('course_level', BrainChampionRegistration::EVENT_TAG);
+            } elseif ($this->programFilter === 'non_bc') {
+                $query->where(function (Builder $q) {
+                    $q->whereNull('course_level')
+                        ->orWhere('course_level', '!=', BrainChampionRegistration::EVENT_TAG);
+                });
+            }
+        }
+
+        $needle = trim($this->search);
         if ($needle !== '') {
-            $students = $students->filter(function (Student $s) use ($needle): bool {
-                $haystack = implode(' ', [
-                    $s->name,
-                    $s->nis,
-                    $s->nisn,
-                    $s->competition_code,
-                    $s->school_name,
-                    $s->class_name,
-                    $s->user?->username,
-                    $s->schoolUser?->username,
-                ]);
-                return str_contains(mb_strtolower($haystack), $needle);
+            $like = '%' . $needle . '%';
+            $query->where(function (Builder $q) use ($like) {
+                $q->where('name', 'like', $like)
+                    ->orWhere('nis', 'like', $like)
+                    ->orWhere('nisn', 'like', $like)
+                    ->orWhere('competition_code', 'like', $like)
+                    ->orWhere('school_name', 'like', $like)
+                    ->orWhere('class_name', 'like', $like)
+                    ->orWhere('course_level', 'like', $like)
+                    ->orWhereHas('user', fn (Builder $u) => $u->where('username', 'like', $like))
+                    ->orWhereHas('schoolUser', fn (Builder $su) => $su->where('username', 'like', $like));
             });
         }
 
-        $levels = [
-            'SD' => ['schools' => [], 'schoolCount' => 0, 'studentCount' => 0],
-            'MI' => ['schools' => [], 'schoolCount' => 0, 'studentCount' => 0],
-            'SMP' => ['schools' => [], 'schoolCount' => 0, 'studentCount' => 0],
-            'MTs' => ['schools' => [], 'schoolCount' => 0, 'studentCount' => 0],
-        ];
+        return $query;
+    }
 
-        $schoolKeysSeen = [];
+    /**
+     * Apply sargable WHERE filter for a normalized school's raw school_name values.
+     */
+    protected function applySchoolFilter(Builder $query, array $rawSchools): Builder
+    {
+        $hasEmpty = in_array('', $rawSchools, true) || in_array('Tanpa Sekolah', $rawSchools, true);
+        $named = array_values(array_filter($rawSchools, fn ($s) => $s !== '' && $s !== 'Tanpa Sekolah'));
 
-        foreach ($students as $student) {
-            $level = SchoolAgencyClassifier::classifyLevel($student->school_name, $student->education_level, $student->class_name);
-            $schoolName = trim((string) $student->school_name) ?: 'Tanpa Sekolah';
-            $schoolKey = BrainChampionRegistration::normalizeSchoolName($schoolName) ?: 'tanpa-sekolah';
-            $className = trim((string) $student->class_name) ?: 'Tanpa Kelas';
+        return $query->where(function (Builder $q) use ($named, $hasEmpty) {
+            if (!empty($named)) {
+                $q->whereIn('school_name', $named);
+            }
+            if ($hasEmpty) {
+                $method = empty($named) ? 'where' : 'orWhere';
+                $q->{$method}(fn (Builder $sub) => $sub->whereNull('school_name')->orWhere('school_name', ''));
+            }
+        });
+    }
 
-            if (!isset($levels[$level]['schools'][$schoolKey])) {
-                $levels[$level]['schools'][$schoolKey] = [
-                    'key' => $schoolKey,
-                    'name' => $schoolName,
-                    'username' => $student->schoolUser?->username,
-                    'studentCount' => 0,
-                    'classes' => [],
+    /**
+     * Global tab counts (cached 60s in Redis when search is empty).
+     */
+    #[Computed]
+    public function globalCounts(): array
+    {
+        $builder = function (): array {
+            $row = $this->baseQuery(applyProgramFilter: false)
+                ->selectRaw('COUNT(*) AS total_all, SUM(CASE WHEN course_level = ? THEN 1 ELSE 0 END) AS total_bc', [
+                    BrainChampionRegistration::EVENT_TAG,
+                ])
+                ->first();
+
+            $all = (int) ($row->total_all ?? 0);
+            $bc = (int) ($row->total_bc ?? 0);
+
+            return [
+                'all' => $all,
+                'brain_champion' => $bc,
+                'non_bc' => max(0, $all - $bc),
+            ];
+        };
+
+        if (trim($this->search) === '') {
+            return Cache::remember('ext_students:summary:v1:global', 60, $builder);
+        }
+
+        return $builder();
+    }
+
+    /**
+     * Level 1 & Level 2 Summary ONLY via SQL GROUP BY (0 student Eloquent rows hydrated!).
+     */
+    #[Computed]
+    public function hierarchy(): array
+    {
+        $build = function (): array {
+            $rows = $this->baseQuery()
+                ->selectRaw(
+                    "school_name, school_user_id, education_level, COUNT(*) AS student_count, SUM(CASE WHEN course_level = ? THEN 1 ELSE 0 END) AS bc_count",
+                    [BrainChampionRegistration::EVENT_TAG]
+                )
+                ->groupBy('school_name', 'school_user_id', 'education_level')
+                ->orderBy('school_name')
+                ->get();
+
+            $schoolUserIds = $rows->pluck('school_user_id')->filter()->unique()->values()->all();
+            $schoolUsernames = !empty($schoolUserIds)
+                ? User::whereIn('id', $schoolUserIds)->pluck('username', 'id')->all()
+                : [];
+
+            $levels = [
+                'SD' => ['schools' => [], 'schoolCount' => 0, 'studentCount' => 0, 'bcCount' => 0],
+                'MI' => ['schools' => [], 'schoolCount' => 0, 'studentCount' => 0, 'bcCount' => 0],
+                'SMP' => ['schools' => [], 'schoolCount' => 0, 'studentCount' => 0, 'bcCount' => 0],
+                'MTs' => ['schools' => [], 'schoolCount' => 0, 'studentCount' => 0, 'bcCount' => 0],
+            ];
+
+            $totalStudents = 0;
+            $totalBc = 0;
+            $schoolKeysSeen = [];
+
+            foreach ($rows as $row) {
+                $rawSchool = trim((string) ($row->school_name ?? ''));
+                $displaySchool = $rawSchool !== '' ? $rawSchool : 'Tanpa Sekolah';
+                $level = SchoolAgencyClassifier::classifyLevel($displaySchool, $row->education_level);
+                $schoolKey = BrainChampionRegistration::normalizeSchoolName($displaySchool) ?: 'tanpa-sekolah';
+                $cnt = (int) $row->student_count;
+                $bcCnt = (int) $row->bc_count;
+
+                if (!isset($levels[$level]['schools'][$schoolKey])) {
+                    $levels[$level]['schools'][$schoolKey] = [
+                        'key' => $schoolKey,
+                        'name' => $displaySchool,
+                        'rawSchools' => [],
+                        'username' => null,
+                        'studentCount' => 0,
+                        'bcCount' => 0,
+                    ];
+                    $schoolKeysSeen[$level . '::' . $schoolKey] = true;
+                }
+
+                $rawKey = $rawSchool !== '' ? $rawSchool : 'Tanpa Sekolah';
+                if (!in_array($rawKey, $levels[$level]['schools'][$schoolKey]['rawSchools'], true)) {
+                    $levels[$level]['schools'][$schoolKey]['rawSchools'][] = $rawKey;
+                }
+
+                if (!$levels[$level]['schools'][$schoolKey]['username'] && $row->school_user_id && isset($schoolUsernames[$row->school_user_id])) {
+                    $levels[$level]['schools'][$schoolKey]['username'] = $schoolUsernames[$row->school_user_id];
+                }
+
+                $levels[$level]['schools'][$schoolKey]['studentCount'] += $cnt;
+                $levels[$level]['schools'][$schoolKey]['bcCount'] += $bcCnt;
+                $levels[$level]['studentCount'] += $cnt;
+                $levels[$level]['bcCount'] += $bcCnt;
+                $totalStudents += $cnt;
+                $totalBc += $bcCnt;
+            }
+
+            foreach ($levels as $lvl => &$lvlData) {
+                usort($lvlData['schools'], fn ($a, $b) => strnatcasecmp($a['name'], $b['name']));
+                $lvlData['schoolCount'] = count($lvlData['schools']);
+            }
+            unset($lvlData);
+
+            return [
+                'levels' => $levels,
+                'totalStudents' => $totalStudents,
+                'totalSchools' => count($schoolKeysSeen),
+                'totalBc' => $totalBc,
+                'totalNonBc' => max(0, $totalStudents - $totalBc),
+            ];
+        };
+
+        if (trim($this->search) === '') {
+            return Cache::remember("ext_students:summary:v1:{$this->programFilter}", 60, $build);
+        }
+
+        return $build();
+    }
+
+    /**
+     * Lazy Level 3: fetch class breakdown ONLY when a school accordion is expanded.
+     *
+     * @return array<int, array{name: string, rawClasses: array<int, string>, total: int, bcCount: int}>
+     */
+    public function getSchoolClasses(string $schoolCompositeKey, array $rawSchools): array
+    {
+        if (isset($this->schoolClassesMemo[$schoolCompositeKey])) {
+            return $this->schoolClassesMemo[$schoolCompositeKey];
+        }
+
+        $rows = $this->applySchoolFilter($this->baseQuery(), $rawSchools)
+            ->selectRaw(
+                "class_name, COUNT(*) AS total, SUM(CASE WHEN course_level = ? THEN 1 ELSE 0 END) AS bc_count",
+                [BrainChampionRegistration::EVENT_TAG]
+            )
+            ->groupBy('class_name')
+            ->get();
+
+        $classes = [];
+        foreach ($rows as $row) {
+            $rawCls = trim((string) ($row->class_name ?? ''));
+            $displayCls = $rawCls !== '' ? $rawCls : 'Tanpa Kelas';
+
+            if (!isset($classes[$displayCls])) {
+                $classes[$displayCls] = [
+                    'name' => $displayCls,
+                    'rawClasses' => [],
+                    'total' => 0,
+                    'bcCount' => 0,
                 ];
-                $schoolKeysSeen[$level . '::' . $schoolKey] = true;
             }
 
-            if (!$levels[$level]['schools'][$schoolKey]['username'] && $student->schoolUser?->username) {
-                $levels[$level]['schools'][$schoolKey]['username'] = $student->schoolUser->username;
+            $rawKey = $rawCls !== '' ? $rawCls : 'Tanpa Kelas';
+            if (!in_array($rawKey, $classes[$displayCls]['rawClasses'], true)) {
+                $classes[$displayCls]['rawClasses'][] = $rawKey;
             }
 
-            $levels[$level]['schools'][$schoolKey]['classes'][$className][] = $student;
-            $levels[$level]['schools'][$schoolKey]['studentCount']++;
-            $levels[$level]['studentCount']++;
+            $classes[$displayCls]['total'] += (int) $row->total;
+            $classes[$displayCls]['bcCount'] += (int) $row->bc_count;
         }
 
-        foreach ($levels as $lvl => &$lvlData) {
-            foreach ($lvlData['schools'] as &$sch) {
-                ksort($sch['classes'], SORT_NATURAL);
-            }
-            $lvlData['schools'] = array_values($lvlData['schools']);
-            $lvlData['schoolCount'] = count($lvlData['schools']);
+        uksort($classes, 'strnatcasecmp');
+
+        return $this->schoolClassesMemo[$schoolCompositeKey] = array_values($classes);
+    }
+
+    /**
+     * Lazy Level 4: fetch paginated students ONLY when a class accordion is expanded.
+     *
+     * @return array{items: \Illuminate\Support\Collection<int, Student>, loaded: int, limit: int, hasMore: bool}
+     */
+    public function getClassStudents(string $classKey, array $rawSchools, array $rawClasses): array
+    {
+        if (isset($this->classStudentsMemo[$classKey])) {
+            return $this->classStudentsMemo[$classKey];
         }
 
-        return [
-            'levels' => $levels,
-            'totalStudents' => $students->count(),
-            'totalSchools' => count($schoolKeysSeen),
+        $limit = max(self::PER_CLASS_STEP, (int) ($this->classLimits[$classKey] ?? self::PER_CLASS_STEP));
+
+        $query = $this->applySchoolFilter($this->baseQuery(), $rawSchools)
+            ->select([
+                'id',
+                'user_id',
+                'school_user_id',
+                'nis',
+                'nisn',
+                'competition_code',
+                'name',
+                'gender',
+                'phone',
+                'parent_name',
+                'parent_phone',
+                'father_name',
+                'mother_name',
+                'course_level',
+                'class_name',
+                'school_name',
+                'is_active',
+            ])
+            ->with(['user:id,username']);
+
+        $hasEmptyCls = in_array('', $rawClasses, true) || in_array('Tanpa Kelas', $rawClasses, true);
+        $namedCls = array_values(array_filter($rawClasses, fn ($c) => $c !== '' && $c !== 'Tanpa Kelas'));
+
+        $query->where(function (Builder $q) use ($namedCls, $hasEmptyCls) {
+            if (!empty($namedCls)) {
+                $q->whereIn('class_name', $namedCls);
+            }
+            if ($hasEmptyCls) {
+                $method = empty($namedCls) ? 'where' : 'orWhere';
+                $q->{$method}(fn (Builder $sub) => $sub->whereNull('class_name')->orWhere('class_name', ''));
+            }
+        });
+
+        $fetched = $query
+            ->orderBy('name')
+            ->limit($limit + 1)
+            ->get();
+
+        $hasMore = $fetched->count() > $limit;
+        $items = $hasMore ? $fetched->slice(0, $limit)->values() : $fetched;
+
+        return $this->classStudentsMemo[$classKey] = [
+            'items' => $items,
+            'loaded' => $items->count(),
+            'limit' => $limit,
+            'hasMore' => $hasMore,
         ];
     }
 
@@ -224,37 +490,56 @@ class ListExternalStudents extends ListRecords
                 ->icon('heroicon-o-document-arrow-down')
                 ->color('danger')
                 ->action(function () {
-                    $hierarchy = $this->hierarchy;
+                    $maxPdfRows = 600;
+                    $totalMatched = $this->baseQuery()->count();
+
                     $rows = [];
                     $no = 1;
-                    foreach (['SD', 'MI', 'SMP', 'MTs'] as $lvl) {
-                        foreach ($hierarchy['levels'][$lvl]['schools'] ?? [] as $school) {
-                            foreach ($school['classes'] as $className => $students) {
-                                foreach ($students as $s) {
-                                    $rows[] = [
-                                        $no++,
-                                        $lvl,
-                                        $school['name'],
-                                        $className,
-                                        $s->user?->username ?: ($s->competition_code ?: ($s->nis ?: '-')),
-                                        $s->nisn ?: '-',
-                                        $s->name,
-                                        ($s->parent_name ?: ($s->father_name ?: '-')) . ' / ' . ($s->parent_phone ?: ($s->phone ?: '-')),
-                                    ];
-                                }
+                    $this->baseQuery()
+                        ->select([
+                            'id', 'user_id', 'nis', 'nisn', 'competition_code', 'name',
+                            'school_name', 'education_level', 'class_name', 'course_level',
+                            'parent_name', 'father_name', 'parent_phone', 'phone',
+                        ])
+                        ->with(['user:id,username'])
+                        ->orderBy('school_name')
+                        ->orderBy('class_name')
+                        ->orderBy('name')
+                        ->limit($maxPdfRows)
+                        ->chunk(200, function ($chunk) use (&$rows, &$no) {
+                            foreach ($chunk as $s) {
+                                $lvl = SchoolAgencyClassifier::classifyLevel($s->school_name, $s->education_level, $s->class_name);
+                                $rows[] = [
+                                    $no++,
+                                    $lvl,
+                                    $s->school_name ?: 'Tanpa Sekolah',
+                                    $s->class_name ?: '-',
+                                    $s->course_level === BrainChampionRegistration::EVENT_TAG ? 'Brain Champion' : ($s->course_level ?: 'Eksternal Umum'),
+                                    $s->user?->username ?: ($s->competition_code ?: ($s->nis ?: '-')),
+                                    $s->name,
+                                    ($s->parent_name ?: ($s->father_name ?: '-')) . ' / ' . ($s->parent_phone ?: ($s->phone ?: '-')),
+                                ];
                             }
-                        }
-                    }
+                        });
+
+                    $filterLabel = match ($this->programFilter) {
+                        'brain_champion' => 'Program: Peserta Brain Champion',
+                        'non_bc' => 'Program: Eksternal Non-Brain Champion',
+                        default => 'Program: Semua Siswa Eksternal',
+                    };
+                    $subtitle = $filterLabel
+                        . ($this->search ? ' • Cari: "' . $this->search . '"' : '')
+                        . ($totalMatched > $maxPdfRows ? " • Menampilkan {$maxPdfRows} pertama dari {$totalMatched} (gunakan filter/cari untuk cetak spesifik)" : '');
 
                     return \App\Support\TablePdfExporter::download(
                         filename: 'daftar-siswa-eksternal-' . now()->format('Y-m-d') . '.pdf',
-                        title: 'Daftar Siswa Eksternal (Brain Champion)',
-                        subtitle: $this->search ? 'Filter pencarian: "' . $this->search . '"' : 'Seluruh jenjang SD, MI, SMP, dan MTs',
-                        headers: ['No', 'Jenjang', 'Sekolah', 'Kelas', 'Kode / User', 'NISN', 'Nama Siswa', 'Orang Tua / WA'],
+                        title: 'Daftar Siswa Eksternal',
+                        subtitle: $subtitle,
+                        headers: ['No', 'Jenjang', 'Sekolah', 'Kelas', 'Program', 'Kode / User', 'Nama Siswa', 'Orang Tua / WA'],
                         rows: $rows,
                         summary: [
-                            'Total Peserta' => $hierarchy['totalStudents'] . ' siswa',
-                            'Total Sekolah' => $hierarchy['totalSchools'] . ' sekolah',
+                            'Total Tercatat' => number_format($totalMatched, 0, ',', '.') . ' siswa',
+                            'Ditampilkan di PDF' => number_format(count($rows), 0, ',', '.') . ' baris',
                         ],
                     );
                 }),
@@ -275,7 +560,7 @@ class ListExternalStudents extends ListRecords
                 ->form([
                     \Filament\Forms\Components\Select::make('school_user_id')
                         ->label('Pilih Akun Sekolah (Opsional)')
-                        ->options(fn () => \App\Models\User::where('role', 'school')->pluck('name', 'id')->toArray())
+                        ->options(fn () => User::where('role', 'school')->pluck('name', 'id')->toArray())
                         ->searchable(),
                     \Filament\Forms\Components\TextInput::make('school_name')
                         ->label('Nama Sekolah (Jika akun sekolah belum dipilih)')
@@ -297,12 +582,13 @@ class ListExternalStudents extends ListRecords
                         $filePath = \Illuminate\Support\Facades\Storage::disk('local')->path($data['excel_file']);
                     }
 
-                    $schoolUser = !empty($data['school_user_id']) ? \App\Models\User::find($data['school_user_id']) : null;
+                    $schoolUser = !empty($data['school_user_id']) ? User::find($data['school_user_id']) : null;
                     $importer = new \App\Imports\BrainChampionStudentImport(
                         schoolUserId: $schoolUser?->id,
                         schoolName: $schoolUser?->name ?: ($data['school_name'] ?? 'Sekolah Peserta'),
                     );
                     \Maatwebsite\Excel\Facades\Excel::import($importer, $filePath);
+                    self::flushSummaryCache();
 
                     $summary = "Ditambahkan: {$importer->createdCount} peserta, Diperbarui: {$importer->updatedCount} peserta.";
                     if ($importer->skippedCount > 0) {
@@ -320,7 +606,8 @@ class ListExternalStudents extends ListRecords
                 ->mutateFormDataUsing(function (array $data): array {
                     $data['student_type'] = 'external';
                     return $data;
-                }),
+                })
+                ->after(fn () => self::flushSummaryCache()),
         ];
     }
 }
