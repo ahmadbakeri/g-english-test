@@ -177,6 +177,88 @@ Route::get('/admin/pdf-exports/{jobId}/download', function (string $jobId) {
     ]);
 })->name('admin.pdf-export.download')->middleware(['web', 'auth']);
 
+Route::get('/admin/students/internal/download-pdf', function (\Illuminate\Http\Request $request) {
+    abort_unless(auth()->user()?->isAdmin(), 403);
+
+    $search = trim((string) $request->query('search', ''));
+    $needle = mb_strtolower($search);
+
+    $students = \App\Models\Student::query()
+        ->with(['user:id,username', 'classes:id,name'])
+        ->where(fn ($q) => $q->where('student_type', 'internal')->orWhereNull('student_type'))
+        ->orderBy('name')
+        ->get();
+
+    if ($needle !== '') {
+        $students = $students->filter(function (\App\Models\Student $s) use ($needle): bool {
+            $hay = implode(' ', [
+                $s->name, $s->nis, $s->nisn, $s->phone, $s->school_name,
+                $s->father_name, $s->mother_name,
+                \App\Filament\Resources\HR\StudentResource::resolveClassLabel($s), $s->user?->username,
+            ]);
+            return str_contains(mb_strtolower($hay), $needle);
+        })->values();
+    }
+
+    $rows = [];
+    $no = 1;
+    foreach ($students as $s) {
+        $rows[] = [
+            $no++,
+            $s->nis ?: '-',
+            $s->name,
+            \App\Filament\Resources\HR\StudentResource::resolveClassLabel($s),
+            $s->gender ?: '-',
+            $s->phone ?: '-',
+            ($s->father_name ?: ($s->mother_name ?: '-')) . ' (' . ($s->father_phone ?: ($s->mother_phone ?: '-')) . ')',
+            $s->is_active ? 'Aktif' : 'Nonaktif',
+        ];
+    }
+
+    return \App\Support\FastTablePdfWriter::download(
+        filename: 'daftar-siswa-internal-' . now()->format('Y-m-d') . '.pdf',
+        title: 'Daftar Siswa Internal — Survival English',
+        subtitle: $search !== '' ? 'Filter pencarian: "' . $search . '"' : 'Jenjang SD/MI, SMP/MTs, dan SMA/MA',
+        headers: ['No', 'NIS', 'Nama Siswa', 'Kelas', 'L/P', 'No. HP', 'Orang Tua / WA', 'Status'],
+        rows: $rows,
+        summary: [
+            'Total Siswa' => $students->count() . ' siswa',
+            'Aktif' => $students->where('is_active', true)->count() . ' siswa',
+        ],
+        orientation: 'landscape',
+    );
+})->name('admin.students.internal.download-pdf')->middleware(['web', 'auth']);
+
+Route::get('/admin/students/internal/download-excel', function (\Illuminate\Http\Request $request) {
+    abort_unless(auth()->user()?->isAdmin(), 403);
+    $search = trim((string) $request->query('search', ''));
+
+    return \Maatwebsite\Excel\Facades\Excel::download(
+        new \App\Exports\InternalStudentsExport($search),
+        'daftar-siswa-internal-' . now()->format('Y-m-d') . '.xlsx'
+    );
+})->name('admin.students.internal.download-excel')->middleware(['web', 'auth']);
+
+Route::get('/admin/students/external/download-excel', function (\Illuminate\Http\Request $request) {
+    abort_unless(auth()->user()?->isAdmin(), 403);
+    $program = (string) $request->query('program', 'all');
+    $search = trim((string) $request->query('search', ''));
+
+    return \Maatwebsite\Excel\Facades\Excel::download(
+        new \App\Exports\ExternalStudentsExport($program, $search),
+        'daftar-siswa-eksternal-' . now()->format('Y-m-d') . '.xlsx'
+    );
+})->name('admin.students.external.download-excel')->middleware(['web', 'auth']);
+
+Route::get('/admin/students/external/template', function () {
+    abort_unless(auth()->user()?->isAdmin(), 403);
+
+    return \Maatwebsite\Excel\Facades\Excel::download(
+        new \App\Exports\BrainChampionStudentTemplateExport(null),
+        'template_peserta_brain_champion.xlsx'
+    );
+})->name('admin.students.external.template')->middleware(['web', 'auth']);
+
 Route::post('/api/push/unsubscribe', [\App\Http\Controllers\PushSubscriptionController::class, 'destroy'])
     ->name('push.unsubscribe')
     ->middleware(['web', 'auth']);

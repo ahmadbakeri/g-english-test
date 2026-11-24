@@ -6,7 +6,24 @@
         $autoExpandDeep = $hasSearch && $hierarchy['totalStudents'] > 0 && $hierarchy['totalStudents'] <= 40;
     @endphp
 
-    <div class="gx-wrap" x-data @gx-pdf-ready.window="window.location.href = $event.detail.url">
+    <div
+        class="gx-wrap"
+        x-data="{
+            triggerDownload(e) {
+                const url = e?.detail?.url || (Array.isArray(e?.detail) ? e.detail[0]?.url : null);
+                if (!url) return;
+                const a = document.createElement('a');
+                a.href = url;
+                a.setAttribute('download', '');
+                a.style.display = 'none';
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(() => a.remove(), 1000);
+            }
+        }"
+        @gx-pdf-started.window="window.scrollTo({ top: 0, behavior: 'smooth' })"
+        @gx-pdf-ready.window="triggerDownload($event)"
+    >
         {{-- Live Chunked PDF Export Progress Banner --}}
         @if ($pdfStatus !== 'idle')
             <div
@@ -309,4 +326,5 @@
             </div>
         @endforeach
     </div>
+    <x-filament-actions::modals />
 </x-filament-panels::page>

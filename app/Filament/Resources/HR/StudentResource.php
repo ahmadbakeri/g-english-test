@@ -19,6 +19,11 @@ class StudentResource extends Resource
         return auth()->user()->isAdmin();
     }
 
+    public static function canCreate(): bool
+    {
+        return false;
+    }
+
     protected static ?string $model = Student::class;
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-user-group';
     public static function getNavigationLabel(): string { return __('Internal Students'); }
@@ -125,8 +130,6 @@ class StudentResource extends Resource
                                 ->default('Survival English'),
                             Forms\Components\TextInput::make('school_name')
                                 ->label('Sekolah Asal (School Name)'),
-                            Forms\Components\TextInput::make('class_name')
-                                ->label('Kelas (Class)'),
                             Forms\Components\Textarea::make('address')
                                 ->label(__('Address'))
                                 ->rows(2)

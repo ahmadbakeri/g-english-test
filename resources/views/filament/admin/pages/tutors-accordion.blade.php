@@ -111,4 +111,5 @@
             <div class="gx-toolbar" style="justify-content:center;color:#64748b;">Tidak ada data tutor.</div>
         @endforelse
     </div>
+    <x-filament-actions::modals />
 </x-filament-panels::page>

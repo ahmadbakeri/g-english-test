@@ -253,47 +253,18 @@ class ListStudents extends ListRecords
                 ->label('Download PDF')
                 ->icon('heroicon-o-document-arrow-down')
                 ->color('danger')
-                ->action(function () {
-                    $data = $this->groupedStudents;
-                    $rows = [];
-                    $no = 1;
-                    foreach ($data['groups'] as $cls => $list) {
-                        foreach ($list as $s) {
-                            $rows[] = [
-                                $no++,
-                                $s->nis ?: '-',
-                                $s->name,
-                                $cls,
-                                $s->gender ?: '-',
-                                $s->phone ?: '-',
-                                ($s->father_name ?: ($s->mother_name ?: '-')) . ' (' . ($s->father_phone ?: ($s->mother_phone ?: '-')) . ')',
-                                $s->is_active ? 'Aktif' : 'Nonaktif',
-                            ];
-                        }
-                    }
-
-                    return \App\Support\TablePdfExporter::download(
-                        filename: 'daftar-siswa-internal-' . now()->format('Y-m-d') . '.pdf',
-                        title: 'Daftar Siswa Internal — Survival English',
-                        subtitle: $this->search ? 'Filter pencarian: "' . $this->search . '"' : 'Jenjang SD/MI, SMP/MTs, dan SMA/MA',
-                        headers: ['No', 'NIS', 'Nama Siswa', 'Kelas', 'L/P', 'No. HP', 'Orang Tua / WA', 'Status'],
-                        rows: $rows,
-                        summary: [
-                            'Total Siswa' => $data['total'] . ' siswa',
-                            'Aktif' => $data['active'] . ' siswa',
-                        ],
-                    );
-                }),
-            Actions\ExportAction::make()->exporter(\App\Filament\Exports\StudentExporter::class),
-            Actions\CreateAction::make()
-                ->label(__('Add Student'))
-                ->slideOver()
-                ->modalWidth('4xl')
-                ->mutateFormDataUsing(function (array $data): array {
-                    $data['student_type'] = 'internal';
-                    $data['course_level'] = 'Survival English';
-                    return $data;
-                }),
+                ->url(fn (): string => route('admin.students.internal.download-pdf', [
+                    'search' => $this->search,
+                ]))
+                ->openUrlInNewTab(),
+            Actions\Action::make('download_excel')
+                ->label('Download Excel')
+                ->icon('heroicon-o-table-cells')
+                ->color('success')
+                ->url(fn (): string => route('admin.students.internal.download-excel', [
+                    'search' => $this->search,
+                ]))
+                ->openUrlInNewTab(),
         ];
     }
 }

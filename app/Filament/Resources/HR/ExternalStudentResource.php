@@ -45,7 +45,85 @@ class ExternalStudentResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        return StudentResource::form($schema);
+        return $schema->columns(2)->components([
+            Forms\Components\Hidden::make('student_type')
+                ->default('external'),
+            Forms\Components\TextInput::make('name')
+                ->label('Nama Lengkap Siswa')
+                ->required()
+                ->maxLength(255),
+            Forms\Components\TextInput::make('nisn')
+                ->label('NISN (10 Digit)')
+                ->maxLength(20),
+            Forms\Components\Select::make('course_level')
+                ->label('Program / Event')
+                ->options([
+                    \App\Livewire\BrainChampionRegistration::EVENT_TAG => 'G-English Brain Champion',
+                    'Try Out Bahasa Inggris' => 'Try Out Bahasa Inggris',
+                    'Placement Test Sekolah' => 'Placement Test Sekolah',
+                    'Kemitraan Sekolah' => 'Kemitraan Sekolah',
+                    'English Proficiency Test' => 'English Proficiency Test',
+                    'Eksternal Umum' => 'Eksternal Umum',
+                ])
+                ->default(\App\Livewire\BrainChampionRegistration::EVENT_TAG)
+                ->required(),
+            Forms\Components\Select::make('education_level')
+                ->label('Jenjang')
+                ->options([
+                    'SD' => 'SD',
+                    'MI' => 'MI',
+                    'SMP' => 'SMP',
+                    'MTs' => 'MTs',
+                ])
+                ->default('SD')
+                ->required(),
+            Forms\Components\TextInput::make('school_name')
+                ->label('Asal Sekolah')
+                ->placeholder('Contoh: SDN 1 Tanjung / MIN 1 Tabalong')
+                ->required()
+                ->maxLength(255),
+            Forms\Components\Select::make('class_name')
+                ->label('Kelas')
+                ->options([
+                    'Kelas 1' => 'Kelas 1',
+                    'Kelas 2' => 'Kelas 2',
+                    'Kelas 3' => 'Kelas 3',
+                    'Kelas 4' => 'Kelas 4',
+                    'Kelas 5' => 'Kelas 5',
+                    'Kelas 6' => 'Kelas 6',
+                    'Kelas 7' => 'Kelas 7',
+                    'Kelas 8' => 'Kelas 8',
+                    'Kelas 9' => 'Kelas 9',
+                ])
+                ->default('Kelas 4')
+                ->required(),
+            Forms\Components\Select::make('gender')
+                ->label('Jenis Kelamin')
+                ->options([
+                    'L' => 'Laki-laki (L)',
+                    'P' => 'Perempuan (P)',
+                ])
+                ->default('L')
+                ->required(),
+            Forms\Components\TextInput::make('phone')
+                ->label('No. HP Siswa')
+                ->tel()
+                ->maxLength(30),
+            Forms\Components\TextInput::make('parent_name')
+                ->label('Nama Orang Tua / Wali')
+                ->maxLength(255),
+            Forms\Components\TextInput::make('parent_phone')
+                ->label('No. HP / WA Orang Tua')
+                ->tel()
+                ->maxLength(30),
+            Forms\Components\TextInput::make('nis')
+                ->label('Kode Peserta / NIS (Opsional — otomatis dibuat jika kosong)')
+                ->unique(ignoreRecord: true)
+                ->maxLength(30),
+            Forms\Components\Toggle::make('is_active')
+                ->label('Aktif')
+                ->default(true),
+        ]);
     }
 
     public static function table(Table $table): Table

@@ -567,6 +567,8 @@ class ListExternalStudents extends ListRecords
         $this->pdfElapsed = '0,0 dtk';
         $this->pdfError = '';
 
+        $this->dispatch('gx-pdf-started');
+
         // Process the first chunk immediately so small exports finish in 1 click and large exports show live progress right away
         $this->processPdfChunk();
     }
@@ -680,7 +682,21 @@ class ListExternalStudents extends ListRecords
                     : number_format(max(1, $result['bytes'] / 1024), 0, ',', '.') . ' KB';
                 $this->pdfElapsed = number_format(max(0.1, microtime(true) - (float) $job['started_at']), 1, ',', '.') . ' dtk';
 
-                $this->dispatch('gx-pdf-ready', url: route('admin.pdf-export.download', $this->pdfJobId));
+                $downloadUrl = route('admin.pdf-export.download', $this->pdfJobId);
+                $this->dispatch('gx-pdf-ready', url: $downloadUrl);
+
+                Notification::make()
+                    ->title('PDF Siswa Eksternal Siap Diunduh')
+                    ->body(number_format($this->pdfProcessed, 0, ',', '.') . ' siswa • ' . number_format($this->pdfTotalPages, 0, ',', '.') . ' halaman • ' . $this->pdfFileSize)
+                    ->success()
+                    ->actions([
+                        \Filament\Actions\Action::make('download_ready_pdf')
+                            ->label('Unduh PDF (' . $this->pdfFileSize . ')')
+                            ->url($downloadUrl)
+                            ->openUrlInNewTab()
+                            ->button(),
+                    ])
+                    ->send();
             } else {
                 $this->pdfPercent = min(99, (int) floor(($rowNo / max(1, (int) $job['total'])) * 100));
                 Cache::put($cacheKey, $job, 1800);
@@ -724,16 +740,21 @@ class ListExternalStudents extends ListRecords
                 ->icon('heroicon-o-document-arrow-down')
                 ->color('danger')
                 ->action(fn () => $this->startPdfExport()),
+            Actions\Action::make('download_excel')
+                ->label('Download Excel')
+                ->icon('heroicon-o-table-cells')
+                ->color('info')
+                ->url(fn (): string => route('admin.students.external.download-excel', [
+                    'program' => $this->programFilter,
+                    'search' => $this->search,
+                ]))
+                ->openUrlInNewTab(),
             Actions\Action::make('download_brain_champion_template')
                 ->label('Download Template Excel')
                 ->icon('heroicon-o-arrow-down-tray')
                 ->color('success')
-                ->action(function () {
-                    return \Maatwebsite\Excel\Facades\Excel::download(
-                        new \App\Exports\BrainChampionStudentTemplateExport(null),
-                        'template_peserta_brain_champion.xlsx'
-                    );
-                }),
+                ->url(route('admin.students.external.template'))
+                ->openUrlInNewTab(),
             Actions\Action::make('import_brain_champion_excel')
                 ->label('Import Excel')
                 ->icon('heroicon-o-arrow-up-tray')
@@ -784,8 +805,21 @@ class ListExternalStudents extends ListRecords
                 }),
             Actions\CreateAction::make()
                 ->label('Tambah Siswa Eksternal')
+                ->modalWidth('3xl')
                 ->mutateFormDataUsing(function (array $data): array {
                     $data['student_type'] = 'external';
+                    if (empty($data['nis'])) {
+                        $prefix = ($data['course_level'] ?? '') === BrainChampionRegistration::EVENT_TAG
+                            ? 'BC-K' . (preg_replace('/\D+/', '', (string) ($data['class_name'] ?? '4')) ?: '4') . '-'
+                            : 'EXT-';
+                        do {
+                            $code = $prefix . str_pad((string) random_int(100, 9999), 4, '0', STR_PAD_LEFT);
+                        } while (Student::withTrashed()->where('nis', $code)->exists());
+                        $data['nis'] = $code;
+                    }
+                    if (($data['course_level'] ?? '') === BrainChampionRegistration::EVENT_TAG && empty($data['competition_code'])) {
+                        $data['competition_code'] = $data['nis'];
+                    }
                     return $data;
                 })
                 ->after(fn () => self::flushSummaryCache()),
