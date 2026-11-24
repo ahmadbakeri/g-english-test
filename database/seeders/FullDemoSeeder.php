@@ -37,7 +37,7 @@ class FullDemoSeeder extends Seeder
 {
     public function run(): void
     {
-        $password = Hash::make('ganzajaya');
+        $password = Hash::make('genzajaya');
 
         // 1. Admin & Agency Accounts
         $admin = User::updateOrCreate(
@@ -55,7 +55,7 @@ class FullDemoSeeder extends Seeder
             [
                 'name' => 'Admin Genza 48',
                 'email' => 'admin48@g-english.com',
-                'password' => Hash::make('ganzajaya'),
+                'password' => Hash::make('genzajaya'),
                 'role' => 'admin',
             ]
         );

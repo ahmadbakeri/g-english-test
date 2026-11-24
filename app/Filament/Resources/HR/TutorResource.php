@@ -86,7 +86,7 @@ class TutorResource extends Resource
                         ->label('Password Login')
                         ->password()
                         ->revealable()
-                        ->placeholder('Default: ganzajaya')
+                        ->placeholder('Default: genzajaya')
                         ->prefixIcon('heroicon-o-lock-closed')
                         ->dehydrated(false),
                 ])->columns(3),

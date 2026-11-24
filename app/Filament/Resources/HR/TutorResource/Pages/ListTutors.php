@@ -181,7 +181,7 @@ class ListTutors extends ListRecords
                 'name' => $name,
                 'username' => $resolvedUsername,
                 'email' => $resolvedEmail,
-                'password' => Hash::make($newPassword !== '' ? $newPassword : 'ganzajaya'),
+                'password' => Hash::make($newPassword !== '' ? $newPassword : 'genzajaya'),
                 'role' => 'tutor',
             ]);
             $t->update(['user_id' => $u->id]);

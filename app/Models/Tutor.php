@@ -85,7 +85,7 @@ class Tutor extends Model
                     'username' => $resolvedUsername,
                     'name' => $tutor->name,
                     'email' => $baseEmail,
-                    'password' => \Illuminate\Support\Facades\Hash::make('ganzajaya'),
+                    'password' => \Illuminate\Support\Facades\Hash::make('genzajaya'),
                     'role' => 'tutor',
                 ]);
                 $tutor->user_id = $user->id;
