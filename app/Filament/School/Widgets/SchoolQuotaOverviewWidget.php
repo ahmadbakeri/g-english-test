@@ -50,10 +50,10 @@ class SchoolQuotaOverviewWidget extends BaseWidget
         $grades = $level === 'SMP' ? [7, 8, 9] : [4, 5, 6];
         $normalizedSchool = BrainChampionRegistration::normalizeSchoolName((string) ($user?->name ?? ''));
 
-        $admissions = Admission::query()
+        $bcStudents = Student::query()
             ->select(['class_name', 'school_name', 'school_user_id'])
+            ->where('student_type', 'external')
             ->where('course_level', BrainChampionRegistration::EVENT_TAG)
-            ->where('status', '!=', 'rejected')
             ->get();
 
         $stats = [];
@@ -61,7 +61,7 @@ class SchoolQuotaOverviewWidget extends BaseWidget
             $classLabel = "Kelas {$grade}";
             $maxPerSchool = BrainChampionRegistration::maxPerSchoolForGrade($grade);
 
-            $gradeRows = $admissions->filter(fn ($row) => trim((string) $row->class_name) === $classLabel);
+            $gradeRows = $bcStudents->filter(fn ($row) => trim((string) $row->class_name) === $classLabel);
             $globalUsed = $gradeRows->count();
             $globalRemaining = max(0, BrainChampionRegistration::MAX_QUOTA_PER_GRADE - $globalUsed);
 

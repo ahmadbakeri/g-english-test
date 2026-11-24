@@ -66,8 +66,8 @@ class BrainChampionStudentTemplateExport implements FromArray, WithHeadings, Wit
                     $rows[] = $this->formatStudentRow($s);
                 }
 
-                $globalUsed = Admission::where('course_level', BrainChampionRegistration::EVENT_TAG)
-                    ->where('status', '!=', 'rejected')
+                $globalUsed = Student::where('student_type', 'external')
+                    ->where('course_level', BrainChampionRegistration::EVENT_TAG)
                     ->where('class_name', $classLabel)
                     ->count();
 

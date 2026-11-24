@@ -338,10 +338,10 @@ class BrainChampionRegistration extends Component
     {
         $normalizedSchool = self::normalizeSchoolName($this->school_name);
 
-        $admissions = Admission::query()
+        $students = Student::query()
             ->select(['class_name', 'school_name'])
+            ->where('student_type', 'external')
             ->where('course_level', self::EVENT_TAG)
-            ->where('status', '!=', 'rejected')
             ->get();
 
         $summary = [];
@@ -349,7 +349,7 @@ class BrainChampionRegistration extends Component
             $classLabel = "Kelas {$grade}";
             $maxPerSchool = self::maxPerSchoolForGrade($grade);
 
-            $gradeRows = $admissions->filter(fn ($row) => trim((string) $row->class_name) === $classLabel);
+            $gradeRows = $students->filter(fn ($row) => trim((string) $row->class_name) === $classLabel);
             $globalUsed = $gradeRows->count();
             $globalRemaining = max(0, self::MAX_QUOTA_PER_GRADE - $globalUsed);
 
@@ -478,9 +478,10 @@ class BrainChampionRegistration extends Component
             : Str::upper(Str::random(6));
 
         $createdRecords = DB::transaction(function () use ($entriesByGrade, $cleanSchoolName, $normalizedSchool, $coordinatorPhone, $cleanSchoolEmail, $plainPassword) {
-            $lockedRows = Admission::query()
+            $lockedRows = Student::query()
+                ->select(['id', 'class_name', 'school_name'])
+                ->where('student_type', 'external')
                 ->where('course_level', self::EVENT_TAG)
-                ->where('status', '!=', 'rejected')
                 ->lockForUpdate()
                 ->get();
 
@@ -612,7 +613,7 @@ class BrainChampionRegistration extends Component
                     ]);
 
                     $student->parents()->syncWithoutDetaching([$schoolUser->id]);
-                    $lockedRows->push($admission);
+                    $lockedRows->push($student);
 
                     $results[] = [
                         'registration_number' => $regCode,

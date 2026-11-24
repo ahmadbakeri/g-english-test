@@ -33,9 +33,10 @@ class BrainChampionStudentImport implements ToCollection, WithHeadingRow
         $normalizedSchool = BrainChampionRegistration::normalizeSchoolName($resolvedSchoolName);
 
         DB::transaction(function () use ($rows, $schoolUser, $resolvedSchoolName, $normalizedSchool) {
-            $lockedAdmissions = Admission::query()
+            $lockedStudents = Student::query()
+                ->select(['id', 'class_name', 'school_name', 'school_user_id'])
+                ->where('student_type', 'external')
                 ->where('course_level', BrainChampionRegistration::EVENT_TAG)
-                ->where('status', '!=', 'rejected')
                 ->lockForUpdate()
                 ->get();
 
@@ -142,7 +143,7 @@ class BrainChampionStudentImport implements ToCollection, WithHeadingRow
 
                 // 2. New participant: enforce 35 global quota & 2 (SD) / 1 (SMP) per-school quota
                 $maxPerSchool = BrainChampionRegistration::maxPerSchoolForGrade($grade);
-                $gradeRows = $lockedAdmissions->filter(fn ($a) => trim((string) $a->class_name) === $classLabel);
+                $gradeRows = $lockedStudents->filter(fn ($a) => trim((string) $a->class_name) === $classLabel);
 
                 if ($gradeRows->count() >= BrainChampionRegistration::MAX_QUOTA_PER_GRADE) {
                     $this->skippedCount++;
@@ -233,7 +234,7 @@ class BrainChampionStudentImport implements ToCollection, WithHeadingRow
                     $student->parents()->syncWithoutDetaching([$schoolUser->id]);
                 }
 
-                $lockedAdmissions->push($admission);
+                $lockedStudents->push($student);
                 $this->createdCount++;
             }
         });
