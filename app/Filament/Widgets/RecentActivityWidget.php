@@ -2,67 +2,59 @@
 
 namespace App\Filament\Widgets;
 
-use Filament\Tables;
-use Filament\Tables\Table;
-use Filament\Widgets\TableWidget as BaseWidget;
+use App\Filament\Pages\AccessLogsPage;
 use App\Models\ActivityLog;
+use Filament\Widgets\Widget;
 
-class RecentActivityWidget extends BaseWidget
+class RecentActivityWidget extends Widget
 {
     protected static bool $isLazy = false;
 
-    protected int|string|array $columnSpan = 'full';
+    protected int | string | array $columnSpan = 'full';
+
     protected static ?int $sort = 4;
 
-    public function getHeading(): string
-    {
-        return __('Today\'s Access Activity');
-    }
+    protected string $view = 'filament.widgets.recent-activity-widget';
 
     public static function canView(): bool
     {
-        return auth()->user()->isAdmin();
+        return auth()->user()?->isAdmin() ?? false;
     }
 
-    public function table(Table $table): Table
+    public function getTodayActiveUsersProperty(): int
     {
-        return $table
-            ->heading(__('Recent Activity'))
-            ->modelLabel(__('activity log'))
-            ->pluralModelLabel(__('activity logs'))
-            ->query(
-                ActivityLog::query()->with('user')
-                    ->whereDate('created_at', today())
-                    ->latest()
-                    ->limit(10)
-            )
-            ->columns([
-                \Filament\Tables\Columns\Layout\Split::make([
-                Tables\Columns\TextColumn::make('id')
-                    ->label(__('No'))
-                    ->rowIndex(),
-                Tables\Columns\TextColumn::make('user.name')
-                    ->label(__('Name'))
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('user.role')
-                    ->label(__('Role'))
-                    ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'admin' => 'danger',
-                        'tutor' => 'info',
-                        default => 'gray',
-                    }),
-                Tables\Columns\TextColumn::make('page')
-                    ->label(__('Page Opened'))
-                    ->limit(30),
-                Tables\Columns\TextColumn::make('ip')
-                    ->label(__('IP Address')),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->label(__('Time'))
-                    ->dateTime('H:i:s')
-                    ->sortable(),
-                ])->from('md'),
-            ])
-            ->paginated(false);
+        return (int) ActivityLog::query()
+            ->whereDate('created_at', today())
+            ->whereNotNull('user_id')
+            ->distinct('user_id')
+            ->count('user_id');
+    }
+
+    public function getLogsProperty()
+    {
+        return ActivityLog::query()
+            ->with(['user.student:id,user_id,school_name,class_name'])
+            ->latest('created_at')
+            ->limit(15)
+            ->get();
+    }
+
+    public function getDetailUrlProperty(): string
+    {
+        return AccessLogsPage::getUrl();
+    }
+
+    public static function roleMeta(?string $role): array
+    {
+        return match ($role) {
+            'admin' => ['label' => 'Admin', 'class' => 'gx-pill-danger'],
+            'tutor' => ['label' => 'Tutor', 'class' => 'gx-pill-gold'],
+            'school' => ['label' => 'Sekolah', 'class' => 'gx-pill-primary'],
+            'siswa' => ['label' => 'Siswa', 'class' => 'gx-pill-success'],
+            'parent' => ['label' => 'Orang Tua', 'class' => 'gx-pill-muted'],
+            'kemenag' => ['label' => 'Kemenag', 'class' => 'gx-pill-gold'],
+            'kemendikdasmen' => ['label' => 'Kemendikdasmen', 'class' => 'gx-pill-primary'],
+            default => ['label' => ucfirst((string) ($role ?: 'User')), 'class' => 'gx-pill-muted'],
+        };
     }
 }

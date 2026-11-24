@@ -716,7 +716,31 @@ class FullDemoSeeder extends Seeder
             );
         }
 
-        // 14. Settings
+        // 14. Sample Access Logs (hanya jika masih kosong)
+        if (\App\Models\ActivityLog::count() === 0) {
+            $sampleLogs = [
+                [$sdnUser, 'Request Jadwal Tes', '182.8.130.91', 1],
+                [$students['Alya Putri']->user, 'Kerjakan Ujian CBT', '182.2.105.134', 2],
+                [$minUser, 'Kelola Peserta Sekolah', '36.75.52.237', 4],
+                [$tutorUsers['Ms Hana'], 'Jurnal Mengajar', '140.213.57.55', 6],
+                [$admin, 'Dashboard Admin', '114.122.232.219', 8],
+            ];
+            foreach ($sampleLogs as [$u, $page, $ip, $minsAgo]) {
+                if ($u) {
+                    \App\Models\ActivityLog::create([
+                        'user_id' => $u->id,
+                        'action' => 'access',
+                        'page' => $page,
+                        'description' => '/' . strtolower(str_replace(' ', '-', $page)),
+                        'ip' => $ip,
+                        'created_at' => now()->subMinutes($minsAgo),
+                        'updated_at' => now()->subMinutes($minsAgo),
+                    ]);
+                }
+            }
+        }
+
+        // 15. Settings
         $settings = [
             ['key' => 'app_name', 'value' => 'G-English', 'group' => 'general'],
             ['key' => 'app_description', 'value' => 'Sistem Administrasi G-English & Brain Champion', 'group' => 'general'],

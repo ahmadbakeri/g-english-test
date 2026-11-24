@@ -36,8 +36,21 @@ Route::post('/login-action', function (\Illuminate\Http\Request $request) {
 
     if (\Illuminate\Support\Facades\Auth::attempt($credentials)) {
         $request->session()->regenerate();
-        
-        $role = \Illuminate\Support\Facades\Auth::user()->role;
+        $authUser = \Illuminate\Support\Facades\Auth::user();
+
+        try {
+            \App\Models\ActivityLog::create([
+                'user_id' => $authUser->id,
+                'action' => 'login',
+                'page' => 'Login Portal',
+                'description' => '/login',
+                'ip' => $request->ip(),
+                'user_agent' => mb_substr((string) $request->userAgent(), 0, 240),
+            ]);
+        } catch (\Throwable) {
+        }
+
+        $role = $authUser->role;
         if ($role === 'admin') {
             return redirect()->to('/admin');
         } elseif ($role === 'tutor') {
