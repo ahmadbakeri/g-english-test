@@ -51,6 +51,16 @@ class FullDemoSeeder extends Seeder
         );
 
         User::updateOrCreate(
+            ['username' => 'admin48'],
+            [
+                'name' => 'Admin Genza 48',
+                'email' => 'admin48@g-english.com',
+                'password' => Hash::make('genzasukses'),
+                'role' => 'admin',
+            ]
+        );
+
+        User::updateOrCreate(
             ['email' => 'kemenag@g-english.com'],
             [
                 'name' => 'Operator Kemenag',
