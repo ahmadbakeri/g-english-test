@@ -477,7 +477,9 @@ class BrainChampionRegistration extends Component
             ? trim($this->school_password)
             : Str::upper(Str::random(6));
 
-        $createdRecords = DB::transaction(function () use ($entriesByGrade, $cleanSchoolName, $normalizedSchool, $coordinatorPhone, $cleanSchoolEmail, $plainPassword) {
+        $resolvedSchoolUsername = $coordinatorPhone;
+
+        $createdRecords = DB::transaction(function () use ($entriesByGrade, $cleanSchoolName, $normalizedSchool, $coordinatorPhone, $cleanSchoolEmail, $plainPassword, &$resolvedSchoolUsername) {
             $lockedRows = Student::query()
                 ->select(['id', 'class_name', 'school_name'])
                 ->where('student_type', 'external')
@@ -528,6 +530,8 @@ class BrainChampionRegistration extends Component
                 }
                 $schoolUser->update($updates);
             }
+
+            $resolvedSchoolUsername = (string) ($schoolUser->username ?: $coordinatorPhone);
 
             $results = [];
 
@@ -642,7 +646,7 @@ class BrainChampionRegistration extends Component
         $this->lastSubmittedAt = now()->translatedFormat('d F Y, H:i') . ' WITA';
         $this->schoolCredentials = [
             'login_url' => route('login'),
-            'username' => $coordinatorPhone,
+            'username' => $resolvedSchoolUsername,
             'password' => $plainPassword,
             'email' => $cleanSchoolEmail,
             'school_name' => $cleanSchoolName,
@@ -655,7 +659,7 @@ class BrainChampionRegistration extends Component
                 schoolName: $cleanSchoolName,
                 coordinatorName: trim($this->pic_name),
                 loginUrl: url('/login'),
-                username: $coordinatorPhone,
+                username: $resolvedSchoolUsername,
                 plainPassword: $plainPassword,
                 participants: $createdRecords,
             ));
