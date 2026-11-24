@@ -6,7 +6,63 @@
         $autoExpandDeep = $hasSearch && $hierarchy['totalStudents'] > 0 && $hierarchy['totalStudents'] <= 40;
     @endphp
 
-    <div class="gx-wrap">
+    <div class="gx-wrap" x-data @gx-pdf-ready.window="window.location.href = $event.detail.url">
+        {{-- Live Chunked PDF Export Progress Banner --}}
+        @if ($pdfStatus !== 'idle')
+            <div
+                @if ($pdfStatus === 'running') wire:poll.350ms="processPdfChunk" @endif
+                class="gx-toolbar"
+                style="flex-direction:column;align-items:stretch;gap:0.55rem;border-color:{{ $pdfStatus === 'done' ? 'rgba(16,185,129,0.35)' : ($pdfStatus === 'error' ? 'rgba(244,63,94,0.35)' : 'rgba(10,66,130,0.28)') }};"
+            >
+                <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:0.5rem;">
+                    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:0.5rem;">
+                        @if ($pdfStatus === 'running')
+                            <span class="gx-pill gx-pill-gold">Proses PDF {{ $pdfPercent }}%</span>
+                            <span style="font-size:0.84rem;font-weight:700;color:#0a4282;" class="dark:!text-white">
+                                {{ number_format($pdfProcessed, 0, ',', '.') }} / {{ number_format($pdfTotal, 0, ',', '.') }} siswa
+                            </span>
+                            <span class="gx-pill gx-pill-muted">
+                                Hal {{ number_format($pdfPagesDone, 0, ',', '.') }} / {{ number_format($pdfTotalPages, 0, ',', '.') }} • {{ $pdfElapsed }}
+                            </span>
+                        @elseif ($pdfStatus === 'done')
+                            <span class="gx-pill gx-pill-success">PDF Siap</span>
+                            <span style="font-size:0.84rem;font-weight:700;color:#047857;" class="dark:!text-emerald-300">
+                                {{ number_format($pdfProcessed, 0, ',', '.') }} siswa • {{ number_format($pdfTotalPages, 0, ',', '.') }} halaman • {{ $pdfFileSize }} ({{ $pdfElapsed }})
+                            </span>
+                        @else
+                            <span class="gx-pill gx-pill-danger">Export Gagal</span>
+                            <span style="font-size:0.82rem;color:#be123c;">{{ $pdfError }}</span>
+                        @endif
+                    </div>
+
+                    <div style="display:flex;align-items:center;gap:0.45rem;">
+                        @if ($pdfStatus === 'done' && $pdfJobId)
+                            <a href="{{ route('admin.pdf-export.download', $pdfJobId) }}" class="gx-btn gx-btn-card">
+                                Download PDF ({{ $pdfFileSize }})
+                            </a>
+                            <button type="button" wire:click="cancelPdfExport" class="gx-btn gx-btn-cancel" style="padding:0.32rem 0.78rem;font-size:0.75rem;">
+                                Tutup
+                            </button>
+                        @elseif ($pdfStatus === 'running')
+                            <button type="button" wire:click="cancelPdfExport" class="gx-btn gx-btn-del">
+                                Batalkan
+                            </button>
+                        @else
+                            <button type="button" wire:click="cancelPdfExport" class="gx-btn gx-btn-cancel" style="padding:0.32rem 0.78rem;font-size:0.75rem;">
+                                Tutup
+                            </button>
+                        @endif
+                    </div>
+                </div>
+
+                @if ($pdfStatus === 'running' || $pdfStatus === 'done')
+                    <div style="width:100%;height:0.5rem;border-radius:9999px;background:rgba(15,23,42,0.08);overflow:hidden;" class="dark:!bg-slate-800">
+                        <div style="height:100%;border-radius:9999px;width:{{ $pdfPercent }}%;background:{{ $pdfStatus === 'done' ? '#10b981' : '#0a4282' }};transition:width 0.3s ease;"></div>
+                    </div>
+                @endif
+            </div>
+        @endif
+
         {{-- Search & Program Filter Toolbar --}}
         <div class="gx-toolbar">
             <input

@@ -119,6 +119,26 @@ Route::post('/api/push/subscribe', [\App\Http\Controllers\PushSubscriptionContro
     ->name('push.subscribe')
     ->middleware(['web', 'auth']);
 
+Route::get('/admin/pdf-exports/{jobId}/download', function (string $jobId) {
+    abort_unless(auth()->user()?->isAdmin(), 403);
+    abort_unless(preg_match('/^[a-f0-9-]{36}$/i', $jobId) === 1, 404);
+
+    $job = \Illuminate\Support\Facades\Cache::get("pdf_export_job:{$jobId}");
+    abort_unless(
+        is_array($job)
+        && (int) ($job['user_id'] ?? 0) === (int) auth()->id()
+        && ($job['status'] ?? '') === 'done',
+        404
+    );
+
+    $path = (string) ($job['file_path'] ?? '');
+    abort_unless($path !== '' && is_file($path), 404);
+
+    return response()->download($path, (string) ($job['filename'] ?? 'export.pdf'), [
+        'Content-Type' => 'application/pdf',
+    ]);
+})->name('admin.pdf-export.download')->middleware(['web', 'auth']);
+
 Route::post('/api/push/unsubscribe', [\App\Http\Controllers\PushSubscriptionController::class, 'destroy'])
     ->name('push.unsubscribe')
     ->middleware(['web', 'auth']);

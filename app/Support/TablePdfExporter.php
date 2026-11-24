@@ -22,6 +22,19 @@ class TablePdfExporter
         array $summary = [],
         string $orientation = 'landscape',
     ): StreamedResponse {
+        // Automatically switch to zero-overhead streaming native PDF writer for large datasets (> 120 rows)
+        if (count($rows) > 120) {
+            return FastTablePdfWriter::download(
+                filename: $filename,
+                title: $title,
+                subtitle: $subtitle,
+                headers: $headers,
+                rows: $rows,
+                summary: $summary,
+                orientation: $orientation,
+            );
+        }
+
         $pdf = Pdf::loadView('reports.table-export-pdf', [
             'title' => $title,
             'subtitle' => $subtitle,

@@ -6,12 +6,14 @@ use App\Filament\Resources\HR\ExternalStudentResource;
 use App\Livewire\BrainChampionRegistration;
 use App\Models\Student;
 use App\Models\User;
+use App\Support\FastTablePdfWriter;
 use App\Support\SchoolAgencyClassifier;
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Computed;
 
 class ListExternalStudents extends ListRecords
@@ -21,6 +23,7 @@ class ListExternalStudents extends ListRecords
     protected string $view = 'filament.admin.pages.external-students-hierarchy';
 
     public const PER_CLASS_STEP = 25;
+    public const PDF_CHUNK_SIZE = 1000;
 
     public string $search = '';
 
@@ -43,6 +46,18 @@ class ListExternalStudents extends ListRecords
 
     /** @var array<string, mixed> */
     public array $editForm = [];
+
+    // Chunked Streaming PDF Export Progress State
+    public ?string $pdfJobId = null;
+    public string $pdfStatus = 'idle'; // idle | running | done | error
+    public int $pdfTotal = 0;
+    public int $pdfProcessed = 0;
+    public int $pdfPercent = 0;
+    public int $pdfPagesDone = 0;
+    public int $pdfTotalPages = 0;
+    public string $pdfFileSize = '';
+    public string $pdfElapsed = '';
+    public string $pdfError = '';
 
     /** Per-request memoization for lazy class queries */
     protected array $schoolClassesMemo = [];
@@ -482,6 +497,225 @@ class ListExternalStudents extends ListRecords
         ];
     }
 
+    public function startPdfExport(): void
+    {
+        $this->cancelPdfExport();
+
+        $total = $this->baseQuery()->count();
+        if ($total === 0) {
+            Notification::make()
+                ->title('Tidak ada data siswa eksternal untuk diexport pada filter ini.')
+                ->warning()
+                ->send();
+            return;
+        }
+
+        $bcTotal = (clone $this->baseQuery())
+            ->where('course_level', BrainChampionRegistration::EVENT_TAG)
+            ->count();
+        $nonBcTotal = max(0, $total - $bcTotal);
+
+        $jobId = (string) Str::uuid();
+        $jobDir = storage_path("app/pdf-exports/{$jobId}");
+        $filename = 'daftar-siswa-eksternal-' . now()->format('Y-m-d-His') . '.pdf';
+
+        $filterLabel = match ($this->programFilter) {
+            'brain_champion' => 'Program: Peserta Brain Champion',
+            'non_bc' => 'Program: Eksternal Non-Brain Champion',
+            default => 'Program: Semua Siswa Eksternal',
+        };
+        $subtitle = $filterLabel . ($this->search ? ' • Pencarian: "' . $this->search . '"' : ' • Seluruh jenjang SD, MI, SMP, MTs');
+
+        $meta = FastTablePdfWriter::beginJob($jobDir, [
+            'title' => 'Daftar Siswa Eksternal',
+            'subtitle' => $subtitle,
+            'headers' => ['No', 'Jenjang', 'Sekolah', 'Kelas', 'Program', 'Kode / User', 'Nama Siswa', 'Orang Tua / WA'],
+            'colWeights' => [0.45, 0.55, 1.9, 0.72, 1.3, 1.05, 1.75, 1.65],
+            'summary' => [
+                'Total Siswa' => number_format($total, 0, ',', '.') . ' siswa',
+                'Brain Champion' => number_format($bcTotal, 0, ',', '.') . ' peserta',
+                'Eksternal Non-BC' => number_format($nonBcTotal, 0, ',', '.') . ' siswa',
+            ],
+            'orientation' => 'landscape',
+            'totalRows' => $total,
+        ]);
+
+        Cache::put("pdf_export_job:{$jobId}", [
+            'user_id' => (int) auth()->id(),
+            'status' => 'running',
+            'job_dir' => $jobDir,
+            'filename' => $filename,
+            'file_path' => $jobDir . DIRECTORY_SEPARATOR . $filename,
+            'program_filter' => $this->programFilter,
+            'search' => $this->search,
+            'last_id' => 0,
+            'row_no' => 0,
+            'total' => $total,
+            'processed' => 0,
+            'total_pages' => (int) $meta['totalPages'],
+            'started_at' => microtime(true),
+        ], 1800);
+
+        $this->pdfJobId = $jobId;
+        $this->pdfStatus = 'running';
+        $this->pdfTotal = $total;
+        $this->pdfProcessed = 0;
+        $this->pdfPercent = 0;
+        $this->pdfPagesDone = 0;
+        $this->pdfTotalPages = (int) $meta['totalPages'];
+        $this->pdfFileSize = '';
+        $this->pdfElapsed = '0,0 dtk';
+        $this->pdfError = '';
+
+        // Process the first chunk immediately so small exports finish in 1 click and large exports show live progress right away
+        $this->processPdfChunk();
+    }
+
+    public function processPdfChunk(): void
+    {
+        if ($this->pdfStatus !== 'running' || !$this->pdfJobId) {
+            return;
+        }
+
+        $cacheKey = "pdf_export_job:{$this->pdfJobId}";
+        $job = Cache::get($cacheKey);
+        if (!is_array($job) || ($job['status'] ?? '') !== 'running') {
+            $this->pdfStatus = 'idle';
+            return;
+        }
+
+        try {
+            $query = Student::query()->where('student_type', 'external');
+
+            $pf = (string) ($job['program_filter'] ?? 'all');
+            if ($pf === 'brain_champion') {
+                $query->where('course_level', BrainChampionRegistration::EVENT_TAG);
+            } elseif ($pf === 'non_bc') {
+                $query->where(function (Builder $q) {
+                    $q->whereNull('course_level')
+                        ->orWhere('course_level', '!=', BrainChampionRegistration::EVENT_TAG);
+                });
+            }
+
+            $needle = trim((string) ($job['search'] ?? ''));
+            if ($needle !== '') {
+                $like = '%' . $needle . '%';
+                $query->where(function (Builder $q) use ($like) {
+                    $q->where('name', 'like', $like)
+                        ->orWhere('nis', 'like', $like)
+                        ->orWhere('nisn', 'like', $like)
+                        ->orWhere('competition_code', 'like', $like)
+                        ->orWhere('school_name', 'like', $like)
+                        ->orWhere('class_name', 'like', $like)
+                        ->orWhere('course_level', 'like', $like)
+                        ->orWhereHas('user', fn (Builder $u) => $u->where('username', 'like', $like))
+                        ->orWhereHas('schoolUser', fn (Builder $su) => $su->where('username', 'like', $like));
+                });
+            }
+
+            // O(1) keyset pagination on primary key (zero slow OFFSET)
+            $students = $query
+                ->select([
+                    'id', 'user_id', 'nis', 'nisn', 'competition_code', 'name',
+                    'school_name', 'education_level', 'class_name', 'course_level',
+                    'parent_name', 'father_name', 'parent_phone', 'phone',
+                ])
+                ->with(['user:id,username'])
+                ->where('id', '>', (int) $job['last_id'])
+                ->orderBy('id')
+                ->limit(self::PDF_CHUNK_SIZE)
+                ->get();
+
+            $rows = [];
+            $rowNo = (int) $job['row_no'];
+            $lastId = (int) $job['last_id'];
+
+            foreach ($students as $s) {
+                $rowNo++;
+                $lastId = (int) $s->id;
+                $lvl = SchoolAgencyClassifier::classifyLevel($s->school_name, $s->education_level, $s->class_name);
+                $program = $s->course_level === BrainChampionRegistration::EVENT_TAG
+                    ? 'Brain Champion'
+                    : ($s->course_level ?: 'Eksternal Umum');
+
+                $rows[] = [
+                    $rowNo,
+                    $lvl,
+                    $s->school_name ?: 'Tanpa Sekolah',
+                    $s->class_name ?: '-',
+                    $program,
+                    $s->user?->username ?: ($s->competition_code ?: ($s->nis ?: '-')),
+                    $s->name,
+                    ($s->parent_name ?: ($s->father_name ?: '-')) . ' / ' . ($s->parent_phone ?: ($s->phone ?: '-')),
+                ];
+            }
+
+            $meta = FastTablePdfWriter::appendRows($job['job_dir'], $rows);
+
+            $job['last_id'] = $lastId;
+            $job['row_no'] = $rowNo;
+            $job['processed'] = $rowNo;
+
+            $elapsedSec = max(0.1, microtime(true) - (float) $job['started_at']);
+            $this->pdfProcessed = $rowNo;
+            $this->pdfPagesDone = (int) $meta['pagesWritten'];
+            $this->pdfTotalPages = max($this->pdfTotalPages, (int) $meta['totalPages']);
+            $this->pdfElapsed = number_format($elapsedSec, 1, ',', '.') . ' dtk';
+
+            $isFinished = $students->count() < self::PDF_CHUNK_SIZE || $rowNo >= (int) $job['total'];
+
+            if ($isFinished) {
+                $result = FastTablePdfWriter::finalizeJob($job['job_dir'], $job['file_path']);
+                $job['status'] = 'done';
+                $job['pages'] = $result['pages'];
+                $job['bytes'] = $result['bytes'];
+                Cache::put($cacheKey, $job, 1800);
+
+                $this->pdfStatus = 'done';
+                $this->pdfPercent = 100;
+                $this->pdfPagesDone = $result['pages'];
+                $this->pdfTotalPages = $result['pages'];
+                $this->pdfFileSize = $result['bytes'] >= 1048576
+                    ? number_format($result['bytes'] / 1048576, 2, ',', '.') . ' MB'
+                    : number_format(max(1, $result['bytes'] / 1024), 0, ',', '.') . ' KB';
+                $this->pdfElapsed = number_format(max(0.1, microtime(true) - (float) $job['started_at']), 1, ',', '.') . ' dtk';
+
+                $this->dispatch('gx-pdf-ready', url: route('admin.pdf-export.download', $this->pdfJobId));
+            } else {
+                $this->pdfPercent = min(99, (int) floor(($rowNo / max(1, (int) $job['total'])) * 100));
+                Cache::put($cacheKey, $job, 1800);
+            }
+        } catch (\Throwable $e) {
+            $this->pdfStatus = 'error';
+            $this->pdfError = $e->getMessage();
+            Cache::forget($cacheKey);
+            FastTablePdfWriter::cleanupDir($job['job_dir'] ?? '');
+        }
+    }
+
+    public function cancelPdfExport(): void
+    {
+        if ($this->pdfJobId) {
+            $cacheKey = "pdf_export_job:{$this->pdfJobId}";
+            $job = Cache::get($cacheKey);
+            Cache::forget($cacheKey);
+            if (is_array($job) && !empty($job['job_dir'])) {
+                FastTablePdfWriter::cleanupDir((string) $job['job_dir']);
+            }
+        }
+
+        $this->pdfJobId = null;
+        $this->pdfStatus = 'idle';
+        $this->pdfTotal = 0;
+        $this->pdfProcessed = 0;
+        $this->pdfPercent = 0;
+        $this->pdfPagesDone = 0;
+        $this->pdfTotalPages = 0;
+        $this->pdfFileSize = '';
+        $this->pdfElapsed = '';
+        $this->pdfError = '';
+    }
+
     protected function getHeaderActions(): array
     {
         return [
@@ -489,60 +723,7 @@ class ListExternalStudents extends ListRecords
                 ->label('Download PDF')
                 ->icon('heroicon-o-document-arrow-down')
                 ->color('danger')
-                ->action(function () {
-                    $maxPdfRows = 600;
-                    $totalMatched = $this->baseQuery()->count();
-
-                    $rows = [];
-                    $no = 1;
-                    $this->baseQuery()
-                        ->select([
-                            'id', 'user_id', 'nis', 'nisn', 'competition_code', 'name',
-                            'school_name', 'education_level', 'class_name', 'course_level',
-                            'parent_name', 'father_name', 'parent_phone', 'phone',
-                        ])
-                        ->with(['user:id,username'])
-                        ->orderBy('school_name')
-                        ->orderBy('class_name')
-                        ->orderBy('name')
-                        ->limit($maxPdfRows)
-                        ->chunk(200, function ($chunk) use (&$rows, &$no) {
-                            foreach ($chunk as $s) {
-                                $lvl = SchoolAgencyClassifier::classifyLevel($s->school_name, $s->education_level, $s->class_name);
-                                $rows[] = [
-                                    $no++,
-                                    $lvl,
-                                    $s->school_name ?: 'Tanpa Sekolah',
-                                    $s->class_name ?: '-',
-                                    $s->course_level === BrainChampionRegistration::EVENT_TAG ? 'Brain Champion' : ($s->course_level ?: 'Eksternal Umum'),
-                                    $s->user?->username ?: ($s->competition_code ?: ($s->nis ?: '-')),
-                                    $s->name,
-                                    ($s->parent_name ?: ($s->father_name ?: '-')) . ' / ' . ($s->parent_phone ?: ($s->phone ?: '-')),
-                                ];
-                            }
-                        });
-
-                    $filterLabel = match ($this->programFilter) {
-                        'brain_champion' => 'Program: Peserta Brain Champion',
-                        'non_bc' => 'Program: Eksternal Non-Brain Champion',
-                        default => 'Program: Semua Siswa Eksternal',
-                    };
-                    $subtitle = $filterLabel
-                        . ($this->search ? ' • Cari: "' . $this->search . '"' : '')
-                        . ($totalMatched > $maxPdfRows ? " • Menampilkan {$maxPdfRows} pertama dari {$totalMatched} (gunakan filter/cari untuk cetak spesifik)" : '');
-
-                    return \App\Support\TablePdfExporter::download(
-                        filename: 'daftar-siswa-eksternal-' . now()->format('Y-m-d') . '.pdf',
-                        title: 'Daftar Siswa Eksternal',
-                        subtitle: $subtitle,
-                        headers: ['No', 'Jenjang', 'Sekolah', 'Kelas', 'Program', 'Kode / User', 'Nama Siswa', 'Orang Tua / WA'],
-                        rows: $rows,
-                        summary: [
-                            'Total Tercatat' => number_format($totalMatched, 0, ',', '.') . ' siswa',
-                            'Ditampilkan di PDF' => number_format(count($rows), 0, ',', '.') . ' baris',
-                        ],
-                    );
-                }),
+                ->action(fn () => $this->startPdfExport()),
             Actions\Action::make('download_brain_champion_template')
                 ->label('Download Template Excel')
                 ->icon('heroicon-o-arrow-down-tray')
