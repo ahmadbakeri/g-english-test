@@ -29,7 +29,7 @@
         </div>
 
         <div class="gx-welcome-actions" style="display:flex; flex-wrap:wrap; align-items:center; gap:0.5rem;">
-            <a href="{{ asset('juknis/Juknis-Lomba-Brain-Champion-G-English.pdf') }}"
+            <a href="{{ asset('juknis/Juknis-Lomba-Brain-Champion-G-English.pdf') }}?v=2"
                download="Juknis-Lomba-Brain-Champion-G-English.pdf"
                target="_blank"
                class="gx-welcome-date-pill"

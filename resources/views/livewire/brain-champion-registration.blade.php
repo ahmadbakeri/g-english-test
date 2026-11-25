@@ -77,7 +77,7 @@
                         <span>Unduh Dokumen Resmi (PDF):</span>
                     </div>
                     <div class="flex flex-wrap items-center gap-2.5">
-                        <a href="{{ asset('juknis/Juknis-Lomba-Brain-Champion-G-English.pdf') }}"
+                        <a href="{{ asset('juknis/Juknis-Lomba-Brain-Champion-G-English.pdf') }}?v=2"
                            download="Juknis-Lomba-Brain-Champion-G-English.pdf"
                            target="_blank"
                            class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-genza-yellow hover:bg-yellow-400 text-genza-blue font-black text-xs sm:text-sm shadow-lg shadow-yellow-500/20 hover:-translate-y-0.5 transition-all">
@@ -116,7 +116,7 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <!-- Card 1: Juknis Lomba -->
-                    <a href="{{ asset('juknis/Juknis-Lomba-Brain-Champion-G-English.pdf') }}"
+                    <a href="{{ asset('juknis/Juknis-Lomba-Brain-Champion-G-English.pdf') }}?v=2"
                        download="Juknis-Lomba-Brain-Champion-G-English.pdf"
                        target="_blank"
                        class="group flex flex-col justify-between p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-amber-50/90 via-white to-amber-50/40 dark:from-slate-900 dark:via-slate-900 dark:to-amber-950/30 border-2 border-genza-yellow/70 hover:border-genza-blue dark:hover:border-genza-yellow shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all">

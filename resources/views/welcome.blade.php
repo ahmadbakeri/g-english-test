@@ -146,7 +146,7 @@
                     <span>KUOTA SANGAT TERBATAS (Hanya 5–15 Siswa Reguler &amp; 35 Peserta Brain Champion per jenjang)</span>
                 </div>
                 <div class="mt-2 flex flex-wrap justify-center items-center gap-2.5">
-                    <a href="{{ asset('juknis/Juknis-Lomba-Brain-Champion-G-English.pdf') }}"
+                    <a href="{{ asset('juknis/Juknis-Lomba-Brain-Champion-G-English.pdf') }}?v=2"
                        download="Juknis-Lomba-Brain-Champion-G-English.pdf"
                        target="_blank"
                        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-genza-blue hover:bg-[#083568] text-white font-extrabold text-xs sm:text-sm shadow-md hover:-translate-y-0.5 transition-all">
