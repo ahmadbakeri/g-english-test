@@ -69,6 +69,133 @@
                         <div class="text-blue-200 text-xs pt-1 border-t border-white/15">&bull; Kuota Global: <strong>35 Siswa / Kelas</strong></div>
                     </div>
                 </div>
+
+                <!-- QUICK JUKNIS DOWNLOAD BAR INSIDE HERO -->
+                <div class="mt-6 pt-5 border-t border-white/15 flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 relative">
+                    <div class="flex items-center gap-2 text-xs sm:text-sm font-extrabold text-genza-yellow">
+                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        <span>Unduh Dokumen Resmi (PDF):</span>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2.5">
+                        <a href="{{ asset('juknis/Juknis-Lomba-Brain-Champion-G-English.pdf') }}"
+                           download="Juknis-Lomba-Brain-Champion-G-English.pdf"
+                           target="_blank"
+                           class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-genza-yellow hover:bg-yellow-400 text-genza-blue font-black text-xs sm:text-sm shadow-lg shadow-yellow-500/20 hover:-translate-y-0.5 transition-all">
+                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.3" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            <span>Juknis Lomba</span>
+                        </a>
+                        <a href="{{ asset('juknis/Juknis-Pendaftaran-Brain-Champion-G-English.pdf') }}"
+                           download="Juknis-Pendaftaran-Brain-Champion-G-English.pdf"
+                           target="_blank"
+                           class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/15 hover:bg-white/25 text-white border border-white/30 font-extrabold text-xs sm:text-sm hover:-translate-y-0.5 transition-all">
+                            <svg class="w-4 h-4 text-genza-yellow shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            <span>Juknis Pendaftaran</span>
+                        </a>
+                        <a href="{{ asset('juknis/Juknis-Penggunaan-Aplikasi-G-English.pdf') }}"
+                           download="Juknis-Penggunaan-Aplikasi-G-English.pdf"
+                           target="_blank"
+                           class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/15 hover:bg-white/25 text-white border border-white/30 font-extrabold text-xs sm:text-sm hover:-translate-y-0.5 transition-all">
+                            <svg class="w-4 h-4 text-genza-yellow shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            <span>Juknis Penggunaan</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 1B. PUSAT UNDUHAN 3 JUKNIS RESMI (LOMBA, PENDAFTARAN, PENGGUNAAN APLIKASI) -->
+            <div class="no-print glass-card rounded-3xl p-5 sm:p-6 mb-8 border-2 border-genza-blue/15 dark:border-slate-700">
+                <div class="flex items-center justify-between flex-wrap gap-2 mb-4">
+                    <h2 class="text-sm sm:text-base font-extrabold text-genza-blue dark:text-white uppercase tracking-wider flex items-center gap-2">
+                        <svg class="w-5 h-5 text-genza-yellow shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"></path></svg>
+                        <span>Pusat Unduhan Petunjuk Teknis (Juknis) Resmi</span>
+                    </h2>
+                    <span class="text-xs font-bold text-slate-500 dark:text-slate-400">
+                        Format PDF Siap Cetak (A4) &bull; Edisi Resmi Brain Champion
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Card 1: Juknis Lomba -->
+                    <a href="{{ asset('juknis/Juknis-Lomba-Brain-Champion-G-English.pdf') }}"
+                       download="Juknis-Lomba-Brain-Champion-G-English.pdf"
+                       target="_blank"
+                       class="group flex flex-col justify-between p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-amber-50/90 via-white to-amber-50/40 dark:from-slate-900 dark:via-slate-900 dark:to-amber-950/30 border-2 border-genza-yellow/70 hover:border-genza-blue dark:hover:border-genza-yellow shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all">
+                        <div>
+                            <div class="flex items-center justify-between gap-2 mb-2.5">
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-genza-yellow text-genza-blue">
+                                    Wajib Peserta &amp; Pendamping
+                                </span>
+                                <span class="text-[11px] font-bold text-slate-400">PDF</span>
+                            </div>
+                            <h3 class="text-base font-black text-genza-blue dark:text-white group-hover:text-amber-600 dark:group-hover:text-genza-yellow transition-colors">
+                                1. Juknis Lomba Brain Champion
+                            </h3>
+                            <p class="text-xs text-slate-600 dark:text-slate-300 mt-1.5 leading-relaxed">
+                                Ketentuan peserta Elementary (SD/MI) &amp; Junior (SMP/MTs), sistem gugur 5 babak materi, aturan menjawab, tata tertib, hadiah &amp; rundown (12 Jan 2027 &bull; Gedung Saraba Kawa).
+                            </p>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-amber-200/70 dark:border-slate-700 flex items-center justify-between text-xs font-black text-genza-blue dark:text-genza-yellow">
+                            <span>Download Juknis Lomba</span>
+                            <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-genza-blue text-genza-yellow group-hover:scale-110 transition-transform">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.3" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            </span>
+                        </div>
+                    </a>
+
+                    <!-- Card 2: Juknis Pendaftaran -->
+                    <a href="{{ asset('juknis/Juknis-Pendaftaran-Brain-Champion-G-English.pdf') }}"
+                       download="Juknis-Pendaftaran-Brain-Champion-G-English.pdf"
+                       target="_blank"
+                       class="group flex flex-col justify-between p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border-2 border-slate-200/90 dark:border-slate-700 hover:border-genza-blue dark:hover:border-genza-yellow shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all">
+                        <div>
+                            <div class="flex items-center justify-between gap-2 mb-2.5">
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-blue-100 text-genza-blue dark:bg-blue-950 dark:text-blue-300">
+                                    Panduan Koordinator Sekolah
+                                </span>
+                                <span class="text-[11px] font-bold text-slate-400">PDF</span>
+                            </div>
+                            <h3 class="text-base font-black text-genza-blue dark:text-white group-hover:text-blue-700 dark:group-hover:text-genza-yellow transition-colors">
+                                2. Juknis Pendaftaran Delegasi
+                            </h3>
+                            <p class="text-xs text-slate-600 dark:text-slate-300 mt-1.5 leading-relaxed">
+                                Panduan bergambar cek kuota real-time, pengisian formulir delegasi manual maupun import Template Excel (.xlsx), bukti email otomatis, dan cetak Kartu Peserta QR.
+                            </p>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs font-black text-genza-blue dark:text-genza-yellow">
+                            <span>Download Juknis Pendaftaran</span>
+                            <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-blue-50 dark:bg-slate-800 text-genza-blue dark:text-genza-yellow group-hover:bg-genza-blue group-hover:text-genza-yellow transition-all">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.3" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            </span>
+                        </div>
+                    </a>
+
+                    <!-- Card 3: Juknis Penggunaan Aplikasi -->
+                    <a href="{{ asset('juknis/Juknis-Penggunaan-Aplikasi-G-English.pdf') }}"
+                       download="Juknis-Penggunaan-Aplikasi-G-English.pdf"
+                       target="_blank"
+                       class="group flex flex-col justify-between p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border-2 border-slate-200/90 dark:border-slate-700 hover:border-genza-blue dark:hover:border-genza-yellow shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all">
+                        <div>
+                            <div class="flex items-center justify-between gap-2 mb-2.5">
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                                    Manual 6 Portal Sistem
+                                </span>
+                                <span class="text-[11px] font-bold text-slate-400">PDF</span>
+                            </div>
+                            <h3 class="text-base font-black text-genza-blue dark:text-white group-hover:text-blue-700 dark:group-hover:text-genza-yellow transition-colors">
+                                3. Juknis Penggunaan Aplikasi
+                            </h3>
+                            <p class="text-xs text-slate-600 dark:text-slate-300 mt-1.5 leading-relaxed">
+                                Panduan lengkap login multi-identitas dan operasional 6 portal G-English (Portal Sekolah, Siswa, Orang Tua, Tutor, Dinas Kemenag/Kemendikdasmen &amp; Admin).
+                            </p>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs font-black text-genza-blue dark:text-genza-yellow">
+                            <span>Download Juknis Penggunaan</span>
+                            <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-blue-50 dark:bg-slate-800 text-genza-blue dark:text-genza-yellow group-hover:bg-genza-blue group-hover:text-genza-yellow transition-all">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.3" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            </span>
+                        </div>
+                    </a>
+                </div>
             </div>
 
             <!-- 2. LIVE QUOTA MONITOR (6 CARDS: KELAS 4, 5, 6 & KELAS 7, 8, 9) -->

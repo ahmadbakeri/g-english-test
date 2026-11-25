@@ -145,6 +145,29 @@
                     <svg class="w-4 h-4 text-rose-500 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
                     <span>KUOTA SANGAT TERBATAS (Hanya 5–15 Siswa Reguler &amp; 35 Peserta Brain Champion per jenjang)</span>
                 </div>
+                <div class="mt-2 flex flex-wrap justify-center items-center gap-2.5">
+                    <a href="{{ asset('juknis/Juknis-Lomba-Brain-Champion-G-English.pdf') }}"
+                       download="Juknis-Lomba-Brain-Champion-G-English.pdf"
+                       target="_blank"
+                       class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-genza-blue hover:bg-[#083568] text-white font-extrabold text-xs sm:text-sm shadow-md hover:-translate-y-0.5 transition-all">
+                        <svg class="w-4 h-4 text-genza-yellow shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        <span>Download Juknis Lomba (PDF)</span>
+                    </a>
+                    <a href="{{ asset('juknis/Juknis-Pendaftaran-Brain-Champion-G-English.pdf') }}"
+                       download="Juknis-Pendaftaran-Brain-Champion-G-English.pdf"
+                       target="_blank"
+                       class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white dark:bg-slate-800 text-genza-blue dark:text-genza-yellow border border-genza-blue/25 dark:border-slate-700 hover:border-genza-yellow font-extrabold text-xs sm:text-sm shadow-sm hover:-translate-y-0.5 transition-all">
+                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        <span>Juknis Pendaftaran (PDF)</span>
+                    </a>
+                    <a href="{{ asset('juknis/Juknis-Penggunaan-Aplikasi-G-English.pdf') }}"
+                       download="Juknis-Penggunaan-Aplikasi-G-English.pdf"
+                       target="_blank"
+                       class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white dark:bg-slate-800 text-genza-blue dark:text-genza-yellow border border-genza-blue/25 dark:border-slate-700 hover:border-genza-yellow font-extrabold text-xs sm:text-sm shadow-sm hover:-translate-y-0.5 transition-all">
+                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        <span>Juknis Penggunaan (PDF)</span>
+                    </a>
+                </div>
             </div>
         </div>
     </section>

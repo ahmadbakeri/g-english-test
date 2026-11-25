@@ -28,7 +28,31 @@
             </div>
         </div>
 
-        <div class="gx-welcome-actions">
+        <div class="gx-welcome-actions" style="display:flex; flex-wrap:wrap; align-items:center; gap:0.5rem;">
+            <a href="{{ asset('juknis/Juknis-Lomba-Brain-Champion-G-English.pdf') }}"
+               download="Juknis-Lomba-Brain-Champion-G-English.pdf"
+               target="_blank"
+               class="gx-welcome-date-pill"
+               style="background:#fbb900; color:#0a4282; font-weight:800; text-decoration:none;">
+                <x-heroicon-o-arrow-down-tray style="width: 1rem; height: 1rem; color: #0a4282;" />
+                <span>Juknis Lomba</span>
+            </a>
+            <a href="{{ asset('juknis/Juknis-Pendaftaran-Brain-Champion-G-English.pdf') }}"
+               download="Juknis-Pendaftaran-Brain-Champion-G-English.pdf"
+               target="_blank"
+               class="gx-welcome-date-pill"
+               style="text-decoration:none;">
+                <x-heroicon-o-arrow-down-tray style="width: 1rem; height: 1rem; color: #fbb900;" />
+                <span>Juknis Pendaftaran</span>
+            </a>
+            <a href="{{ asset('juknis/Juknis-Penggunaan-Aplikasi-G-English.pdf') }}"
+               download="Juknis-Penggunaan-Aplikasi-G-English.pdf"
+               target="_blank"
+               class="gx-welcome-date-pill"
+               style="text-decoration:none;">
+                <x-heroicon-o-arrow-down-tray style="width: 1rem; height: 1rem; color: #fbb900;" />
+                <span>Juknis Penggunaan</span>
+            </a>
             <div class="gx-welcome-date-pill">
                 <x-heroicon-o-calendar style="width: 1.05rem; height: 1.05rem; color: #fbb900;" />
                 <span>{{ now('Asia/Makassar')->locale('id')->translatedFormat('l, d F Y') }}</span>
