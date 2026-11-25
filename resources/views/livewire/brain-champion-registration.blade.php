@@ -131,7 +131,7 @@
                                 1. Juknis Lomba Brain Champion
                             </h3>
                             <p class="text-xs text-slate-600 dark:text-slate-300 mt-1.5 leading-relaxed">
-                                Ketentuan peserta Elementary (SD/MI) &amp; Junior (SMP/MTs), sistem gugur 5 babak materi, aturan menjawab, tata tertib, hadiah &amp; rundown (12 Jan 2027 &bull; Gedung Saraba Kawa).
+                                Ketentuan peserta Elementary (SD/MI) &amp; Junior (SMP/MTs), sistem gugur 5 babak materi, aturan menjawab, tata tertib, hadiah &amp; rundown (Selasa, 12 Jan 2027 &bull; 07.30–13.30 WITA).
                             </p>
                         </div>
                         <div class="mt-4 pt-3 border-t border-amber-200/70 dark:border-slate-700 flex items-center justify-between text-xs font-black text-genza-blue dark:text-genza-yellow">
